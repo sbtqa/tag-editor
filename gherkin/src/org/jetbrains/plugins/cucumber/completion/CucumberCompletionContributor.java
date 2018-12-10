@@ -55,6 +55,7 @@ public class CucumberCompletionContributor extends CompletionContributor {
 
   private static final int SCENARIO_KEYWORD_PRIORITY = 70;
   private static final int SCENARIO_OUTLINE_KEYWORD_PRIORITY = 60;
+  public static final Pattern OPTIONAL_GROUP_PATTERN = Pattern.compile("\\)(\\?)");
   public static final Pattern POSSIBLE_GROUP_PATTERN = Pattern.compile("\\(((?!<action>)[^)]*)\\)");
   public static final Pattern QUESTION_MARK_PATTERN = Pattern.compile("([^\\\\])\\?:?");
   public static final Pattern ARGS_INTO_BRACKETS_PATTERN = Pattern.compile("\\(\\?:[^)]*\\)");
@@ -266,6 +267,16 @@ public class CucumberCompletionContributor extends CompletionContributor {
      */
     private static List<String> parseVariationsIntoBrackets(@NotNull String cucumberRegex) {
       List<Pair<String, List<String>>> insertions = new ArrayList<>();
+      String option = "";
+      Matcher quest = OPTIONAL_GROUP_PATTERN.matcher(cucumberRegex);
+
+      if(quest.find() && !quest.group(1).isEmpty()){
+        option = cucumberRegex.substring(quest.start()+2);
+        cucumberRegex = cucumberRegex.substring(0, quest.start()+1) + option;
+      }
+
+
+
       Matcher m = ARGS_INTO_BRACKETS_PATTERN.matcher(cucumberRegex);
       String mainSample = cucumberRegex;
       int k = 0;
@@ -312,6 +323,10 @@ public class CucumberCompletionContributor extends CompletionContributor {
           stepVar = stepVar.replace(key, insertion.getSecond().get(c[i] - 1));
         }
         result.add(stepVar);
+      }
+
+      if(!option.isEmpty()) {
+          result.add(option);
       }
       return result;
     }
