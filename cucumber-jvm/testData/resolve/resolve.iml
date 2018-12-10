@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/negativeLookBehind" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/resolveToStepWithTimeout" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/stepDefContainerMarkedWithStepDefAnnotation" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/stepResolveStringConcatenation" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/stepResolve_01" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/stepResolve_02" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/stepResolve_03" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/stepResolve_ParameterType" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/stepResolve_java8" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/stepResolve_w" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/strictStartAndEndRegexOptions" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/treeListener" isTestSource="false" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>

@@ -1,0 +1,8 @@
+intellij {
+    plugins = [project(':gherkin')]
+}
+
+
+dependencies {
+    implementation project(':gherkin')
+}

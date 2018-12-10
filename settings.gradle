@@ -1,0 +1,3 @@
+rootProject.name = 'bdd-editor'
+include 'gherkin', 'cucumber-jvm'
+
