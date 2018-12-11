@@ -2,10 +2,7 @@ package org.jetbrains.plugins.cucumber.java;
 
 import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.openapi.module.Module;
-import com.intellij.psi.JavaPsiFacade;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiMethod;
+import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.AnnotatedElementsSearch;
 import com.intellij.util.Query;
@@ -18,8 +15,10 @@ import org.jetbrains.plugins.cucumber.java.steps.JavaStepDefinitionCreator;
 import org.jetbrains.plugins.cucumber.steps.AbstractStepDefinition;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CucumberJavaExtension extends AbstractCucumberJavaExtension {
   public static final String CUCUMBER_RUNTIME_JAVA_STEP_DEF_ANNOTATION = "cucumber.runtime.java.StepDefAnnotation";
@@ -51,6 +50,16 @@ public class CucumberJavaExtension extends AbstractCucumberJavaExtension {
       return Collections.emptyList();
     }
 
+    final PsiClass aClass = JavaPsiFacade.getInstance(module.getProject()).findClass("cucumber.api.CucumberOptions",
+            dependenciesScope);
+    final Query<PsiClass> psiClasses = AnnotatedElementsSearch.searchPsiClasses(aClass, dependenciesScope);
+    final PsiElement[] glueClasses = psiClasses.findFirst().getAnnotation("cucumber.api.CucumberOptions").findAttributeValue("glue").getChildren();
+
+    final List<String> glue = Arrays.asList(glueClasses).stream()
+            .filter(psiElement -> psiElement instanceof PsiLiteral)
+            .map(literal -> literal.getText().replaceAll("\"", ""))
+            .collect(Collectors.toList());
+
     final List<AbstractStepDefinition> result = new ArrayList<>();
     final Query<PsiClass> stepDefAnnotations = AnnotatedElementsSearch.searchPsiClasses(stepDefAnnotationClass, dependenciesScope);
     for (PsiClass annotationClass : stepDefAnnotations) {
@@ -58,7 +67,15 @@ public class CucumberJavaExtension extends AbstractCucumberJavaExtension {
       if (annotationClass.isAnnotationType() && annotationClassName != null) {
         final Query<PsiMethod> javaStepDefinitions = AnnotatedElementsSearch.searchPsiMethods(annotationClass, dependenciesScope);
         for (PsiMethod stepDefMethod : javaStepDefinitions) {
+
+
+          final String fqdn = stepDefMethod.getContainingClass().getQualifiedName();
+          final boolean isInGlue = glue.stream().anyMatch(glueElement -> fqdn.startsWith(glueElement));
+
+
+          if (isInGlue) {
           result.add(new JavaStepDefinition(stepDefMethod, annotationClassName));
+          }
         }
       }
     }

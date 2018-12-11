@@ -272,7 +272,7 @@ public class CucumberCompletionContributor extends CompletionContributor {
 
       if(quest.find() && !quest.group(1).isEmpty()){
         option = cucumberRegex.substring(quest.start()+2);
-        cucumberRegex = cucumberRegex.substring(0, quest.start()+1) + option;
+        cucumberRegex = cucumberRegex.substring(0, quest.start()) + "|)" + option;
       }
 
 
