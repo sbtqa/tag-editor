@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class CucumberJavaExtension extends AbstractCucumberJavaExtension {
+  public static final String CUCUMBER_OPTIONS_ANNOTATION= "cucumber.api.CucumberOptions";
   public static final String CUCUMBER_RUNTIME_JAVA_STEP_DEF_ANNOTATION = "cucumber.runtime.java.StepDefAnnotation";
   public static final String ZUCHINI_RUNTIME_JAVA_STEP_DEF_ANNOTATION = "org.zuchini.annotations.StepAnnotation";
 
@@ -50,10 +51,11 @@ public class CucumberJavaExtension extends AbstractCucumberJavaExtension {
       return Collections.emptyList();
     }
 
-    final PsiClass aClass = JavaPsiFacade.getInstance(module.getProject()).findClass("cucumber.api.CucumberOptions",
+    final PsiClass aClass = JavaPsiFacade.getInstance(module.getProject()).findClass(CUCUMBER_OPTIONS_ANNOTATION,
             dependenciesScope);
     final Query<PsiClass> psiClasses = AnnotatedElementsSearch.searchPsiClasses(aClass, dependenciesScope);
-    final PsiElement[] glueClasses = psiClasses.findFirst().getAnnotation("cucumber.api.CucumberOptions").findAttributeValue("glue").getChildren();
+    final PsiElement[] glueClasses = psiClasses.findFirst()
+            .getAnnotation(CUCUMBER_OPTIONS_ANNOTATION).findAttributeValue("glue").getChildren();
 
     final List<String> glue = Arrays.asList(glueClasses).stream()
             .filter(psiElement -> psiElement instanceof PsiLiteral)
@@ -67,14 +69,11 @@ public class CucumberJavaExtension extends AbstractCucumberJavaExtension {
       if (annotationClass.isAnnotationType() && annotationClassName != null) {
         final Query<PsiMethod> javaStepDefinitions = AnnotatedElementsSearch.searchPsiMethods(annotationClass, dependenciesScope);
         for (PsiMethod stepDefMethod : javaStepDefinitions) {
-
-
           final String fqdn = stepDefMethod.getContainingClass().getQualifiedName();
           final boolean isInGlue = glue.stream().anyMatch(glueElement -> fqdn.startsWith(glueElement));
 
-
           if (isInGlue) {
-          result.add(new JavaStepDefinition(stepDefMethod, annotationClassName));
+            result.add(new JavaStepDefinition(stepDefMethod, annotationClassName));
           }
         }
       }
