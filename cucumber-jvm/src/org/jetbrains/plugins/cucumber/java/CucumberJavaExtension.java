@@ -3,6 +3,7 @@ package org.jetbrains.plugins.cucumber.java;
 import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.openapi.module.Module;
 import com.intellij.psi.*;
+import com.intellij.psi.impl.source.tree.JavaElementType;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.AnnotatedElementsSearch;
 import com.intellij.util.Query;
@@ -58,7 +59,7 @@ public class CucumberJavaExtension extends AbstractCucumberJavaExtension {
             .getAnnotation(CUCUMBER_OPTIONS_ANNOTATION).findAttributeValue("glue").getChildren();
 
     final List<String> glue = Arrays.asList(glueClasses).stream()
-            .filter(psiElement -> psiElement instanceof PsiLiteral)
+            .filter(psiElement -> psiElement.getNode().getElementType() == JavaElementType.LITERAL_EXPRESSION)
             .map(literal -> literal.getText().replaceAll("\"", ""))
             .collect(Collectors.toList());
 

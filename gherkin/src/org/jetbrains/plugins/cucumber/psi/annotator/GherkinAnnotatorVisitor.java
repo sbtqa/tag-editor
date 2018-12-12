@@ -62,11 +62,53 @@ public class GherkinAnnotatorVisitor extends GherkinElementVisitor {
       if (parameterRanges == null) return;
       for (TextRange range : parameterRanges) {
         if (range.getLength() > 0) {
-          highlight(step, range, GherkinHighlighter.REGEXP_PARAMETER);
+            highlightParam(step, range);
         }
       }
       highlightOutlineParams(step, reference);
     }
+  }
+
+  private void highlightParam(GherkinStep step, TextRange range) {
+
+    TextAttributesKey highlighter = GherkinHighlighter.REGEXP_PARAMETER;
+
+    if(isAction(step, range)) highlighter = GherkinHighlighter.GHERKIN_ACTION_PARAMETER;
+    if(isDigit(step, range)) highlighter = GherkinHighlighter.GHERKIN_DIGIT_PARAMETER;
+    if(isString(step, range)) highlighter = GherkinHighlighter.GHERKIN_STRING_PARAMETER;
+    if(isDataJack(step, range)) highlighter = GherkinHighlighter.DATAJACK_PARAMETER;
+
+    highlight(step, range, highlighter);
+  }
+
+  private boolean isAction(GherkinStep step, TextRange range) {
+    String stepText = step.getText();
+    String left = stepText.substring(0, range.getStartOffset()).trim();
+    String right = stepText.substring(range.getEndOffset()).trim();
+
+    return left.endsWith("(") && right.startsWith(")");
+  }
+
+  private boolean isDataJack(GherkinStep step, TextRange range) {
+    String stepText = step.getText();
+    String content = stepText.substring(range.getStartOffset(), range.getEndOffset()).trim();
+
+    return content.matches("\\$[\\w\\s\\d]+") || content.matches("\\$[\\w\\s\\d]?\\{[\\w\\s\\d.\\[\\]]+\\}");
+  }
+
+  private boolean isDigit(GherkinStep step, TextRange range) {
+    String stepText = step.getText();
+    String content = stepText.substring(range.getStartOffset(), range.getEndOffset()).trim();
+
+    return content.matches("\\d+(:?[.|,]\\d+)?");
+  }
+
+  private boolean isString(GherkinStep step, TextRange range) {
+    String stepText = step.getText();
+    String left = stepText.substring(0, range.getStartOffset()).trim();
+    String right = stepText.substring(range.getEndOffset()).trim();
+
+    return left.endsWith("\"") && right.startsWith("\"");
   }
 
   @Override
