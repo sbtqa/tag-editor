@@ -76,7 +76,7 @@ public final class GherkinHighlighter {
   static final String DATAJACK_PARAMETER_ID = "DATAJACK_PARAMETER";
   public static final TextAttributesKey DATAJACK_PARAMETER = TextAttributesKey.createTextAttributesKey(
           DATAJACK_PARAMETER_ID,
-          DefaultLanguageHighlighterColors.LOCAL_VARIABLE
+          DefaultLanguageHighlighterColors.CONSTANT
   );
 
   @NonNls
