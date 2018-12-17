@@ -34,6 +34,8 @@ public abstract class AbstractStepDefinition {
 
   private volatile Pattern myRegex;
 
+  private boolean isContextChanger = false;
+
   public AbstractStepDefinition(@NotNull final PsiElement element) {
     myElementPointer = SmartPointerManager.getInstance(element.getProject()).createSmartPsiElementPointer(element);
   }
@@ -161,5 +163,13 @@ public abstract class AbstractStepDefinition {
   @Nullable
   public String getStepDefinitionText() {
     return getCucumberRegex();
+  }
+
+  public boolean isContextChanger() {
+    return isContextChanger;
+  }
+
+  public void setContextChanger(boolean contextChanger) {
+    isContextChanger = contextChanger;
   }
 }
