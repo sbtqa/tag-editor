@@ -28,6 +28,8 @@ import java.util.regex.Pattern;
 public class GherkinAnnotatorVisitor extends GherkinElementVisitor {
   private final AnnotationHolder myHolder;
 
+  public static final Pattern DATAJACK_COLLECTION_PARSE_REGEX = Pattern.compile("(\\$(?:[^\\{]+))");
+  public static final Pattern DATAJACK_PATH_PARSE_REGEX = Pattern.compile("(\\$(?:[^\\{]+)?(\\{([^\\}]+)\\}))");
   public GherkinAnnotatorVisitor(@NotNull final AnnotationHolder holder) {
     myHolder = holder;
   }
@@ -62,11 +64,79 @@ public class GherkinAnnotatorVisitor extends GherkinElementVisitor {
       if (parameterRanges == null) return;
       for (TextRange range : parameterRanges) {
         if (range.getLength() > 0) {
-          highlight(step, range, GherkinHighlighter.REGEXP_PARAMETER);
+            highlightParam(step, range);
         }
       }
       highlightOutlineParams(step, reference);
     }
+  }
+
+  @Override
+  public void visitTag(GherkinTagImpl gherkinTag) {
+      if(gherkinTag.getText().startsWith("@data=")) {
+          highlightDataJack(gherkinTag, new TextRange(0, gherkinTag.getTextLength()), 0, true);
+          highlightDataJack(gherkinTag, new TextRange(0, gherkinTag.getTextLength()), 0, false);
+      }
+
+    super.visitElement(gherkinTag);
+  }
+
+  private void highlightParam(GherkinStep step, TextRange range) {
+
+    TextAttributesKey highlighter = GherkinHighlighter.REGEXP_PARAMETER;
+
+    if(isAction(step, range)) highlighter = GherkinHighlighter.GHERKIN_ACTION_PARAMETER;
+    if(isDigit(step, range)) highlighter = GherkinHighlighter.GHERKIN_DIGIT_PARAMETER;
+    if(isString(step, range)) highlighter = GherkinHighlighter.GHERKIN_STRING_PARAMETER;
+
+    highlightDataJack(step, range, range.getStartOffset(), false);
+    highlight(step, range, highlighter);
+  }
+
+  private boolean isAction(GherkinStep step, TextRange range) {
+    String stepText = step.getText();
+    String left = stepText.substring(0, range.getStartOffset()).trim();
+    String right = stepText.substring(range.getEndOffset()).trim();
+
+    return left.endsWith("(") && right.startsWith(")");
+  }
+
+  private void highlightDataJack(GherkinPsiElement element, TextRange range, int offset, boolean isCollection) {
+    String stepText = element.getText();
+    String parameterContent = stepText.substring(range.getStartOffset(), range.getEndOffset()).trim();
+    List<TextRange> dataJackRanges = new ArrayList<>();
+
+    final Matcher pathMatcher = isCollection
+            ? DATAJACK_COLLECTION_PARSE_REGEX.matcher(parameterContent)
+            : DATAJACK_PATH_PARSE_REGEX.matcher(parameterContent);
+
+    if (pathMatcher.find()) {
+      final int groupCount = pathMatcher.groupCount();
+      for (int i = 0; i < groupCount; i++) {
+        final int start = pathMatcher.start(i + 1);
+        final int end = pathMatcher.end(i + 1);
+        if (start >= 0 && end >= 0) {
+          dataJackRanges.add(new TextRange(start, end).shiftRight(offset));
+        }
+      }
+    }
+
+    dataJackRanges.forEach(dataJackRange -> highlight(element, dataJackRange, GherkinHighlighter.DATAJACK_PARAMETER));
+  }
+
+  private boolean isDigit(GherkinStep step, TextRange range) {
+    String stepText = step.getText();
+    String content = stepText.substring(range.getStartOffset(), range.getEndOffset()).trim();
+
+    return content.matches("\\d+(:?[.|,]\\d+)?");
+  }
+
+  private boolean isString(GherkinStep step, TextRange range) {
+    String stepText = step.getText();
+    String left = stepText.substring(0, range.getStartOffset()).trim();
+    String right = stepText.substring(range.getEndOffset()).trim();
+
+    return left.endsWith("\"") && right.startsWith("\"");
   }
 
   @Override

@@ -20,11 +20,12 @@ public class GherkinColorsPage implements ColorSettingsPage {
 
  private static final String DEMO_TEXT =
     "# language: en\n" +
+    "  @wip @data=<datajack_param>$Data</datajack_param>\n" +
     "Feature: Cucumber Colors Settings Page\n" +
     "  In order to customize Gherkin language (*.feature files) highlighting\n" +
     "  Our users can use this settings preview pane\n" +
     "\n" +
-    "  @wip\n" +
+    "  @wip @data=<datajack_param>$Data{users}</datajack_param>\n" +
     "  Scenario Outline: Different Gherkin language structures\n" +
     "    Given Some feature file with content\n" +
     "    \"\"\"\n" +
@@ -32,7 +33,9 @@ public class GherkinColorsPage implements ColorSettingsPage {
     "      Scenario: Some scenario\n" +
     "    \"\"\"\n" +
     "    And I want to add new cucumber step\n" +
-    "    And Also a step with \"<regexp_param>regexp</regexp_param>\" parameter\n" +
+    "    And Also a step with \"<string_param>string</string_param>\" and digit <digit_param>42</digit_param> parameter\n" +
+    "    And Also a step with (<action_param>action</action_param>) \"<string_param>DataJack param in step " +
+            "<datajack_param>$Data{users[0].name}</datajack_param></string_param>\" parameter <datajack_param>${users.name}</datajack_param>\n" +
     "    When I open <<outline_param>ruby_ide</outline_param>>\n" +
     "    Then Steps autocompletion feature will help me with all these tasks\n" +
     "\n" +
@@ -51,6 +54,11 @@ public class GherkinColorsPage implements ColorSettingsPage {
     new AttributesDescriptor(CucumberBundle.message("color.settings.gherkin.table.pipe"), GherkinHighlighter.PIPE),
     new AttributesDescriptor(CucumberBundle.message("color.settings.gherkin.outline.param.substitution"), GherkinHighlighter.OUTLINE_PARAMETER_SUBSTITUTION),
     new AttributesDescriptor(CucumberBundle.message("color.settings.gherkin.regexp.param"), GherkinHighlighter.REGEXP_PARAMETER),
+    new AttributesDescriptor(CucumberBundle.message("color.settings.gherkin.action.param"), GherkinHighlighter.GHERKIN_ACTION_PARAMETER),
+    new AttributesDescriptor(CucumberBundle.message("color.settings.gherkin.datajack.param"), GherkinHighlighter.DATAJACK_PARAMETER),
+    new AttributesDescriptor(CucumberBundle.message("color.settings.gherkin.digit.param"), GherkinHighlighter.GHERKIN_DIGIT_PARAMETER),
+    new AttributesDescriptor(CucumberBundle.message("color.settings.gherkin.string.param"), GherkinHighlighter.GHERKIN_STRING_PARAMETER),
+
   };
 
   // Empty still
@@ -59,6 +67,10 @@ public class GherkinColorsPage implements ColorSettingsPage {
     ADDITIONAL_HIGHLIGHT_DESCRIPTORS.put("th", GherkinHighlighter.TABLE_HEADER_CELL);
     ADDITIONAL_HIGHLIGHT_DESCRIPTORS.put("outline_param", GherkinHighlighter.OUTLINE_PARAMETER_SUBSTITUTION);
     ADDITIONAL_HIGHLIGHT_DESCRIPTORS.put("regexp_param", GherkinHighlighter.REGEXP_PARAMETER);
+    ADDITIONAL_HIGHLIGHT_DESCRIPTORS.put("action_param", GherkinHighlighter.GHERKIN_ACTION_PARAMETER);
+    ADDITIONAL_HIGHLIGHT_DESCRIPTORS.put("digit_param", GherkinHighlighter.GHERKIN_DIGIT_PARAMETER);
+    ADDITIONAL_HIGHLIGHT_DESCRIPTORS.put("datajack_param", GherkinHighlighter.DATAJACK_PARAMETER);
+    ADDITIONAL_HIGHLIGHT_DESCRIPTORS.put("string_param", GherkinHighlighter.GHERKIN_STRING_PARAMETER);
   }
 
   @Override

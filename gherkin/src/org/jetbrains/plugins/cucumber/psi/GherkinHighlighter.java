@@ -52,6 +52,34 @@ public final class GherkinHighlighter {
   );
 
   @NonNls
+  static final String GHERKIN_ACTION_PARAMETER_ID = "GHERKIN_ACTION_PARAMETER";
+  public static final TextAttributesKey GHERKIN_ACTION_PARAMETER = TextAttributesKey.createTextAttributesKey(
+          GHERKIN_ACTION_PARAMETER_ID,
+          DefaultLanguageHighlighterColors.INSTANCE_METHOD
+  );
+
+  @NonNls
+  static final String GHERKIN_DIGIT_PARAMETER_ID = "GHERKIN_DIGIT_PARAMETER";
+  public static final TextAttributesKey GHERKIN_DIGIT_PARAMETER = TextAttributesKey.createTextAttributesKey(
+          GHERKIN_DIGIT_PARAMETER_ID,
+          DefaultLanguageHighlighterColors.NUMBER
+  );
+
+  @NonNls
+  static final String GHERKIN_STRING_PARAMETER_ID = "GHERKIN_STRING_PARAMETER";
+  public static final TextAttributesKey GHERKIN_STRING_PARAMETER = TextAttributesKey.createTextAttributesKey(
+          GHERKIN_STRING_PARAMETER_ID,
+          DefaultLanguageHighlighterColors.STRING
+  );
+
+  @NonNls
+  static final String DATAJACK_PARAMETER_ID = "DATAJACK_PARAMETER";
+  public static final TextAttributesKey DATAJACK_PARAMETER = TextAttributesKey.createTextAttributesKey(
+          DATAJACK_PARAMETER_ID,
+          DefaultLanguageHighlighterColors.CONSTANT
+  );
+
+  @NonNls
   static final String GHERKIN_TABLE_CELL_ID = "GHERKIN_TABLE_CELL";
   public static final TextAttributesKey TABLE_CELL = TextAttributesKey.createTextAttributesKey(
     GHERKIN_TABLE_CELL_ID,
