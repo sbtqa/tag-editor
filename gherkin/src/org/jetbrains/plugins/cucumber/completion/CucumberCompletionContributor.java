@@ -101,7 +101,7 @@ public class CucumberCompletionContributor extends CompletionContributor {
       protected void addCompletions(@NotNull CompletionParameters parameters,
                                     @NotNull ProcessingContext context,
                                     @NotNull CompletionResultSet result) {
-        addStepDefinitions(result, parameters.getOriginalFile());
+        addStepDefinitions(parameters, result, parameters.getOriginalFile());
       }
     });
   }
@@ -209,7 +209,17 @@ public class CucumberCompletionContributor extends CompletionContributor {
   }
 
 
-  private static void addStepDefinitions(@NotNull CompletionResultSet result, @NotNull PsiFile file) {
+
+  private static void addStepDefinitions(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet result, @NotNull PsiFile file) {
+
+    if (TagCompletionUtils.addPageTitles(parameters, result, file)) {
+      return;
+    }
+
+    if (TagCompletionUtils.addPageActions(parameters, result, file)) {
+      return;
+    }
+
     final List<AbstractStepDefinition> definitions = CucumberStepsIndex.getInstance(file.getProject()).getAllStepDefinitions(file);
     for (AbstractStepDefinition definition : definitions) {
       String definitionText = definition.getStepDefinitionText();
