@@ -48,7 +48,7 @@ public class TagContext {
         PsiElement prevElement = gherkinStep;
         do {
             GherkinStepImpl prevStep = (prevElement instanceof GherkinStepImpl) ? (GherkinStepImpl) prevElement : null;
-            if (prevElement != null) {
+            if (prevStep != null) {
                 boolean isStepChanger = prevStep.findDefinitions().stream().anyMatch(AbstractStepDefinition::isContextChanger);
                 if (isStepChanger) {
                     Matcher m = QUOTES_VALUE_EXTRACTOR_PATTERN.matcher(prevStep.getName());

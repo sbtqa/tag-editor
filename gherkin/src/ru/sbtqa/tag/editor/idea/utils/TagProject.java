@@ -13,6 +13,7 @@ import kotlin.Pair;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -37,18 +38,41 @@ public class TagProject {
      * @param page
      * @return Возвращает поток пар значений (Аннотация; Количество параметров в сигнатуре метода c данной аннотацией).
      */
-    public static Stream<Pair<PsiAnnotation, Integer>> actionTitle(PsiClass page) {
+    public static List<Pair<PsiAnnotation, Integer>> actionAnnotations(PsiClass page) {
         List<Pair<PsiAnnotation, PsiMethod>> allAnnotations = new ArrayList<>();
         Arrays.stream(page.getAllMethods())
                 .filter(x -> x.getContainingClass() != null &&
-                        x.getContainingClass().getQualifiedName() != null) // игнорируем экшины из родителя
+                        x.getContainingClass().getQualifiedName() != null) // игнорируем экшины из родителя FIXME: а надо ли?
                 .forEach(x -> Arrays.stream(x.getModifierList().getAnnotations())
                         .forEach(y -> allAnnotations.add(new Pair<>(y, x))));
 
-        return allAnnotations.stream()
+
+        List<Pair<PsiAnnotation, Integer>> actionTitleAnnotations = new ArrayList<>();
+
+
+        actionTitleAnnotations.addAll(allAnnotations.stream()
                 .filter(x -> x.getFirst() != null && ACTION_TITLE_ANNOTATION_QUALIFIED_NAME.equals(x.getFirst().getQualifiedName()))
-                .map(x -> new Pair<>(x.getFirst(), x.getSecond().getParameterList().getParameters().length))
-                .unordered();
+                .map(x -> new Pair<>(x.getFirst(), x.getSecond().getParameterList().getParameters().length)).collect(Collectors.toList()));
+
+
+
+        final List<Pair<PsiAnnotation, Integer>> actionTitleArrays = allAnnotations.stream()
+                .filter(x -> x.getFirst() != null && ACTION_TITLES_ANNOTATION_QUALIFIED_NAME.equals(x.getFirst().getQualifiedName()))
+                .map(x -> new Pair<>(x.getFirst(), x.getSecond().getParameterList().getParameters().length)).collect(Collectors.toList());
+        actionTitleArrays.forEach(x -> actionTitleAnnotations.addAll(Arrays.asList(x.component1().findAttributeValue("value").getChildren())
+                .stream().filter(psiElement -> psiElement instanceof PsiAnnotation)
+                .map(y -> new Pair<>((PsiAnnotation) y, x.getSecond())).collect(Collectors.toList())));
+
+
+        return actionTitleAnnotations;
+    }
+
+
+    public static List<String> actionTitles(PsiClass page) {
+        return actionAnnotations(page).stream().map(psiAnnotationIntegerPair -> {
+            final String value = psiAnnotationIntegerPair.component1().findAttributeValue("value").getText();
+            return value.substring(1, value.length() - 1);
+        }).collect(Collectors.toList());
     }
 
 //    /**
@@ -86,13 +110,12 @@ public class TagProject {
      * Найти значаение title() для аннотации PageEntry для класса наследованного от ru.sbtqa.tag.pagefactory.Page.
      *
      * @param page
-     * @param project
      * @return
      */
-    public static String findPageName(PsiClass page, Project project) {
+    public static String findPageName(PsiClass page) {
         String annotationTitle = page.getAnnotation(PAGE_ENTRY_ANNOTATION_QUALIFIED_NAME).findAttribute("title")
                 .getAttributeValue().getSourceElement().getText();
-        return annotationTitle.substring(1, annotationTitle.length()-1);
+        return annotationTitle.substring(1, annotationTitle.length() - 1);
 
     }
 
@@ -109,6 +132,19 @@ public class TagProject {
         final Query<PsiClass> psiClasses = AnnotatedElementsSearch.searchPsiClasses(aClass, GlobalSearchScope.projectScope(project));
         return psiClasses.findAll().stream();
 
+    }
+
+
+    /**
+     * Поиск страницы по имени
+     *
+     * @param project
+     * @return
+     */
+    public static PsiClass getPageByName(Project project, String pageTitle) {
+        return pages(project).filter(pageClass ->
+                findPageName(pageClass).equals(pageTitle)
+        ).findFirst().orElse(null);
     }
 
     /**
