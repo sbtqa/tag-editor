@@ -15,16 +15,14 @@ import org.jetbrains.plugins.cucumber.java.steps.JavaStepDefinition;
 import org.jetbrains.plugins.cucumber.java.steps.JavaStepDefinitionCreator;
 import org.jetbrains.plugins.cucumber.steps.AbstractStepDefinition;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class CucumberJavaExtension extends AbstractCucumberJavaExtension {
   public static final String CUCUMBER_OPTIONS_ANNOTATION= "cucumber.api.CucumberOptions";
   public static final String CUCUMBER_RUNTIME_JAVA_STEP_DEF_ANNOTATION = "cucumber.runtime.java.StepDefAnnotation";
   public static final String ZUCHINI_RUNTIME_JAVA_STEP_DEF_ANNOTATION = "org.zuchini.annotations.StepAnnotation";
+  public static final String CORE_GENERIC_STEPS_CLASS = "ru.sbtqa.tag.stepdefs.CoreGenericSteps";
 
   @NotNull
   @Override
@@ -73,8 +71,18 @@ public class CucumberJavaExtension extends AbstractCucumberJavaExtension {
           final String fqdn = stepDefMethod.getContainingClass().getQualifiedName();
           final boolean isInGlue = glue.stream().anyMatch(glueElement -> fqdn.startsWith(glueElement));
 
+
+
           if (isInGlue) {
-            result.add(new JavaStepDefinition(stepDefMethod, annotationClassName));
+            final boolean isContextChanger = Arrays.asList(stepDefMethod.findDeepestSuperMethods()).stream()
+                    .anyMatch(psiMethod -> psiMethod.getName().equals("openPage")
+                            && psiMethod.getContainingClass().getQualifiedName()
+                            .equals(CORE_GENERIC_STEPS_CLASS));
+
+            final JavaStepDefinition javaStepDefinition = new JavaStepDefinition(stepDefMethod, annotationClassName);
+            javaStepDefinition.setContextChanger(isContextChanger);
+
+            result.add(javaStepDefinition);
           }
         }
       }
