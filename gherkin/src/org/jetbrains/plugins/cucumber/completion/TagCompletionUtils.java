@@ -15,16 +15,22 @@ import org.jetbrains.plugins.cucumber.steps.AbstractStepDefinition;
 import ru.sbtqa.tag.editor.idea.utils.TagContext;
 import ru.sbtqa.tag.editor.idea.utils.TagProject;
 
-// TODO зарефакторить. вынести общее в методы
-public class TagCompletionUtils {
+// TODO сделать не-static
+class TagCompletionUtils {
 
     private TagCompletionUtils() {}
 
-    public static boolean addPageTitles(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet result) {
+    public enum TagCompletion {
+        ELEMENTS, ACTIONS
+    }
+
+    static boolean addPageTitles(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet result) {
         PsiElement element = parameters.getPosition().getContext();
         String stepName = element instanceof GherkinStepImpl ? ((GherkinStepImpl) element).getStepName() : null;
+
         if (element instanceof GherkinStep && ((GherkinStep) element).findDefinitions().stream().anyMatch(AbstractStepDefinition::isContextChanger)) {
             final String startWith = stepName != null && stepName.contains("\"") ? stepName.substring(0, stepName.indexOf('"') + 1) : null;
+
             if (startWith != null) {
                 final Project project = element.getProject();
                 TagProject.getPages(project)
@@ -39,56 +45,53 @@ public class TagCompletionUtils {
         return false;
     }
 
-    public static boolean addPageActions(CompletionParameters parameters, CompletionResultSet result) {
-        PsiElement element = parameters.getPosition().getContext();
-        String stepName = element instanceof GherkinStepImpl ? ((GherkinStepImpl) element).getStepName() : null;
-
-        // TODO почему GherkinStepImpl а не GherkinStep?
-        // TODO сначала проверять что нужна подстановка экшена и только потом искать их если надо
-        if (element instanceof GherkinStepImpl) {
-            final String currentPageName = TagContext.getCurrentPageName((GherkinStepImpl) element);
-            final PsiClass pageClass = TagProject.getPageByName(element.getProject(), currentPageName);
-            if (pageClass == null) {
-                return false;
-            }
-            final List<String> actionTitles = TagProject.getActionTitles(pageClass);
-            if (actionTitles.isEmpty()) {
-                return false;
-            }
-            final String startWith = stepName != null && stepName.contains("(") ? stepName.substring(0, stepName.indexOf('(') + 1) : null;
-            if (startWith == null) {
-                return false;
-            }
-            actionTitles.forEach(s -> result.addElement(LookupElementBuilder.create(startWith + s).withPresentableText(s)));
-            return true;
-        }
-        return false;
+    static boolean addPageActions(CompletionParameters parameters, CompletionResultSet result) {
+        String placeholder = "(" + CucumberCompletionContributor.INTELLIJ_IDEA_RULEZZZ;
+        return addCompletions(parameters, result, placeholder, TagCompletion.ACTIONS);
     }
 
-    public static boolean addPageElements(CompletionParameters parameters, CompletionResultSet result) {
+    static boolean addPageElements(CompletionParameters parameters, CompletionResultSet result) {
+        String placeholder = "\"" + CucumberCompletionContributor.INTELLIJ_IDEA_RULEZZZ;
+        return addCompletions(parameters, result, placeholder, TagCompletion.ELEMENTS);
+    }
+
+    private static boolean addCompletions(CompletionParameters parameters, CompletionResultSet result, String placeholder, TagCompletion tagCompletion) {
         PsiElement element = parameters.getPosition().getContext();
         String stepName = element instanceof GherkinStepImpl ? ((GherkinStepImpl) element).getStepName() : null;
 
         if (element instanceof GherkinStep) {
 
-            final String startWith = stepName != null && stepName.contains("\"" + CucumberCompletionContributor.INTELLIJ_IDEA_RULEZZZ) ? stepName.substring(0, stepName.indexOf("\"" + CucumberCompletionContributor.INTELLIJ_IDEA_RULEZZZ) + 1) : null;
+            String startWith = stepName != null && stepName.contains(placeholder) ? stepName.substring(0, stepName.indexOf(placeholder) + 1) : null;
             if (startWith == null) {
                 return false;
             }
 
-            final String currentPageName = TagContext.getCurrentPageName((GherkinStepImpl) element);
-            final PsiClass pageClass = TagProject.getPageByName(element.getProject(), currentPageName);
+            PsiClass pageClass = getPageClass(element);
             if (pageClass == null) {
                 return false;
             }
-            final List<String> elements = TagProject.getElements(pageClass);
-            if (elements.isEmpty()) {
-                return false;
+
+            List<String> completions;
+            switch (tagCompletion) {
+                case ACTIONS:
+                    completions = TagProject.getActionTitles(pageClass);
+                    break;
+                case ELEMENTS:
+                    completions = TagProject.getElements(pageClass);
+                    break;
+                default:
+                    return false;
             }
 
-            elements.forEach(s -> result.addElement(LookupElementBuilder.create(startWith + s).withPresentableText(s)));
+            completions.forEach(completion -> result.addElement(LookupElementBuilder.create(startWith + completion).withPresentableText(completion)));
             return true;
         }
-        return true;
+
+        return false;
+    }
+
+    private static PsiClass getPageClass(PsiElement element) {
+        String currentPageName = TagContext.getCurrentPageName((GherkinStepImpl) element);
+        return TagProject.getPageByName(element.getProject(), currentPageName);
     }
 }
