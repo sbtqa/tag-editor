@@ -231,7 +231,7 @@ public class CucumberCompletionContributor extends CompletionContributor {
         if (TagCompletionUtils.addPageTitles(parameters, result)) {
             return;
         }
-
+        
         if (TagCompletionUtils.addPageActions(parameters, result)) {
             return;
         }

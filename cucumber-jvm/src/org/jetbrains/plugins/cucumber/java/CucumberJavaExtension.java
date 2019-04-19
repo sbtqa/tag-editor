@@ -83,7 +83,6 @@ public class CucumberJavaExtension extends AbstractCucumberJavaExtension {
                     if (isInGlue) {
                         final boolean isContextChanger = stepDefMethod.getName().equals(CLASS_NAME_OPEN_PAGE)
                                 && stepDefMethod.getContainingClass().getName().equals(CLASS_NAME_CORE_STEP_DEFS);
-
                         final JavaStepDefinition javaStepDefinition = new JavaStepDefinition(stepDefMethod, annotationClassName);
                         javaStepDefinition.setContextChanger(isContextChanger);
 
