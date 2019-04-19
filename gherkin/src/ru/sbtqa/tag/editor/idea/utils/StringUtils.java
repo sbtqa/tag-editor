@@ -5,7 +5,7 @@ public class StringUtils {
     private StringUtils() {}
 
     public static String unquote(String string) {
-        if (string.startsWith("\"")&& string.endsWith("\"")) {
+        if (string.startsWith("\"") && string.endsWith("\"")) {
             return string.substring(1, string.length() - 1);
         }
 
