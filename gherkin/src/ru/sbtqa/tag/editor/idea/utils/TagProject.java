@@ -8,13 +8,12 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.AnnotatedElementsSearch;
 import com.intellij.util.Query;
-import kotlin.Pair;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import kotlin.Pair;
 
 /**
  * Created by cyberspace on 7/19/2017.
@@ -55,7 +54,6 @@ public class TagProject {
                 .map(x -> new Pair<>(x.getFirst(), x.getSecond().getParameterList().getParameters().length)).collect(Collectors.toList()));
 
 
-
         final List<Pair<PsiAnnotation, Integer>> actionTitleArrays = allAnnotations.stream()
                 .filter(x -> x.getFirst() != null && ACTION_TITLES_ANNOTATION_QUALIFIED_NAME.equals(x.getFirst().getQualifiedName()))
                 .map(x -> new Pair<>(x.getFirst(), x.getSecond().getParameterList().getParameters().length)).collect(Collectors.toList());
@@ -74,37 +72,6 @@ public class TagProject {
             return value.substring(1, value.length() - 1);
         }).collect(Collectors.toList());
     }
-
-//    /**
-//     * Опредялеят если в классе метод, который содержит заданный actionTitle
-//     */
-//    public static PsiMethod containsActionTitle(PsiClass psiClass, String actionTitle, Project project) {
-//        List<PsiMethod> methods = new ArrayList<>();
-//        while (psiClass != null) {
-//            methods.addAll(Arrays.asList(psiClass.getAllMethods()));
-//            psiClass = psiClass.getSuperClass();
-//        }
-//        final PsiConstantEvaluationHelper evaluationHelper = JavaPsiFacade.getInstance(project).getConstantEvaluationHelper();
-//        for (PsiMethod method : methods) {
-//            List<PsiAnnotation> psiAnnotations = Optional.of(method.getModifierList()).map(PsiAnnotationOwner::getAnnotations).map(Arrays::asList).orElse(null);
-//            if (psiAnnotations != null) {
-//                PsiAnnotation actionTileAnnotation = psiAnnotations.stream()
-//                        .filter(x -> TagProject.ACTION_TITLE_ANNOTATION_QUALIFIED_NAME.equals(x.getQualifiedName()))
-//                        .findFirst()
-//                        .orElse(null);
-//                String actionTitleOfAnnotation = Optional.ofNullable(actionTileAnnotation)
-//                        .map(CucumberJavaUtil::getAnnotationValue)
-//                        .map(y -> evaluationHelper.computeConstantExpression(y, false))
-//                        .map(Object::toString)
-//                        .filter(y -> y.length() > 1)
-//                        .orElse(null);
-//                if (actionTitle.equals(actionTitleOfAnnotation)) {
-//                    return method;
-//                }
-//            }
-//        }
-//        return null;
-//    }
 
     /**
      * Найти значаение title() для аннотации PageEntry для класса наследованного от ru.sbtqa.tag.pagefactory.Page.

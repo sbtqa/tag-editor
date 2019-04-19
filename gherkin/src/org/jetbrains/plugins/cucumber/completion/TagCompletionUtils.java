@@ -7,15 +7,14 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import java.util.List;
+import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.plugins.cucumber.psi.GherkinStep;
 import org.jetbrains.plugins.cucumber.psi.impl.GherkinStepImpl;
 import org.jetbrains.plugins.cucumber.steps.AbstractStepDefinition;
 import ru.sbtqa.tag.editor.idea.utils.TagContext;
 import ru.sbtqa.tag.editor.idea.utils.TagProject;
-
-import java.util.List;
-import java.util.Objects;
 
 public class TagCompletionUtils {
 
