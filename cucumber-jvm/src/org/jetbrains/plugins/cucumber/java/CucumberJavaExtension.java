@@ -26,10 +26,11 @@ import org.jetbrains.plugins.cucumber.steps.AbstractStepDefinition;
 
 public class CucumberJavaExtension extends AbstractCucumberJavaExtension {
 
-    public static final String CUCUMBER_OPTIONS_ANNOTATION = "cucumber.api.CucumberOptions";
-    public static final String CUCUMBER_RUNTIME_JAVA_STEP_DEF_ANNOTATION = "cucumber.runtime.java.StepDefAnnotation";
-    public static final String ZUCHINI_RUNTIME_JAVA_STEP_DEF_ANNOTATION = "org.zuchini.annotations.StepAnnotation";
-    public static final String CORE_GENERIC_STEPS_CLASS = "ru.sbtqa.tag.stepdefs.CoreGenericSteps";
+    static final String CUCUMBER_OPTIONS_ANNOTATION = "cucumber.api.CucumberOptions";
+    static final String CUCUMBER_RUNTIME_JAVA_STEP_DEF_ANNOTATION = "cucumber.runtime.java.StepDefAnnotation";
+    static final String ZUCHINI_RUNTIME_JAVA_STEP_DEF_ANNOTATION = "org.zuchini.annotations.StepAnnotation";
+    static final String CLASS_NAME_OPEN_PAGE = "openPage";
+    static final String CLASS_NAME_CORE_STEP_DEFS = "CoreStepDefs";
 
     @NotNull
     @Override
@@ -80,11 +81,8 @@ public class CucumberJavaExtension extends AbstractCucumberJavaExtension {
 
 
                     if (isInGlue) {
-                        final boolean isContextChanger = Arrays.asList(stepDefMethod.findDeepestSuperMethods()).stream()
-                                .anyMatch(psiMethod -> psiMethod.getName().equals("openPage")
-                                        && psiMethod.getContainingClass().getQualifiedName()
-                                        .equals(CORE_GENERIC_STEPS_CLASS));
-
+                        final boolean isContextChanger = stepDefMethod.getName().equals(CLASS_NAME_OPEN_PAGE)
+                                && stepDefMethod.getContainingClass().getName().equals(CLASS_NAME_CORE_STEP_DEFS);
                         final JavaStepDefinition javaStepDefinition = new JavaStepDefinition(stepDefMethod, annotationClassName);
                         javaStepDefinition.setContextChanger(isContextChanger);
 

@@ -51,11 +51,17 @@ import org.jetbrains.plugins.cucumber.steps.CucumberStepsIndex;
 
 import static com.intellij.patterns.PlatformPatterns.psiElement;
 
-/**
- * @author yole
- */
 public class CucumberCompletionContributor extends CompletionContributor {
 
+    public static final Pattern OPTIONAL_GROUP_PATTERN = Pattern.compile("\\)(\\?)");
+    public static final Pattern POSSIBLE_GROUP_PATTERN = Pattern.compile("\\(((?!<action>)[^)]*)\\)");
+    public static final Pattern QUESTION_MARK_PATTERN = Pattern.compile("([^\\\\])\\?:?");
+    public static final Pattern ARGS_INTO_BRACKETS_PATTERN = Pattern.compile("\\(\\?:[^)]*\\)");
+    public static final Pattern PARAMETERS_PATTERN = Pattern.compile("<action>|<string>|<number>|<param>|\\{[^}]+}");
+    public static final String INTELLIJ_IDEA_RULEZZZ = "IntellijIdeaRulezzz";
+
+    private static final int SCENARIO_KEYWORD_PRIORITY = 70;
+    private static final int SCENARIO_OUTLINE_KEYWORD_PRIORITY = 60;
     private static final Map<String, String> GROUP_TYPE_MAP = new HashMap<>();
     private static final Map<String, String> INTERPOLATION_PARAMETERS_MAP = new HashMap<>();
 
@@ -71,15 +77,6 @@ public class CucumberCompletionContributor extends CompletionContributor {
         GROUP_TYPE_MAP.put("(\\.[\\d]+)", "<number>");
         INTERPOLATION_PARAMETERS_MAP.put("#\\{[^\\}]*\\}", "<param>");
     }
-
-    private static final int SCENARIO_KEYWORD_PRIORITY = 70;
-    private static final int SCENARIO_OUTLINE_KEYWORD_PRIORITY = 60;
-    public static final Pattern OPTIONAL_GROUP_PATTERN = Pattern.compile("\\)(\\?)");
-    public static final Pattern POSSIBLE_GROUP_PATTERN = Pattern.compile("\\(((?!<action>)[^)]*)\\)");
-    public static final Pattern QUESTION_MARK_PATTERN = Pattern.compile("([^\\\\])\\?:?");
-    public static final Pattern ARGS_INTO_BRACKETS_PATTERN = Pattern.compile("\\(\\?:[^)]*\\)");
-    public static final Pattern PARAMETERS_PATTERN = Pattern.compile("<action>|<string>|<number>|<param>|\\{[^}]+}");
-    public static final String INTELLIJ_IDEA_RULEZZZ = "IntellijIdeaRulezzz";
 
     public CucumberCompletionContributor() {
         final PsiElementPattern.Capture<PsiElement> inScenario = psiElement().inside(psiElement().withElementType(GherkinElementTypes.SCENARIOS));
@@ -230,11 +227,16 @@ public class CucumberCompletionContributor extends CompletionContributor {
 
     private static void addStepDefinitions(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet result, @NotNull PsiFile file) {
 
-        if (TagCompletionUtils.addPageTitles(parameters, result, file)) {
+        // TODO это должно быть на уровень выше
+        if (TagCompletionUtils.addPageTitles(parameters, result)) {
+            return;
+        }
+        
+        if (TagCompletionUtils.addPageActions(parameters, result)) {
             return;
         }
 
-        if (TagCompletionUtils.addPageActions(parameters, result, file)) {
+        if (TagCompletionUtils.addPageElements(parameters, result)) {
             return;
         }
 
@@ -260,19 +262,19 @@ public class CucumberCompletionContributor extends CompletionContributor {
                 }
 
                 final List<TextRange> ranges = new ArrayList<>();
-                Matcher m = QUESTION_MARK_PATTERN.matcher(stepCompletion);
-                if (m.find()) {
-                    stepCompletion = m.replaceAll("$1");
+                Matcher matcher = QUESTION_MARK_PATTERN.matcher(stepCompletion);
+                if (matcher.find()) {
+                    stepCompletion = matcher.replaceAll("$1");
                 }
 
-                m = POSSIBLE_GROUP_PATTERN.matcher(stepCompletion);
-                while (m.find()) {
-                    stepCompletion = m.replaceAll("$1");
+                matcher = POSSIBLE_GROUP_PATTERN.matcher(stepCompletion);
+                while (matcher.find()) {
+                    stepCompletion = matcher.replaceAll("$1");
                 }
 
-                m = PARAMETERS_PATTERN.matcher(stepCompletion);
-                while (m.find()) {
-                    ranges.add(new TextRange(m.start(), m.end()));
+                matcher = PARAMETERS_PATTERN.matcher(stepCompletion);
+                while (matcher.find()) {
+                    ranges.add(new TextRange(matcher.start(), matcher.end()));
                 }
 
                 final PsiElement element = definition.getElement();

@@ -15,118 +15,93 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import kotlin.Pair;
 
-/**
- * Created by cyberspace on 7/19/2017.
- */
 public class TagProject {
 
-    public static final String RU_LANGUAGE = "ru";
-    public static final String EN_LANGUAGE = "en";
+    private static final String ACTION_TITLE_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.ActionTitle";
+    private static final String ACTION_TITLES_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.ActionTitles";
+    private static final String PAGE_ENTRY_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.PageEntry";
+    private static final String ELEMENT_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.ElementTitle";
 
-    public static final String ACTION_TITLE_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.ActionTitle";
-    public static final String ACTION_TITLES_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.ActionTitles";
-    public static final String PAGE_ENTRY_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.PageEntry";
-    public static final String TAG_PAGE_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.Page";
+    private static final String VALUE = "value";
+    private static final String TITLE = "title";
 
-    private TagProject() {
-    }
+    private TagProject() {}
 
     /**
-     * Найти все аннотации ActionTitle класса наследуемого от ru.sbtqa.tag.pagefactory.Page.
-     *
-     * @param page
-     * @return Возвращает поток пар значений (Аннотация; Количество параметров в сигнатуре метода c данной аннотацией).
+     * Найти все экшены на странице
      */
-    public static List<Pair<PsiAnnotation, Integer>> actionAnnotations(PsiClass page) {
-        List<Pair<PsiAnnotation, PsiMethod>> allAnnotations = new ArrayList<>();
-        Arrays.stream(page.getAllMethods())
-                .filter(x -> x.getContainingClass() != null &&
-                        x.getContainingClass().getQualifiedName() != null) // игнорируем экшины из родителя FIXME: а надо ли?
-                .forEach(x -> Arrays.stream(x.getModifierList().getAnnotations())
-                        .forEach(y -> allAnnotations.add(new Pair<>(y, x))));
+    public static List<String> getActionTitles(PsiClass page) {
+        return getActionAnnotations(page).stream()
+                .map(psiAnnotationIntegerPair -> psiAnnotationIntegerPair.component1().findAttributeValue(VALUE).getText())
+                .map(StringUtils::unquote)
+                .collect(Collectors.toList());
+    }
 
+    private static List<Pair<PsiAnnotation, Integer>> getActionAnnotations(PsiClass page) {
+        List<Pair<PsiAnnotation, PsiMethod>> allAnnotations = new ArrayList<>();
+
+        Arrays.stream(page.getAllMethods())
+                .filter(method -> method.getContainingClass() != null && method.getContainingClass().getQualifiedName() != null)
+                .forEach(method -> Arrays.stream(method.getModifierList().getAnnotations())
+                        .forEach(annotation -> allAnnotations.add(new Pair<>(annotation, method))));
 
         List<Pair<PsiAnnotation, Integer>> actionTitleAnnotations = new ArrayList<>();
 
-
         actionTitleAnnotations.addAll(allAnnotations.stream()
                 .filter(x -> x.getFirst() != null && ACTION_TITLE_ANNOTATION_QUALIFIED_NAME.equals(x.getFirst().getQualifiedName()))
-                .map(x -> new Pair<>(x.getFirst(), x.getSecond().getParameterList().getParameters().length)).collect(Collectors.toList()));
-
+                .map(x -> new Pair<>(x.getFirst(), x.getSecond().getParameterList().getParameters().length))
+                .collect(Collectors.toList()));
 
         final List<Pair<PsiAnnotation, Integer>> actionTitleArrays = allAnnotations.stream()
                 .filter(x -> x.getFirst() != null && ACTION_TITLES_ANNOTATION_QUALIFIED_NAME.equals(x.getFirst().getQualifiedName()))
-                .map(x -> new Pair<>(x.getFirst(), x.getSecond().getParameterList().getParameters().length)).collect(Collectors.toList());
-        actionTitleArrays.forEach(x -> actionTitleAnnotations.addAll(Arrays.asList(x.component1().findAttributeValue("value").getChildren())
+                .map(x -> new Pair<>(x.getFirst(), x.getSecond().getParameterList().getParameters().length))
+                .collect(Collectors.toList());
+        actionTitleArrays.forEach(x -> actionTitleAnnotations.addAll(Arrays.asList(x.component1().findAttributeValue(VALUE).getChildren())
                 .stream().filter(psiElement -> psiElement instanceof PsiAnnotation)
-                .map(y -> new Pair<>((PsiAnnotation) y, x.getSecond())).collect(Collectors.toList())));
-
+                .map(y -> new Pair<>((PsiAnnotation) y, x.getSecond()))
+                .collect(Collectors.toList())));
 
         return actionTitleAnnotations;
     }
 
-
-    public static List<String> actionTitles(PsiClass page) {
-        return actionAnnotations(page).stream().map(psiAnnotationIntegerPair -> {
-            final String value = psiAnnotationIntegerPair.component1().findAttributeValue("value").getText();
-            return value.substring(1, value.length() - 1);
-        }).collect(Collectors.toList());
+    /**
+     * Найти все элементы на странице
+     */
+    public static List<String> getElements(PsiClass page) {
+        return Arrays.stream(page.getAllFields())
+                .filter(field -> field.hasAnnotation(ELEMENT_ANNOTATION_QUALIFIED_NAME))
+                .map(field -> field.getAnnotation(ELEMENT_ANNOTATION_QUALIFIED_NAME).findAttributeValue(VALUE).getText())
+                .map(StringUtils::unquote)
+                .collect(Collectors.toList());
     }
 
     /**
-     * Найти значаение title() для аннотации PageEntry для класса наследованного от ru.sbtqa.tag.pagefactory.Page.
-     *
-     * @param page
-     * @return
+     * Найти значения title() для аннотации PageEntry
      */
     public static String findPageName(PsiClass page) {
-        String annotationTitle = page.getAnnotation(PAGE_ENTRY_ANNOTATION_QUALIFIED_NAME).findAttribute("title")
-                .getAttributeValue().getSourceElement().getText();
-        return annotationTitle.substring(1, annotationTitle.length() - 1);
+        String annotationTitle = page.getAnnotation(PAGE_ENTRY_ANNOTATION_QUALIFIED_NAME).findAttributeValue(TITLE).getText();
 
+        return StringUtils.unquote(annotationTitle);
     }
 
     /**
-     * Поиск всех имеющих предка ru.sbtqa.tag.pagefactory.Page.
-     *
-     * @param project
-     * @return
+     * Поиск всех страниц в проекте имеющих аннотацию PageEntry
      */
-    public static Stream<PsiClass> pages(Project project) {
+    public static Stream<PsiClass> getPages(Project project) {
+        PsiClass pageEntry = JavaPsiFacade.getInstance(project)
+                .findClass(PAGE_ENTRY_ANNOTATION_QUALIFIED_NAME, GlobalSearchScope.everythingScope(project));
+        Query<PsiClass> psiClasses = AnnotatedElementsSearch.searchPsiClasses(pageEntry, GlobalSearchScope.projectScope(project));
 
-        final PsiClass aClass = JavaPsiFacade.getInstance(project).findClass(PAGE_ENTRY_ANNOTATION_QUALIFIED_NAME,
-                GlobalSearchScope.projectScope(project));
-        final Query<PsiClass> psiClasses = AnnotatedElementsSearch.searchPsiClasses(aClass, GlobalSearchScope.projectScope(project));
         return psiClasses.findAll().stream();
-
     }
-
 
     /**
      * Поиск страницы по имени
-     *
-     * @param project
-     * @return
      */
     public static PsiClass getPageByName(Project project, String pageTitle) {
-        return pages(project).filter(pageClass ->
-                findPageName(pageClass).equals(pageTitle)
-        ).findFirst().orElse(null);
+        return getPages(project)
+                .filter(pageClass -> findPageName(pageClass).equals(pageTitle))
+                .findFirst()
+                .orElse(null);
     }
-
-    /**
-     * Имеет ли класс в наследниках ru.sbtqa.tag.pagefactory.Page.
-     *
-     * @param psiClass
-     * @return
-     */
-    private static boolean isTAGPage(PsiClass psiClass) {
-        while (psiClass != null) {
-            if (TAG_PAGE_QUALIFIED_NAME.equals(psiClass.getQualifiedName()))
-                return true;
-            psiClass = psiClass.getSuperClass();
-        }
-        return false;
-    }
-
 }
