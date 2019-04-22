@@ -12,26 +12,27 @@ import org.jetbrains.plugins.cucumber.psi.GherkinLanguage;
  * @author Rustam Vishnyakov
  */
 public class GherkinLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSettingsProvider {
-  @NotNull
-  @Override
-  public Language getLanguage() {
-    return GherkinLanguage.INSTANCE;
-  }
 
-  @Override
-  protected void customizeDefaults(@NotNull CommonCodeStyleSettings commonSettings,
-                                   @NotNull CommonCodeStyleSettings.IndentOptions indentOptions) {
-    indentOptions.INDENT_SIZE = 2;
-  }
+    @NotNull
+    @Override
+    public Language getLanguage() {
+        return GherkinLanguage.INSTANCE;
+    }
 
-  @Override
-  public String getCodeSample(@NotNull SettingsType settingsType) {
-    return "Feature: Formatting\n" +
-           "    Scenario: Reformat Cucumber file\n";
-  }
+    @Override
+    protected void customizeDefaults(@NotNull CommonCodeStyleSettings commonSettings,
+                                     @NotNull CommonCodeStyleSettings.IndentOptions indentOptions) {
+        indentOptions.INDENT_SIZE = 2;
+    }
 
-  @Override
-  public IndentOptionsEditor getIndentOptionsEditor() {
-    return new SmartIndentOptionsEditor();
-  }
+    @Override
+    public String getCodeSample(@NotNull SettingsType settingsType) {
+        return "Feature: Formatting\n" +
+                "    Scenario: Reformat Cucumber file\n";
+    }
+
+    @Override
+    public IndentOptionsEditor getIndentOptionsEditor() {
+        return new SmartIndentOptionsEditor();
+    }
 }

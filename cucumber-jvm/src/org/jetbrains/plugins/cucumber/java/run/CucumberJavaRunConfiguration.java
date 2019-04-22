@@ -2,9 +2,20 @@
 package org.jetbrains.plugins.cucumber.java.run;
 
 import com.intellij.diagnostic.logging.LogConfigurationPanel;
-import com.intellij.execution.*;
+import com.intellij.execution.DefaultExecutionResult;
+import com.intellij.execution.ExecutionBundle;
+import com.intellij.execution.ExecutionException;
+import com.intellij.execution.ExecutionResult;
+import com.intellij.execution.Executor;
+import com.intellij.execution.JavaRunConfigurationExtensionManager;
+import com.intellij.execution.RunConfigurationExtension;
 import com.intellij.execution.application.ApplicationConfiguration;
-import com.intellij.execution.configurations.*;
+import com.intellij.execution.configurations.ConfigurationFactory;
+import com.intellij.execution.configurations.JavaParameters;
+import com.intellij.execution.configurations.JavaRunConfigurationModule;
+import com.intellij.execution.configurations.RunConfiguration;
+import com.intellij.execution.configurations.RunProfileState;
+import com.intellij.execution.configurations.RuntimeConfigurationException;
 import com.intellij.execution.filters.Filter;
 import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.runners.ExecutionEnvironment;
@@ -23,215 +34,214 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.PathUtil;
 import com.intellij.util.text.VersionComparatorUtil;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.jetbrains.plugins.cucumber.CucumberBundle;
-import org.jetbrains.plugins.cucumber.java.CucumberJavaBundle;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.plugins.cucumber.CucumberBundle;
+import org.jetbrains.plugins.cucumber.java.CucumberJavaBundle;
 
 
 public class CucumberJavaRunConfiguration extends ApplicationConfiguration {
-  private NullableComputable<String> glueInitializer = null;
 
-  protected CucumberJavaRunConfiguration(String name, Project project, ConfigurationFactory factory) {
-    super(name, project, factory);
-  }
+    private NullableComputable<String> glueInitializer = null;
 
-  @NotNull
-  @Override
-  public SettingsEditor<? extends RunConfiguration> getConfigurationEditor() {
-    SettingsEditorGroup<CucumberJavaRunConfiguration> group = new SettingsEditorGroup<>();
-    group.addEditor(ExecutionBundle.message("run.configuration.configuration.tab.title"), new CucumberJavaApplicationConfigurable(getProject()));
-    JavaRunConfigurationExtensionManager.getInstance().appendEditors(this, group);
-    group.addEditor(ExecutionBundle.message("logs.tab.title"), new LogConfigurationPanel<>());
-    return group;
-  }
+    protected CucumberJavaRunConfiguration(String name, Project project, ConfigurationFactory factory) {
+        super(name, project, factory);
+    }
 
-  @Override
-  public RunProfileState getState(@NotNull Executor executor, @NotNull ExecutionEnvironment env) {
-    return new JavaApplicationCommandLineState<CucumberJavaRunConfiguration>(this, env) {
-      private final Collection<Filter> myConsoleFilters = new ArrayList<>();
+    @NotNull
+    @Override
+    public SettingsEditor<? extends RunConfiguration> getConfigurationEditor() {
+        SettingsEditorGroup<CucumberJavaRunConfiguration> group = new SettingsEditorGroup<>();
+        group.addEditor(ExecutionBundle.message("run.configuration.configuration.tab.title"), new CucumberJavaApplicationConfigurable(getProject()));
+        JavaRunConfigurationExtensionManager.getInstance().appendEditors(this, group);
+        group.addEditor(ExecutionBundle.message("logs.tab.title"), new LogConfigurationPanel<>());
+        return group;
+    }
 
-      @Override
-      protected JavaParameters createJavaParameters() throws ExecutionException {
-        final JavaParameters params = new JavaParameters();
-        final JavaRunConfigurationModule module = getConfigurationModule();
+    @Override
+    public RunProfileState getState(@NotNull Executor executor, @NotNull ExecutionEnvironment env) {
+        return new JavaApplicationCommandLineState<CucumberJavaRunConfiguration>(this, env) {
+            private final Collection<Filter> myConsoleFilters = new ArrayList<>();
 
-        final int classPathType = JavaParameters.JDK_AND_CLASSES_AND_TESTS;
-        final String jreHome = isAlternativeJrePathEnabled() ? getAlternativeJrePath() : null;
-        JavaParametersUtil.configureModule(module, params, classPathType, jreHome);
-        JavaParametersUtil.configureConfiguration(params, CucumberJavaRunConfiguration.this);
+            @Override
+            protected JavaParameters createJavaParameters() throws ExecutionException {
+                final JavaParameters params = new JavaParameters();
+                final JavaRunConfigurationModule module = getConfigurationModule();
 
-        String[] paths = getSMRunnerPaths();
-        for (String path : paths) {
-          params.getClassPath().add(path);
-        }
+                final int classPathType = JavaParameters.JDK_AND_CLASSES_AND_TESTS;
+                final String jreHome = isAlternativeJrePathEnabled() ? getAlternativeJrePath() : null;
+                JavaParametersUtil.configureModule(module, params, classPathType, jreHome);
+                JavaParametersUtil.configureConfiguration(params, CucumberJavaRunConfiguration.this);
 
-        params.setMainClass(getMainClassName());
-        for (RunConfigurationExtension ext : RunConfigurationExtension.EP_NAME.getExtensionList()) {
-          ext.updateJavaParameters(CucumberJavaRunConfiguration.this, params, getRunnerSettings());
-        }
+                String[] paths = getSMRunnerPaths();
+                for (String path : paths) {
+                    params.getClassPath().add(path);
+                }
 
-        final String glueValue = getGlue();
-        if (glueValue != null && !StringUtil.isEmpty(glueValue)) {
-          final String[] glues = glueValue.split(" ");
-          for (String glue : glues) {
-            if (!StringUtil.isEmpty(glue)) {
-              params.getProgramParametersList().addParametersString(" --glue " + glue);
+                params.setMainClass(getMainClassName());
+                for (RunConfigurationExtension ext : RunConfigurationExtension.EP_NAME.getExtensionList()) {
+                    ext.updateJavaParameters(CucumberJavaRunConfiguration.this, params, getRunnerSettings());
+                }
+
+                final String glueValue = getGlue();
+                if (glueValue != null && !StringUtil.isEmpty(glueValue)) {
+                    final String[] glues = glueValue.split(" ");
+                    for (String glue : glues) {
+                        if (!StringUtil.isEmpty(glue)) {
+                            params.getProgramParametersList().addParametersString(" --glue " + glue);
+                        }
+                    }
+                }
+
+                String filePath = getFilePath();
+                File f = new File(filePath);
+                if (!f.isDirectory()) {
+                    f = f.getParentFile();
+                }
+                params.getVMParametersList().addParametersString("-Dorg.jetbrains.run.directory=\"" + f.getAbsolutePath() + "\"");
+
+                params.getProgramParametersList().addParametersString("\"" + filePath + "\"");
+                params.setShortenCommandLine(getShortenCommandLine(), getProject());
+                return params;
             }
-          }
-        }
 
-        String filePath = getFilePath();
-        File f = new File(filePath);
-        if (!f.isDirectory()) {
-          f = f.getParentFile();
-        }
-        params.getVMParametersList().addParametersString("-Dorg.jetbrains.run.directory=\"" + f.getAbsolutePath() + "\"");
+            @NotNull
+            private ConsoleView createConsole(@NotNull final Executor executor, ProcessHandler processHandler) throws ExecutionException {
+                // console view
+                final String testFrameworkName = "cucumber";
+                final CucumberJavaRunConfiguration runConfiguration = CucumberJavaRunConfiguration.this;
+                final SMTRunnerConsoleProperties consoleProperties = new SMTRunnerConsoleProperties(runConfiguration, testFrameworkName, executor) {
+                    @NotNull
+                    @Override
+                    public SMTestLocator getTestLocator() {
+                        return JavaTestLocator.INSTANCE;
+                    }
+                };
+                return SMTestRunnerConnectionUtil.createAndAttachConsole(testFrameworkName, processHandler, consoleProperties);
+            }
 
-        params.getProgramParametersList().addParametersString("\"" + filePath + "\"");
-        params.setShortenCommandLine(getShortenCommandLine(), getProject());
-        return params;
-      }
+            @NotNull
+            @Override
+            public ExecutionResult execute(@NotNull Executor executor, @NotNull ProgramRunner runner) throws ExecutionException {
+                final ProcessHandler processHandler = startProcess();
+                final ConsoleView console = createConsole(executor, processHandler);
+                myConsoleFilters.forEach((filter) -> console.addMessageFilter(filter));
+                return new DefaultExecutionResult(console, processHandler, createActions(console, processHandler, executor));
+            }
 
-      @NotNull
-      private ConsoleView createConsole(@NotNull final Executor executor, ProcessHandler processHandler) throws ExecutionException {
-        // console view
-        final String testFrameworkName = "cucumber";
-        final CucumberJavaRunConfiguration runConfiguration = CucumberJavaRunConfiguration.this;
-        final SMTRunnerConsoleProperties consoleProperties = new SMTRunnerConsoleProperties(runConfiguration, testFrameworkName, executor) {
-          @NotNull
-          @Override
-          public SMTestLocator getTestLocator() {
-            return JavaTestLocator.INSTANCE;
-          }
+            @Override
+            public void addConsoleFilters(Filter... filters) {
+                myConsoleFilters.addAll(Arrays.asList(filters));
+            }
         };
-        return SMTestRunnerConnectionUtil.createAndAttachConsole(testFrameworkName, processHandler, consoleProperties);
-      }
-
-      @NotNull
-      @Override
-      public ExecutionResult execute(@NotNull Executor executor, @NotNull ProgramRunner runner) throws ExecutionException {
-        final ProcessHandler processHandler = startProcess();
-        final ConsoleView console = createConsole(executor, processHandler);
-        myConsoleFilters.forEach((filter) -> console.addMessageFilter(filter));
-        return new DefaultExecutionResult(console, processHandler, createActions(console, processHandler, executor));
-      }
-
-      @Override
-      public void addConsoleFilters(Filter... filters) {
-        myConsoleFilters.addAll(Arrays.asList(filters));
-      }
-    };
-  }
-
-  private String[] getSMRunnerPaths() throws RuntimeException {
-    List<String> result = new ArrayList<>();
-
-    String cucumberJvmFormatterClassPath = null;
-    try {
-      cucumberJvmFormatterClassPath = PathUtil.getJarPathForClass(Class.forName("org.jetbrains.plugins.cucumber.java.run.CucumberJvmSMFormatter"));
-    } catch (ClassNotFoundException e) {
-      throw new RuntimeException("Cucumber-formatter not found");
-    }
-    result.add(cucumberJvmFormatterClassPath);
-    if (VersionComparatorUtil.compare(getCucumberCoreVersion(), "3") >= 0) {
-      if (cucumberJvmFormatterClassPath.endsWith(".jar")) {
-        result.add(cucumberJvmFormatterClassPath.replace(".jar", "3.jar"));
-      } else {
-        // Running IDEA from sources
-        result.add(cucumberJvmFormatterClassPath + "3");
-      }
     }
 
-    return result.toArray(ArrayUtil.EMPTY_STRING_ARRAY);
-  }
+    private String[] getSMRunnerPaths() throws RuntimeException {
+        List<String> result = new ArrayList<>();
 
-  @Override
-  public void checkConfiguration() throws RuntimeConfigurationException {
-    String filePath = getFilePath();
-    if (filePath == null) {
-      throw new RuntimeConfigurationException(CucumberBundle.message("cucumber.run.error.specify.file"));
-    } else if (!(new File(filePath)).exists()) {
-      throw new RuntimeConfigurationException(CucumberBundle.message("cucumber.run.error.file.doesnt.exist"));
-    }
-    else if (StringUtil.isEmpty(getGlue())) {
-      throw new RuntimeConfigurationException(CucumberJavaBundle.message("cucumber.java.run.configuration.glue.mustnt.be.empty"));
-    }
+        String cucumberJvmFormatterClassPath = null;
+        try {
+            cucumberJvmFormatterClassPath = PathUtil.getJarPathForClass(Class.forName("org.jetbrains.plugins.cucumber.java.run.CucumberJvmSMFormatter"));
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("Cucumber-formatter not found");
+        }
+        result.add(cucumberJvmFormatterClassPath);
+        if (VersionComparatorUtil.compare(getCucumberCoreVersion(), "3") >= 0) {
+            if (cucumberJvmFormatterClassPath.endsWith(".jar")) {
+                result.add(cucumberJvmFormatterClassPath.replace(".jar", "3.jar"));
+            } else {
+                // Running IDEA from sources
+                result.add(cucumberJvmFormatterClassPath + "3");
+            }
+        }
 
-    String programParameters = getProgramParameters();
-    if (programParameters != null && programParameters.contains("--glue")) {
-      throw new RuntimeConfigurationException(CucumberJavaBundle.message("cucumber.java.run.configuration.glue.in.program.parameters"));
-    }
-
-    super.checkConfiguration();
-  }
-
-  @NotNull
-  @Override
-  protected CucumberJavaConfigurationOptions getOptions() {
-    return (CucumberJavaConfigurationOptions)super.getOptions();
-  }
-
-  @Nullable
-  public String getGlue() {
-    if (glueInitializer != null) {
-      setGlue(glueInitializer.compute());
+        return result.toArray(ArrayUtil.EMPTY_STRING_ARRAY);
     }
 
-    return getOptions().getGlue();
-  }
+    @Override
+    public void checkConfiguration() throws RuntimeConfigurationException {
+        String filePath = getFilePath();
+        if (filePath == null) {
+            throw new RuntimeConfigurationException(CucumberBundle.message("cucumber.run.error.specify.file"));
+        } else if (!(new File(filePath)).exists()) {
+            throw new RuntimeConfigurationException(CucumberBundle.message("cucumber.run.error.file.doesnt.exist"));
+        } else if (StringUtil.isEmpty(getGlue())) {
+            throw new RuntimeConfigurationException(CucumberJavaBundle.message("cucumber.java.run.configuration.glue.mustnt.be.empty"));
+        }
 
-  public void setGlue(String value) {
-    getOptions().setGlue(value);
-    glueInitializer = null;
-  }
+        String programParameters = getProgramParameters();
+        if (programParameters != null && programParameters.contains("--glue")) {
+            throw new RuntimeConfigurationException(CucumberJavaBundle.message("cucumber.java.run.configuration.glue.in.program.parameters"));
+        }
 
-  public void setGlue(NullableComputable<String> value) {
-    glueInitializer = value;
-  }
+        super.checkConfiguration();
+    }
 
-  public String getFilePath() {
-    return getOptions().getFilePath();
-  }
+    @NotNull
+    @Override
+    protected CucumberJavaConfigurationOptions getOptions() {
+        return (CucumberJavaConfigurationOptions) super.getOptions();
+    }
 
-  public void setFilePath(String filePath) {
-    getOptions().setFilePath(filePath);
-  }
+    @Nullable
+    public String getGlue() {
+        if (glueInitializer != null) {
+            setGlue(glueInitializer.compute());
+        }
 
-  public String getNameFilter() {
-    return getOptions().getNameFilter();
-  }
+        return getOptions().getGlue();
+    }
 
-  public void setNameFilter(String nameFilter) {
-    getOptions().setNameFilter(nameFilter);
-  }
+    public void setGlue(String value) {
+        getOptions().setGlue(value);
+        glueInitializer = null;
+    }
 
-  public String getCucumberCoreVersion() {
-    return getOptions().getCucumberCoreVersion();
-  }
+    public void setGlue(NullableComputable<String> value) {
+        glueInitializer = value;
+    }
 
-  public void setCucumberCoreVersion(String cucumberCoreVersion) {
-    getOptions().setCucumberCoreVersion(cucumberCoreVersion);
-  }
+    public String getFilePath() {
+        return getOptions().getFilePath();
+    }
 
-  @Nullable
-  @Override
-  public String suggestedName() {
-    return getOptions().getSuggestedName();
-  }
+    public void setFilePath(String filePath) {
+        getOptions().setFilePath(filePath);
+    }
 
-  public void setSuggestedName(String suggestedName) {
-    getOptions().setSuggestedName(suggestedName);
-  }
+    public String getNameFilter() {
+        return getOptions().getNameFilter();
+    }
 
-  @Override
-  public String getActionName() {
-    return getName();
-  }
+    public void setNameFilter(String nameFilter) {
+        getOptions().setNameFilter(nameFilter);
+    }
+
+    public String getCucumberCoreVersion() {
+        return getOptions().getCucumberCoreVersion();
+    }
+
+    public void setCucumberCoreVersion(String cucumberCoreVersion) {
+        getOptions().setCucumberCoreVersion(cucumberCoreVersion);
+    }
+
+    @Nullable
+    @Override
+    public String suggestedName() {
+        return getOptions().getSuggestedName();
+    }
+
+    public void setSuggestedName(String suggestedName) {
+        getOptions().setSuggestedName(suggestedName);
+    }
+
+    @Override
+    public String getActionName() {
+        return getName();
+    }
 }

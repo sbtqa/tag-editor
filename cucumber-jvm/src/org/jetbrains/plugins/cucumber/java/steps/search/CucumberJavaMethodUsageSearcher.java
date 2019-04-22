@@ -29,31 +29,32 @@ import org.jetbrains.plugins.cucumber.java.CucumberJavaUtil;
 import org.jetbrains.plugins.cucumber.psi.GherkinFileType;
 
 public class CucumberJavaMethodUsageSearcher extends QueryExecutorBase<PsiReference, MethodReferencesSearch.SearchParameters> {
-  public CucumberJavaMethodUsageSearcher() {
-    super(true);
-  }
 
-  @Override
-  public void processQuery(@NotNull final MethodReferencesSearch.SearchParameters p, @NotNull final Processor<? super PsiReference> consumer) {
-    SearchScope scope = p.getEffectiveSearchScope();
-    if (!(scope instanceof GlobalSearchScope)) {
-      return;
+    public CucumberJavaMethodUsageSearcher() {
+        super(true);
     }
 
-    final PsiMethod method = p.getMethod();
+    @Override
+    public void processQuery(@NotNull final MethodReferencesSearch.SearchParameters p, @NotNull final Processor<? super PsiReference> consumer) {
+        SearchScope scope = p.getEffectiveSearchScope();
+        if (!(scope instanceof GlobalSearchScope)) {
+            return;
+        }
 
-    final PsiAnnotation stepAnnotation = CucumberJavaUtil.getCucumberStepAnnotation(method);
-    final String regexp = stepAnnotation != null ? CucumberJavaUtil.getPatternFromStepDefinition(stepAnnotation) : null;
-    if (regexp == null) {
-      return;
-    }
-    final String word = CucumberUtil.getTheBiggestWordToSearchByIndex(regexp);
-    if (StringUtil.isEmpty(word)) {
-      return;
-    }
+        final PsiMethod method = p.getMethod();
 
-    final GlobalSearchScope restrictedScope = GlobalSearchScope.getScopeRestrictedByFileTypes((GlobalSearchScope)scope,
-                                                                                              GherkinFileType.INSTANCE);
-    ReferencesSearch.search(new ReferencesSearch.SearchParameters(method, restrictedScope, false, p.getOptimizer())).forEach(consumer);
-  }
+        final PsiAnnotation stepAnnotation = CucumberJavaUtil.getCucumberStepAnnotation(method);
+        final String regexp = stepAnnotation != null ? CucumberJavaUtil.getPatternFromStepDefinition(stepAnnotation) : null;
+        if (regexp == null) {
+            return;
+        }
+        final String word = CucumberUtil.getTheBiggestWordToSearchByIndex(regexp);
+        if (StringUtil.isEmpty(word)) {
+            return;
+        }
+
+        final GlobalSearchScope restrictedScope = GlobalSearchScope.getScopeRestrictedByFileTypes((GlobalSearchScope) scope,
+                GherkinFileType.INSTANCE);
+        ReferencesSearch.search(new ReferencesSearch.SearchParameters(method, restrictedScope, false, p.getOptimizer())).forEach(consumer);
+    }
 }

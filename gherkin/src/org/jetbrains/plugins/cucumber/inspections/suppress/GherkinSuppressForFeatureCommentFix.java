@@ -8,19 +8,20 @@ import org.jetbrains.plugins.cucumber.CucumberBundle;
 import org.jetbrains.plugins.cucumber.psi.GherkinFeature;
 
 public class GherkinSuppressForFeatureCommentFix extends AbstractBatchSuppressByNoInspectionCommentFix {
-  GherkinSuppressForFeatureCommentFix(@NotNull final String toolId) {
-    super(toolId, false);
-  }
 
-  @NotNull
-  @Override
-  public String getText() {
-    return CucumberBundle.message("cucumber.inspection.suppress.feature");
-  }
+    GherkinSuppressForFeatureCommentFix(@NotNull final String toolId) {
+        super(toolId, false);
+    }
 
-  @Override
-  public PsiElement getContainer(PsiElement context) {
-    // step
-    return PsiTreeUtil.getNonStrictParentOfType(context, GherkinFeature.class);
-  }
+    @NotNull
+    @Override
+    public String getText() {
+        return CucumberBundle.message("cucumber.inspection.suppress.feature");
+    }
+
+    @Override
+    public PsiElement getContainer(PsiElement context) {
+        // step
+        return PsiTreeUtil.getNonStrictParentOfType(context, GherkinFeature.class);
+    }
 }

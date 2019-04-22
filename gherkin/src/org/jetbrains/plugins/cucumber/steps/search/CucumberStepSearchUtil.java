@@ -7,14 +7,15 @@ import com.intellij.psi.search.SearchScope;
 import org.jetbrains.plugins.cucumber.psi.GherkinFileType;
 
 public class CucumberStepSearchUtil {
-  public static SearchScope restrictScopeToGherkinFiles(final Computable<? extends SearchScope> originalScopeComputation) {
-    return ReadAction.compute(() -> {
-      final SearchScope originalScope = originalScopeComputation.compute();
-      if (originalScope instanceof GlobalSearchScope) {
-        return GlobalSearchScope.getScopeRestrictedByFileTypes((GlobalSearchScope)originalScope,
-                                                               GherkinFileType.INSTANCE);
-      }
-      return originalScope;
-    });
-  }
+
+    public static SearchScope restrictScopeToGherkinFiles(final Computable<? extends SearchScope> originalScopeComputation) {
+        return ReadAction.compute(() -> {
+            final SearchScope originalScope = originalScopeComputation.compute();
+            if (originalScope instanceof GlobalSearchScope) {
+                return GlobalSearchScope.getScopeRestrictedByFileTypes((GlobalSearchScope) originalScope,
+                        GherkinFileType.INSTANCE);
+            }
+            return originalScope;
+        });
+    }
 }

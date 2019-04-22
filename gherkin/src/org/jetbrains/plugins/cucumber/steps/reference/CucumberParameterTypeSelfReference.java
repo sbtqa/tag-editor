@@ -18,13 +18,14 @@ import org.jetbrains.annotations.Nullable;
  * Necessary to find usages of Cucumber Parameter Type
  */
 public class CucumberParameterTypeSelfReference extends PsiReferenceBase<PsiElement> {
-  public CucumberParameterTypeSelfReference(@NotNull PsiElement element) {
-    super(element, TextRange.create(1, element.getTextLength() - 1));
-  }
 
-  @Nullable
-  @Override
-  public PsiElement resolve() {
-    return getElement();
-  }
+    public CucumberParameterTypeSelfReference(@NotNull PsiElement element) {
+        super(element, TextRange.create(1, element.getTextLength() - 1));
+    }
+
+    @Nullable
+    @Override
+    public PsiElement resolve() {
+        return getElement();
+    }
 }

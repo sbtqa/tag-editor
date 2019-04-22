@@ -8,6 +8,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiTreeUtil;
+import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.cucumber.CucumberJvmExtensionPoint;
@@ -16,45 +17,44 @@ import org.jetbrains.plugins.cucumber.psi.GherkinScenario;
 import org.jetbrains.plugins.cucumber.psi.GherkinScenarioOutline;
 import org.jetbrains.plugins.cucumber.psi.GherkinStepsHolder;
 
-import java.util.Set;
-
 /**
  * @author Andrey.Vokin
  */
 public class CucumberJavaFeatureRunConfigurationProducer extends CucumberJavaRunConfigurationProducer {
-  @Override
-  protected NullableComputable<String> getStepsGlue(@NotNull final PsiElement element) {
-    final PsiFile file = element.getContainingFile();
-    if (file instanceof GherkinFile) {
-      return () -> {
-        final Set<String> glues = getHookGlue(element);
-        for (CucumberJvmExtensionPoint extension : CucumberJvmExtensionPoint.EP_NAME.getExtensionList()) {
-          glues.addAll(extension.getGlues((GherkinFile)file, glues));
+
+    @Override
+    protected NullableComputable<String> getStepsGlue(@NotNull final PsiElement element) {
+        final PsiFile file = element.getContainingFile();
+        if (file instanceof GherkinFile) {
+            return () -> {
+                final Set<String> glues = getHookGlue(element);
+                for (CucumberJvmExtensionPoint extension : CucumberJvmExtensionPoint.EP_NAME.getExtensionList()) {
+                    glues.addAll(extension.getGlues((GherkinFile) file, glues));
+                }
+
+                return StringUtil.join(glues, " ");
+            };
         }
 
-        return StringUtil.join(glues, " ");
-      };
+        return null;
     }
 
-    return null;
-  }
-
-  @Override
-  protected String getConfigurationName(@NotNull ConfigurationContext context) {
-    final VirtualFile featureFile = getFileToRun(context);
-    assert featureFile != null;
-    return "Feature: " + featureFile.getNameWithoutExtension();
-  }
-
-  @Nullable
-  @Override
-  protected VirtualFile getFileToRun(ConfigurationContext context) {
-    final PsiElement element = context.getPsiLocation();
-    final GherkinStepsHolder scenario = PsiTreeUtil.getParentOfType(element, GherkinScenario.class, GherkinScenarioOutline.class);
-    if (element != null && scenario == null && element.getContainingFile() instanceof GherkinFile) {
-      return element.getContainingFile().getVirtualFile();
+    @Override
+    protected String getConfigurationName(@NotNull ConfigurationContext context) {
+        final VirtualFile featureFile = getFileToRun(context);
+        assert featureFile != null;
+        return "Feature: " + featureFile.getNameWithoutExtension();
     }
 
-    return null;
-  }
+    @Nullable
+    @Override
+    protected VirtualFile getFileToRun(ConfigurationContext context) {
+        final PsiElement element = context.getPsiLocation();
+        final GherkinStepsHolder scenario = PsiTreeUtil.getParentOfType(element, GherkinScenario.class, GherkinScenarioOutline.class);
+        if (element != null && scenario == null && element.getContainingFile() instanceof GherkinFile) {
+            return element.getContainingFile().getVirtualFile();
+        }
+
+        return null;
+    }
 }

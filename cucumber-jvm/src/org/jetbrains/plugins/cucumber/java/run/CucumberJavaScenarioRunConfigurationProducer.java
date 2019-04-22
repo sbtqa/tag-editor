@@ -13,41 +13,42 @@ import org.jetbrains.plugins.cucumber.psi.GherkinScenarioOutline;
 import org.jetbrains.plugins.cucumber.psi.GherkinStepsHolder;
 
 public class CucumberJavaScenarioRunConfigurationProducer extends CucumberJavaFeatureRunConfigurationProducer {
-  private static final String SCENARIO_OUTLINE_PARAMETER_REGEXP = "\\\\<.*?\\\\>";
-  private static final String ANY_STRING_REGEXP = ".*";
-  private static final String NAME_FILTER_TEMPLATE = "^%s$";
 
-  @Override
-  protected String getNameFilter(@NotNull ConfigurationContext context) {
-    final PsiElement sourceElement = context.getPsiLocation();
+    private static final String SCENARIO_OUTLINE_PARAMETER_REGEXP = "\\\\<.*?\\\\>";
+    private static final String ANY_STRING_REGEXP = ".*";
+    private static final String NAME_FILTER_TEMPLATE = "^%s$";
 
-    final GherkinStepsHolder scenario = PsiTreeUtil.getParentOfType(sourceElement, GherkinScenario.class, GherkinScenarioOutline.class);
-    if (scenario != null) {
-      String nameFilter = String.format(NAME_FILTER_TEMPLATE, StringUtil.escapeToRegexp(scenario.getScenarioName()));
-      if (scenario instanceof GherkinScenarioOutline) {
-        nameFilter = nameFilter.replaceAll(SCENARIO_OUTLINE_PARAMETER_REGEXP, ANY_STRING_REGEXP);
-      }
+    @Override
+    protected String getNameFilter(@NotNull ConfigurationContext context) {
+        final PsiElement sourceElement = context.getPsiLocation();
 
-      return nameFilter;
+        final GherkinStepsHolder scenario = PsiTreeUtil.getParentOfType(sourceElement, GherkinScenario.class, GherkinScenarioOutline.class);
+        if (scenario != null) {
+            String nameFilter = String.format(NAME_FILTER_TEMPLATE, StringUtil.escapeToRegexp(scenario.getScenarioName()));
+            if (scenario instanceof GherkinScenarioOutline) {
+                nameFilter = nameFilter.replaceAll(SCENARIO_OUTLINE_PARAMETER_REGEXP, ANY_STRING_REGEXP);
+            }
+
+            return nameFilter;
+        }
+
+        return super.getNameFilter(context);
     }
 
-    return super.getNameFilter(context);
-  }
+    @Nullable
+    @Override
+    protected VirtualFile getFileToRun(ConfigurationContext context) {
+        final PsiElement element = context.getPsiLocation();
+        final GherkinStepsHolder scenario = PsiTreeUtil.getParentOfType(element, GherkinScenario.class, GherkinScenarioOutline.class);
+        final PsiFile psiFile = scenario != null ? scenario.getContainingFile() : null;
+        return psiFile != null ? psiFile.getVirtualFile() : null;
+    }
 
-  @Nullable
-  @Override
-  protected VirtualFile getFileToRun(ConfigurationContext context) {
-    final PsiElement element = context.getPsiLocation();
-    final GherkinStepsHolder scenario = PsiTreeUtil.getParentOfType(element, GherkinScenario.class, GherkinScenarioOutline.class);
-    final PsiFile psiFile = scenario != null ? scenario.getContainingFile() : null;
-    return psiFile != null ? psiFile.getVirtualFile() : null;
-  }
+    @Override
+    protected String getConfigurationName(@NotNull final ConfigurationContext context) {
+        final PsiElement sourceElement = context.getPsiLocation();
+        final GherkinStepsHolder scenario = PsiTreeUtil.getParentOfType(sourceElement, GherkinScenario.class, GherkinScenarioOutline.class);
 
-  @Override
-  protected String getConfigurationName(@NotNull final ConfigurationContext context) {
-    final PsiElement sourceElement = context.getPsiLocation();
-    final GherkinStepsHolder scenario = PsiTreeUtil.getParentOfType(sourceElement, GherkinScenario.class, GherkinScenarioOutline.class);
-
-    return "Scenario: " + (scenario != null ? scenario.getScenarioName() : "");
-  }
+        return "Scenario: " + (scenario != null ? scenario.getScenarioName() : "");
+    }
 }

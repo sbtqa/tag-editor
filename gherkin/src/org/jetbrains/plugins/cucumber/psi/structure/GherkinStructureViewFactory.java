@@ -20,20 +20,21 @@ import org.jetbrains.plugins.cucumber.psi.GherkinStepsHolder;
  * @author yole
  */
 public class GherkinStructureViewFactory implements PsiStructureViewFactory {
-  @Override
-  public StructureViewBuilder getStructureViewBuilder(@NotNull final PsiFile psiFile) {
-    return new TreeBasedStructureViewBuilder() {
-      @NotNull
-      @Override
-      public StructureViewModel createStructureViewModel(@Nullable Editor editor) {
-        PsiElement root = PsiTreeUtil.getChildOfType(psiFile, GherkinFeature.class);
-        if (root == null) {
-          root = psiFile;
-        }
-        return
-          new StructureViewModelBase(psiFile, editor, new GherkinStructureViewElement(root))
-               .withSuitableClasses(GherkinFile.class, GherkinFeature.class, GherkinStepsHolder.class, GherkinStep.class);
-      }
-    };
-  }
+
+    @Override
+    public StructureViewBuilder getStructureViewBuilder(@NotNull final PsiFile psiFile) {
+        return new TreeBasedStructureViewBuilder() {
+            @NotNull
+            @Override
+            public StructureViewModel createStructureViewModel(@Nullable Editor editor) {
+                PsiElement root = PsiTreeUtil.getChildOfType(psiFile, GherkinFeature.class);
+                if (root == null) {
+                    root = psiFile;
+                }
+                return
+                        new StructureViewModelBase(psiFile, editor, new GherkinStructureViewElement(root))
+                                .withSuitableClasses(GherkinFile.class, GherkinFeature.class, GherkinStepsHolder.class, GherkinStep.class);
+            }
+        };
+    }
 }

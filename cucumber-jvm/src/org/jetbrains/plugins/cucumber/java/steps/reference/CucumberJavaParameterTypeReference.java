@@ -38,53 +38,54 @@ import org.jetbrains.plugins.cucumber.java.CucumberJavaUtil;
  * </code></pre>
  */
 public class CucumberJavaParameterTypeReference extends PsiReferenceBase<PsiElement> {
-  public CucumberJavaParameterTypeReference(@NotNull PsiElement element, @NotNull TextRange range) {
-    // Exclude { and }
-    super(element, TextRange.create(range.getStartOffset() + 1, range.getEndOffset() - 1), false);
-  }
 
-
-  @Nullable
-  @Override
-  public PsiElement resolve() {
-    String parameterTypeName = getParameterTypeName();
-    final Module module = ModuleUtilCore.findModuleForPsiElement(myElement);
-    if (module != null) {
-      MapParameterTypeManager manager = CucumberJavaUtil.getAllParameterTypes(module);
-
-      PsiElement declaration = manager.getParameterTypeDeclaration(parameterTypeName);
-      if (declaration != null) {
-        return PomService.convertToPsi(new CucumberJavaParameterPomTarget(declaration, parameterTypeName));
-      }
+    public CucumberJavaParameterTypeReference(@NotNull PsiElement element, @NotNull TextRange range) {
+        // Exclude { and }
+        super(element, TextRange.create(range.getStartOffset() + 1, range.getEndOffset() - 1), false);
     }
-    return null;
-  }
 
-  @NotNull
-  @Override
-  public String getCanonicalText() {
-    return getParameterTypeName();
-  }
 
-  @Override
-  public boolean isReferenceTo(@NotNull PsiElement element) {
-    if (!(element instanceof PsiNamedElement) || !(element instanceof PomTargetPsiElement)) {
-      return false;
-    }
-    PomTarget pomTarget = ((PomTargetPsiElement)element).getTarget();
-    if (!(pomTarget instanceof CucumberJavaParameterPomTarget)) {
-      return false;
-    }
-    String parameterTypeName = getParameterTypeName();
-    if (!StringUtil.equals(((PsiNamedElement)element).getName(), parameterTypeName)) {
-      return false;
-    }
-    PsiElement resolved = resolve();
-    return resolved != null && resolved.equals(element);
-  }
+    @Nullable
+    @Override
+    public PsiElement resolve() {
+        String parameterTypeName = getParameterTypeName();
+        final Module module = ModuleUtilCore.findModuleForPsiElement(myElement);
+        if (module != null) {
+            MapParameterTypeManager manager = CucumberJavaUtil.getAllParameterTypes(module);
 
-  @NotNull
-  private String getParameterTypeName() {
-    return getRangeInElement().substring(myElement.getText());
-  }
+            PsiElement declaration = manager.getParameterTypeDeclaration(parameterTypeName);
+            if (declaration != null) {
+                return PomService.convertToPsi(new CucumberJavaParameterPomTarget(declaration, parameterTypeName));
+            }
+        }
+        return null;
+    }
+
+    @NotNull
+    @Override
+    public String getCanonicalText() {
+        return getParameterTypeName();
+    }
+
+    @Override
+    public boolean isReferenceTo(@NotNull PsiElement element) {
+        if (!(element instanceof PsiNamedElement) || !(element instanceof PomTargetPsiElement)) {
+            return false;
+        }
+        PomTarget pomTarget = ((PomTargetPsiElement) element).getTarget();
+        if (!(pomTarget instanceof CucumberJavaParameterPomTarget)) {
+            return false;
+        }
+        String parameterTypeName = getParameterTypeName();
+        if (!StringUtil.equals(((PsiNamedElement) element).getName(), parameterTypeName)) {
+            return false;
+        }
+        PsiElement resolved = resolve();
+        return resolved != null && resolved.equals(element);
+    }
+
+    @NotNull
+    private String getParameterTypeName() {
+        return getRangeInElement().substring(myElement.getText());
+    }
 }

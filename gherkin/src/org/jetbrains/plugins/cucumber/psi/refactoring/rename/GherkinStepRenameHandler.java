@@ -16,51 +16,52 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.cucumber.psi.GherkinStep;
 
 public class GherkinStepRenameHandler extends PsiElementRenameHandler {
-  @Override
-  public boolean isAvailableOnDataContext(@NotNull DataContext dataContext) {
-    PsiElement element = getGherkinStep(dataContext);
-    return element != null;
-  }
 
-  @Override
-  public void invoke(@NotNull Project project, Editor editor, PsiFile file, DataContext dataContext) {
-    final GherkinStep step = getGherkinStep(dataContext);
-    if (step == null) {
-      return;
+    @Override
+    public boolean isAvailableOnDataContext(@NotNull DataContext dataContext) {
+        PsiElement element = getGherkinStep(dataContext);
+        return element != null;
     }
 
-    if (!step.isRenameAllowed(null)) {
-      CommonRefactoringUtil.showErrorHint(project, editor, GherkinStep.RENAME_DISABLED_MESSAGE, "", null);
-      return;
+    @Override
+    public void invoke(@NotNull Project project, Editor editor, PsiFile file, DataContext dataContext) {
+        final GherkinStep step = getGherkinStep(dataContext);
+        if (step == null) {
+            return;
+        }
+
+        if (!step.isRenameAllowed(null)) {
+            CommonRefactoringUtil.showErrorHint(project, editor, GherkinStep.RENAME_DISABLED_MESSAGE, "", null);
+            return;
+        }
+
+
+        final CucumberStepRenameDialog dialog = new CucumberStepRenameDialog(project, step, null, editor);
+        Disposer.register(project, dialog.getDisposable());
+        RenameDialog.showRenameDialog(dataContext, dialog);
     }
 
 
-    final CucumberStepRenameDialog dialog = new CucumberStepRenameDialog(project, step, null, editor);
-    Disposer.register(project, dialog.getDisposable());
-    RenameDialog.showRenameDialog(dataContext, dialog);
-  }
-
-
-  @Override
-  public boolean isRenaming(@NotNull DataContext dataContext) {
-    PsiElement element = getGherkinStep(dataContext);
-    return element != null;
-  }
-
-  @Nullable
-  public GherkinStep getGherkinStep(@Nullable final DataContext context) {
-    PsiElement element = null;
-    if (context == null) return null;
-    final Editor editor = CommonDataKeys.EDITOR.getData(context);
-    if (editor != null) {
-      final PsiFile psiFile = CommonDataKeys.PSI_FILE.getData(context);
-      if (psiFile != null) {
-        element = psiFile.findElementAt(editor.getCaretModel().getOffset());
-      }
+    @Override
+    public boolean isRenaming(@NotNull DataContext dataContext) {
+        PsiElement element = getGherkinStep(dataContext);
+        return element != null;
     }
-    if (element == null) {
-      element = CommonDataKeys.PSI_ELEMENT.getData(context);
+
+    @Nullable
+    public GherkinStep getGherkinStep(@Nullable final DataContext context) {
+        PsiElement element = null;
+        if (context == null) return null;
+        final Editor editor = CommonDataKeys.EDITOR.getData(context);
+        if (editor != null) {
+            final PsiFile psiFile = CommonDataKeys.PSI_FILE.getData(context);
+            if (psiFile != null) {
+                element = psiFile.findElementAt(editor.getCaretModel().getOffset());
+            }
+        }
+        if (element == null) {
+            element = CommonDataKeys.PSI_ELEMENT.getData(context);
+        }
+        return element instanceof GherkinStep ? (GherkinStep) element : PsiTreeUtil.getParentOfType(element, GherkinStep.class);
     }
-    return element instanceof GherkinStep ? (GherkinStep)element : PsiTreeUtil.getParentOfType(element, GherkinStep.class);
-  }
 }

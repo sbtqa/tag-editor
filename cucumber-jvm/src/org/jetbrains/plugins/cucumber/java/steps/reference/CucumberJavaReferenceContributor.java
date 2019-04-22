@@ -8,8 +8,9 @@ import com.intellij.psi.PsiReferenceRegistrar;
 import org.jetbrains.annotations.NotNull;
 
 public class CucumberJavaReferenceContributor extends PsiReferenceContributor {
-  @Override
-  public void registerReferenceProviders(@NotNull PsiReferenceRegistrar registrar) {
-    registrar.registerReferenceProvider(PlatformPatterns.psiElement(PsiLiteralExpression.class), new CucumberJavaReferenceProvider());
-  }
+
+    @Override
+    public void registerReferenceProviders(@NotNull PsiReferenceRegistrar registrar) {
+        registrar.registerReferenceProvider(PlatformPatterns.psiElement(PsiLiteralExpression.class), new CucumberJavaReferenceProvider());
+    }
 }
