@@ -117,6 +117,20 @@ public class CucumberCompletionContributor extends CompletionContributor {
             protected void addCompletions(@NotNull CompletionParameters parameters,
                                           @NotNull ProcessingContext context,
                                           @NotNull CompletionResultSet result) {
+                if (TagCompletionUtils.addPageTitles(parameters, result)) {
+                    return;
+                }
+                if (TagCompletionUtils.addEndpointTitles(parameters, result)) {
+                    return;
+                }
+            }
+        });
+
+        extend(CompletionType.BASIC, inStep, new CompletionProvider<CompletionParameters>() {
+            @Override
+            protected void addCompletions(@NotNull CompletionParameters parameters,
+                                          @NotNull ProcessingContext context,
+                                          @NotNull CompletionResultSet result) {
                 addStepDefinitions(parameters, result, parameters.getOriginalFile());
             }
         });
@@ -228,9 +242,9 @@ public class CucumberCompletionContributor extends CompletionContributor {
     private static void addStepDefinitions(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet result, @NotNull PsiFile file) {
 
         // TODO это должно быть на уровень выше
-        if (TagCompletionUtils.addPageTitles(parameters, result)) {
-            return;
-        }
+//        if (TagCompletionUtils.addPageTitles(parameters, result)) {
+//            return;
+//        }
         
         if (TagCompletionUtils.addPageActions(parameters, result)) {
             return;

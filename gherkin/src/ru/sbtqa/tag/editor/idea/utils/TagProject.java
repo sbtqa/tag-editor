@@ -4,6 +4,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.AnnotatedElementsSearch;
@@ -14,13 +15,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import kotlin.Pair;
+import org.jetbrains.plugins.cucumber.completion.TagContext;
 
 public class TagProject {
 
     private static final String ACTION_TITLE_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.ActionTitle";
     private static final String ACTION_TITLES_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.ActionTitles";
     private static final String PAGE_ENTRY_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.PageEntry";
+    private static final String ENDPOINT_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.api.annotation.Endpoint";
     private static final String ELEMENT_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.ElementTitle";
+    private static final String VALIDATION_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.api.annotation.Validation";
+
 
     private static final String VALUE = "value";
     private static final String TITLE = "title";
@@ -30,8 +35,8 @@ public class TagProject {
     /**
      * Найти все экшены на странице
      */
-    public static List<String> getActionTitles(PsiClass page) {
-        return getActionAnnotations(page).stream()
+    public static List<String> getActionTitles(TagContext context) {
+        return getActionAnnotations(context.getUi()).stream()
                 .map(psiAnnotationIntegerPair -> psiAnnotationIntegerPair.component1().findAttributeValue(VALUE).getText())
                 .map(StringUtils::unquote)
                 .collect(Collectors.toList());
@@ -67,10 +72,29 @@ public class TagProject {
     /**
      * Найти все элементы на странице
      */
-    public static List<String> getElements(PsiClass page) {
-        return Arrays.stream(page.getAllFields())
-                .filter(field -> field.hasAnnotation(ELEMENT_ANNOTATION_QUALIFIED_NAME))
-                .map(field -> field.getAnnotation(ELEMENT_ANNOTATION_QUALIFIED_NAME).findAttributeValue(VALUE).getText())
+    public static List<String> getElements(TagContext context) {
+        ArrayList<PsiField> allFields = new ArrayList<>();
+        if (context.getApi() != null) {
+            allFields.addAll(Arrays.asList(context.getApi().getAllFields()));
+        }
+        if (context.getUi() != null) {
+            allFields.addAll(Arrays.asList(context.getUi().getAllFields()));
+        }
+
+
+        allFields.stream()
+                .filter(field -> field.hasAnnotation(ELEMENT_ANNOTATION_QUALIFIED_NAME) || field.hasAnnotation(VALIDATION_ANNOTATION_QUALIFIED_NAME))
+                .forEach(System.out::println);
+
+        return allFields.stream()
+                .filter(field -> field.hasAnnotation(ELEMENT_ANNOTATION_QUALIFIED_NAME) || field.hasAnnotation(VALIDATION_ANNOTATION_QUALIFIED_NAME))
+                .map(field -> {
+                    if (field.getAnnotation(ELEMENT_ANNOTATION_QUALIFIED_NAME) != null) {
+                     return field.getAnnotation(ELEMENT_ANNOTATION_QUALIFIED_NAME).findAttributeValue(VALUE).getText();
+                    } else {
+                     return field.getAnnotation(VALIDATION_ANNOTATION_QUALIFIED_NAME).findAttributeValue(VALUE).getText();
+                    }
+                })
                 .map(StringUtils::unquote)
                 .collect(Collectors.toList());
     }
@@ -85,6 +109,17 @@ public class TagProject {
     }
 
     /**
+     * Найти значения title() для аннотации PageEntry
+     */
+    public static String findEndpointName(PsiClass endpoint) {
+        String annotationTitle = endpoint.getAnnotation(ENDPOINT_ANNOTATION_QUALIFIED_NAME).findAttributeValue(TITLE).getText();
+
+        return StringUtils.unquote(annotationTitle);
+    }
+
+    // TODO вынести в один метод
+
+    /**
      * Поиск всех страниц в проекте имеющих аннотацию PageEntry
      */
     public static Stream<PsiClass> getPages(Project project) {
@@ -96,11 +131,29 @@ public class TagProject {
     }
 
     /**
+     * Поиск всех страниц в проекте имеющих аннотацию Endpoint
+     */
+    public static Stream<PsiClass> getEntries(Project project) {
+        PsiClass pageEntry = JavaPsiFacade.getInstance(project)
+                .findClass(ENDPOINT_ANNOTATION_QUALIFIED_NAME, GlobalSearchScope.everythingScope(project));
+        Query<PsiClass> psiClasses = AnnotatedElementsSearch.searchPsiClasses(pageEntry, GlobalSearchScope.projectScope(project));
+
+        return psiClasses.findAll().stream();
+    }
+
+    /**
      * Поиск страницы по имени
      */
     public static PsiClass getPageByName(Project project, String pageTitle) {
         return getPages(project)
                 .filter(pageClass -> findPageName(pageClass).equals(pageTitle))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public static PsiClass getEndpointByName(Project project, String endpointTitle) {
+        return getEntries(project)
+                .filter(entryClass -> findEndpointName(entryClass).equals(endpointTitle))
                 .findFirst()
                 .orElse(null);
     }

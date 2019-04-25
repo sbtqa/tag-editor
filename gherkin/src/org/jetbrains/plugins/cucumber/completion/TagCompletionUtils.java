@@ -4,7 +4,6 @@ import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import java.util.List;
 import java.util.Objects;
@@ -12,10 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.plugins.cucumber.psi.GherkinStep;
 import org.jetbrains.plugins.cucumber.psi.impl.GherkinStepImpl;
 import org.jetbrains.plugins.cucumber.steps.AbstractStepDefinition;
-import ru.sbtqa.tag.editor.idea.utils.TagContext;
 import ru.sbtqa.tag.editor.idea.utils.TagProject;
 
-// TODO сделать не-static
 class TagCompletionUtils {
 
     private TagCompletionUtils() {}
@@ -28,7 +25,7 @@ class TagCompletionUtils {
         PsiElement element = parameters.getPosition().getContext();
         String stepName = element instanceof GherkinStepImpl ? ((GherkinStepImpl) element).getStepName() : null;
 
-        if (element instanceof GherkinStep && ((GherkinStep) element).findDefinitions().stream().anyMatch(AbstractStepDefinition::isContextChanger)) {
+        if (element instanceof GherkinStep && ((GherkinStep) element).findDefinitions().stream().allMatch(AbstractStepDefinition::isUiContextChanger)) {
             final String startWith = stepName != null && stepName.contains("\"") ? stepName.substring(0, stepName.indexOf('"') + 1) : null;
 
             if (startWith != null) {
@@ -36,6 +33,27 @@ class TagCompletionUtils {
                 TagProject.getPages(project)
                         .filter(Objects::nonNull)
                         .map(TagProject::findPageName)
+                        .forEach(x -> result.addElement(LookupElementBuilder.create(startWith + x).withPresentableText(x)));
+                result.stopHere();
+            }
+
+            return true;
+        }
+        return false;
+    }
+
+    static boolean addEndpointTitles(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet result) {
+        PsiElement element = parameters.getPosition().getContext();
+        String stepName = element instanceof GherkinStepImpl ? ((GherkinStepImpl) element).getStepName() : null;
+
+        if (element instanceof GherkinStep && ((GherkinStep) element).findDefinitions().stream().allMatch(AbstractStepDefinition::isApiContextChanger)) {
+            final String startWith = stepName != null && stepName.contains("\"") ? stepName.substring(0, stepName.indexOf('"') + 1) : null;
+
+            if (startWith != null) {
+                final Project project = element.getProject();
+                TagProject.getEntries(project)
+                        .filter(Objects::nonNull)
+                        .map(TagProject::findEndpointName)
                         .forEach(x -> result.addElement(LookupElementBuilder.create(startWith + x).withPresentableText(x)));
                 result.stopHere();
             }
@@ -66,18 +84,19 @@ class TagCompletionUtils {
                 return false;
             }
 
-            PsiClass pageClass = getPageClass(element);
-            if (pageClass == null) {
+            TagContext tagContext = new TagContext(element);
+
+            if (tagContext.isEmpty()) {
                 return false;
             }
 
             List<String> completions;
             switch (tagCompletion) {
                 case ACTIONS:
-                    completions = TagProject.getActionTitles(pageClass);
+                    completions = TagProject.getActionTitles(tagContext);
                     break;
                 case ELEMENTS:
-                    completions = TagProject.getElements(pageClass);
+                    completions = TagProject.getElements(tagContext);
                     break;
                 default:
                     return false;
@@ -88,10 +107,5 @@ class TagCompletionUtils {
         }
 
         return false;
-    }
-
-    private static PsiClass getPageClass(PsiElement element) {
-        String currentPageName = TagContext.getCurrentPageName((GherkinStepImpl) element);
-        return TagProject.getPageByName(element.getProject(), currentPageName);
     }
 }
