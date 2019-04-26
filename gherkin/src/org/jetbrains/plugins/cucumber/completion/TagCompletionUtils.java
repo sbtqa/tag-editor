@@ -2,9 +2,12 @@ package org.jetbrains.plugins.cucumber.completion;
 
 import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionResultSet;
+import com.intellij.codeInsight.completion.PrioritizedLookupElement;
+import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
@@ -51,7 +54,7 @@ class TagCompletionUtils {
 
             if (startWith != null) {
                 final Project project = element.getProject();
-                TagProject.getEntries(project)
+                TagProject.getEndpoints(project)
                         .filter(Objects::nonNull)
                         .map(TagProject::findEndpointName)
                         .forEach(x -> result.addElement(LookupElementBuilder.create(startWith + x).withPresentableText(x)));
@@ -90,7 +93,7 @@ class TagCompletionUtils {
                 return false;
             }
 
-            List<String> completions;
+            List<TagCompletionElement> completions;
             switch (tagCompletion) {
                 case ACTIONS:
                     completions = TagProject.getActionTitles(tagContext);
@@ -102,7 +105,17 @@ class TagCompletionUtils {
                     return false;
             }
 
-            completions.forEach(completion -> result.addElement(LookupElementBuilder.create(startWith + completion).withPresentableText(completion)));
+            int[] index = {0};
+            completions.stream()
+                    .sorted(Comparator.reverseOrder())
+                    .forEach(completion -> {
+                        LookupElement lookupElement = LookupElementBuilder
+                                .create(startWith + completion.getPresentableText())
+                                .withPresentableText(completion.getPresentableText())
+                                .withTypeText(completion.getTypeText());
+                        result.addElement(PrioritizedLookupElement.withPriority(lookupElement, index[0]++));
+                    });
+
             return true;
         }
 
