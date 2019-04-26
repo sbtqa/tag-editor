@@ -242,10 +242,6 @@ public class CucumberCompletionContributor extends CompletionContributor {
     private static void addStepDefinitions(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet result, @NotNull PsiFile file) {
 
         // TODO это должно быть на уровень выше
-//        if (TagCompletionUtils.addPageTitles(parameters, result)) {
-//            return;
-//        }
-        
         if (TagCompletionUtils.addPageActions(parameters, result)) {
             return;
         }

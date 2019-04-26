@@ -23,9 +23,9 @@ public class TagCompletionElement implements Comparable<TagCompletionElement> {
     }
 
     @Override
-    public int compareTo(@NotNull TagCompletionElement tagCompletionElement) {
+    public int compareTo(@NotNull TagCompletionElement other) {
         String thisType = this.getTypeText();
-        String otherType = tagCompletionElement.getTypeText();
+        String otherType = other.getTypeText();
 
         int compare = thisType.compareTo(otherType);
         if (compare != 0) {
@@ -33,7 +33,7 @@ public class TagCompletionElement implements Comparable<TagCompletionElement> {
         }
 
         String thisPresentable = this.getPresentableText();
-        String otherPresentable = tagCompletionElement.getPresentableText();
+        String otherPresentable = other.getPresentableText();
         return thisPresentable.compareTo(otherPresentable);
     }
 
