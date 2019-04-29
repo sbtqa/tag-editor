@@ -29,9 +29,9 @@ public class CucumberJavaExtension extends AbstractCucumberJavaExtension {
     static final String CUCUMBER_OPTIONS_ANNOTATION = "cucumber.api.CucumberOptions";
     static final String CUCUMBER_RUNTIME_JAVA_STEP_DEF_ANNOTATION = "cucumber.runtime.java.StepDefAnnotation";
     static final String ZUCHINI_RUNTIME_JAVA_STEP_DEF_ANNOTATION = "org.zuchini.annotations.StepAnnotation";
-    static final String CLASS_NAME_OPEN_PAGE = "openPage";
+    static final String METHOD_NAME_OPEN_PAGE = "openPage";
     static final String CLASS_NAME_CORE_STEP_DEFS = "CoreStepDefs";
-    static final String CLASS_NAME_SEND_REQUEST = "send";
+    static final String METHOD_NAME_SEND_REQUEST = "send";
     static final String CLASS_NAME_API_STEPS_IMPL = "ApiStepDefs";
 
     @NotNull
@@ -84,11 +84,11 @@ public class CucumberJavaExtension extends AbstractCucumberJavaExtension {
                     if (isInGlue) {
                         JavaStepDefinition javaStepDefinition = new JavaStepDefinition(stepDefMethod, annotationClassName);
 
-                        boolean isApi = stepDefMethod.getName().equals(CLASS_NAME_SEND_REQUEST)
+                        boolean isApi = stepDefMethod.getName().equals(METHOD_NAME_SEND_REQUEST)
                                 && stepDefMethod.getContainingClass().getName().equals(CLASS_NAME_API_STEPS_IMPL);
                         javaStepDefinition.setApiContextChanger(isApi);
 
-                        boolean isUi = stepDefMethod.getName().equals(CLASS_NAME_OPEN_PAGE)
+                        boolean isUi = stepDefMethod.getName().equals(METHOD_NAME_OPEN_PAGE)
                                 && stepDefMethod.getContainingClass().getName().equals(CLASS_NAME_CORE_STEP_DEFS);
                         javaStepDefinition.setUiContextChanger(isUi);
 

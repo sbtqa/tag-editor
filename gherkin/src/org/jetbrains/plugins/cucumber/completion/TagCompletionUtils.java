@@ -29,7 +29,7 @@ class TagCompletionUtils {
         String stepName = element instanceof GherkinStepImpl ? ((GherkinStepImpl) element).getStepName() : null;
 
         if (element instanceof GherkinStep && ((GherkinStep) element).findDefinitions().stream().allMatch(AbstractStepDefinition::isUiContextChanger)) {
-            final String startWith = stepName != null && stepName.contains("\"") ? stepName.substring(0, stepName.indexOf('"') + 1) : null;
+            final String startWith = getStartWith(stepName, "\"");
 
             if (startWith != null) {
                 final Project project = element.getProject();
@@ -50,7 +50,7 @@ class TagCompletionUtils {
         String stepName = element instanceof GherkinStepImpl ? ((GherkinStepImpl) element).getStepName() : null;
 
         if (element instanceof GherkinStep && ((GherkinStep) element).findDefinitions().stream().allMatch(AbstractStepDefinition::isApiContextChanger)) {
-            final String startWith = stepName != null && stepName.contains("\"") ? stepName.substring(0, stepName.indexOf('"') + 1) : null;
+            final String startWith = getStartWith(stepName, "\"");
 
             if (startWith != null) {
                 final Project project = element.getProject();
@@ -81,7 +81,7 @@ class TagCompletionUtils {
         String stepName = element instanceof GherkinStepImpl ? ((GherkinStepImpl) element).getStepName() : null;
 
         if (element instanceof GherkinStep) {
-            String startWith = stepName != null && stepName.contains(placeholder) ? stepName.substring(0, stepName.indexOf(placeholder) + 1) : null;
+            String startWith = getStartWith(stepName, placeholder);
             if (startWith == null) {
                 return false;
             }
@@ -119,5 +119,9 @@ class TagCompletionUtils {
         }
 
         return false;
+    }
+
+    private static String getStartWith(String stepName, String placeholder) {
+        return stepName != null && stepName.contains(placeholder) ? stepName.substring(0, stepName.indexOf(placeholder) + 1) : null;
     }
 }
