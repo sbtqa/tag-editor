@@ -2,24 +2,92 @@ package org.jetbrains.plugins.cucumber.completion;
 
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.util.PsiTreeUtil;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.jetbrains.plugins.cucumber.psi.impl.GherkinStepImpl;
+import org.apache.commons.lang3.ArrayUtils;
+import org.jetbrains.plugins.cucumber.psi.GherkinFeature;
+import org.jetbrains.plugins.cucumber.psi.GherkinScenario;
+import org.jetbrains.plugins.cucumber.psi.GherkinStep;
 import org.jetbrains.plugins.cucumber.steps.AbstractStepDefinition;
 import ru.sbtqa.tag.editor.idea.utils.TagProject;
 
 public class TagContext {
 
-    private final static Pattern QUOTES_VALUE_EXTRACTOR_PATTERN = Pattern.compile("\"([^\"]*)\"");
+    private static final Pattern QUOTES_VALUE_EXTRACTOR_PATTERN = Pattern.compile("\"([^\"]*)\"");
 
+    private GherkinStep[] background;
     private PsiElement currentElement;
     private PsiClass api;
     private PsiClass ui;
 
-    public TagContext(PsiElement currentElement) {
+    public TagContext(PsiElement currentElement, PsiFile originalFile) {
         this.currentElement = currentElement;
+        this.background = getBackground(originalFile);
         this.api = getCurrentEndpoint();
         this.ui = getCurrentPage();
+    }
+
+    private GherkinStep[] getBackground(PsiFile originalFile) {
+        PsiElement scenarioParent = PsiTreeUtil.getChildOfType(originalFile, GherkinFeature.class);
+        if (scenarioParent == null) {
+            scenarioParent = originalFile;
+        }
+        final GherkinScenario[] scenarios = PsiTreeUtil.getChildrenOfType(scenarioParent, GherkinScenario.class);
+        if (scenarios != null) {
+            for (GherkinScenario scenario : scenarios) {
+                if (scenario.isBackground()) {
+                    return scenario.getSteps();
+                }
+            }
+        }
+        return ArrayUtils.toArray();
+    }
+
+    private PsiClass getCurrentEndpoint() {
+        return TagProject.getEndpointByName(currentElement.getProject(), getCurrentTitle(false));
+    }
+
+    private PsiClass getCurrentPage() {
+        return TagProject.getPageByName(currentElement.getProject(), getCurrentTitle(true));
+    }
+
+    private String getCurrentTitle(boolean isUi) {
+        boolean isBackground = ((GherkinScenario) ((GherkinStep) currentElement).getStepHolder()).isBackground();
+
+        String currentTitle = getTitle(isUi, currentElement);
+
+        if (!isBackground
+                && currentTitle.isEmpty()
+                && background.length > 0) {
+            currentTitle = getTitle(isUi, background[background.length - 1]);
+        }
+
+        return currentTitle;
+    }
+
+    private String getTitle(boolean isUi, PsiElement element) {
+        do {
+            GherkinStep prevStep = (element instanceof GherkinStep) ? (GherkinStep) element : null;
+            if (prevStep != null) {
+                boolean isStepChanger = isUi ? prevStep.findDefinitions().stream().anyMatch(AbstractStepDefinition::isUiContextChanger)
+                        : prevStep.findDefinitions().stream().anyMatch(AbstractStepDefinition::isApiContextChanger);
+                if (isStepChanger) {
+                    return parseTitle(prevStep.getName());
+                }
+            }
+        } while ((element = element.getPrevSibling()) != null);
+
+        return "";
+    }
+
+    private String parseTitle(String step) {
+        Matcher matcher = QUOTES_VALUE_EXTRACTOR_PATTERN.matcher(step);
+        if (matcher.find()) {
+            return matcher.group().replaceAll("\"", "");
+        }
+        return "";
     }
 
     public PsiClass getApi() {
@@ -32,37 +100,5 @@ public class TagContext {
 
     public boolean isEmpty() {
         return api == null && ui == null;
-    }
-
-    private PsiClass getCurrentPage() {
-        return TagProject.getPageByName(currentElement.getProject(), getCurrentTitle(true));
-    }
-
-    private PsiClass getCurrentEndpoint() {
-        return TagProject.getEndpointByName(currentElement.getProject(), getCurrentTitle(false));
-    }
-
-    private String getCurrentTitle(boolean isUi) {
-        PsiElement prevElement = currentElement;
-        do {
-            GherkinStepImpl prevStep = (prevElement instanceof GherkinStepImpl) ? (GherkinStepImpl) prevElement : null;
-            if (prevStep != null) {
-                boolean isStepChanger = isUi ? prevStep.findDefinitions().stream().anyMatch(AbstractStepDefinition::isUiContextChanger)
-                        : prevStep.findDefinitions().stream().anyMatch(AbstractStepDefinition::isApiContextChanger);
-                if (isStepChanger) {
-                    return getTitle(prevStep.getName());
-                }
-            }
-        } while ((prevElement = prevElement.getPrevSibling()) != null);
-
-        return "";
-    }
-
-    private String getTitle(String step) {
-        Matcher matcher = QUOTES_VALUE_EXTRACTOR_PATTERN.matcher(step);
-        if (matcher.find()) {
-            return matcher.group().replaceAll("\"", "");
-        }
-        return "";
     }
 }

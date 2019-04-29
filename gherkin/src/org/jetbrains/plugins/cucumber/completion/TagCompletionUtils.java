@@ -81,13 +81,12 @@ class TagCompletionUtils {
         String stepName = element instanceof GherkinStepImpl ? ((GherkinStepImpl) element).getStepName() : null;
 
         if (element instanceof GherkinStep) {
-
             String startWith = stepName != null && stepName.contains(placeholder) ? stepName.substring(0, stepName.indexOf(placeholder) + 1) : null;
             if (startWith == null) {
                 return false;
             }
 
-            TagContext tagContext = new TagContext(element);
+            TagContext tagContext = new TagContext(element, parameters.getOriginalFile());
 
             if (tagContext.isEmpty()) {
                 return false;

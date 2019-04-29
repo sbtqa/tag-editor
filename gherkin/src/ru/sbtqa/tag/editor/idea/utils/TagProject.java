@@ -189,9 +189,12 @@ public class TagProject {
     private static Stream<PsiClass> getEntries(Project project, String annotation) {
         PsiClass pageEntry = JavaPsiFacade.getInstance(project)
                 .findClass(annotation, GlobalSearchScope.everythingScope(project));
-        Query<PsiClass> psiClasses = AnnotatedElementsSearch.searchPsiClasses(pageEntry, GlobalSearchScope.projectScope(project));
-
-        return psiClasses.findAll().stream();
+        if (pageEntry != null) {
+            Query<PsiClass> psiClasses = AnnotatedElementsSearch.searchPsiClasses(pageEntry, GlobalSearchScope.projectScope(project));
+            return psiClasses.findAll().stream();
+        } else {
+            return Stream.empty();
+        }
     }
 
     /**
