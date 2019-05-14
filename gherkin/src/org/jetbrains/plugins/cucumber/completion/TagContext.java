@@ -1,5 +1,6 @@
 package org.jetbrains.plugins.cucumber.completion;
 
+import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -46,11 +47,11 @@ public class TagContext {
     }
 
     private PsiClass getCurrentEndpoint() {
-        return TagProject.getEndpointByName(currentElement.getProject(), getCurrentTitle(false));
+        return TagProject.getEndpointByName(ModuleUtilCore.findModuleForPsiElement(currentElement), getCurrentTitle(false));
     }
 
     private PsiClass getCurrentPage() {
-        return TagProject.getPageByName(currentElement.getProject(), getCurrentTitle(true));
+        return TagProject.getPageByName(ModuleUtilCore.findModuleForPsiElement(currentElement), getCurrentTitle(true));
     }
 
     private String getCurrentTitle(boolean isUi) {

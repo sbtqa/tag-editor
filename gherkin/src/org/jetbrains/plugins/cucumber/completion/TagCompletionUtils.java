@@ -5,11 +5,14 @@ import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.codeInsight.completion.PrioritizedLookupElement;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
-import com.intellij.openapi.project.Project;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.psi.PsiElement;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.plugins.cucumber.psi.GherkinStep;
 import org.jetbrains.plugins.cucumber.psi.impl.GherkinStepImpl;
@@ -29,11 +32,12 @@ class TagCompletionUtils {
         String stepName = element instanceof GherkinStepImpl ? ((GherkinStepImpl) element).getStepName() : null;
 
         if (element instanceof GherkinStep && ((GherkinStep) element).findDefinitions().stream().allMatch(AbstractStepDefinition::isUiContextChanger)) {
-            final String startWith = getStartWith(stepName, "\"");
+            // TODO вынести в final
+            final String startWith = getStartWith(stepName, "\"(.*)(" + CucumberCompletionContributor.INTELLIJ_IDEA_RULEZZZ + " \")");
 
             if (startWith != null) {
-                final Project project = element.getProject();
-                TagProject.getPages(project)
+                Module module = ModuleUtilCore.findModuleForPsiElement(element);
+                TagProject.getPages(module)
                         .filter(Objects::nonNull)
                         .map(TagProject::findPageName)
                         .forEach(x -> result.addElement(LookupElementBuilder.create(startWith + x).withPresentableText(x)));
@@ -50,11 +54,11 @@ class TagCompletionUtils {
         String stepName = element instanceof GherkinStepImpl ? ((GherkinStepImpl) element).getStepName() : null;
 
         if (element instanceof GherkinStep && ((GherkinStep) element).findDefinitions().stream().allMatch(AbstractStepDefinition::isApiContextChanger)) {
-            final String startWith = getStartWith(stepName, "\"");
+            final String startWith = getStartWith(stepName, "\"(.*)(" + CucumberCompletionContributor.INTELLIJ_IDEA_RULEZZZ + " \")");
 
             if (startWith != null) {
-                final Project project = element.getProject();
-                TagProject.getEndpoints(project)
+                Module module = ModuleUtilCore.findModuleForPsiElement(element);
+                TagProject.getEndpoints(module)
                         .filter(Objects::nonNull)
                         .map(TagProject::findEndpointName)
                         .forEach(x -> result.addElement(LookupElementBuilder.create(startWith + x).withPresentableText(x)));
@@ -67,12 +71,12 @@ class TagCompletionUtils {
     }
 
     static boolean addPageActions(CompletionParameters parameters, CompletionResultSet result) {
-        String placeholder = "(" + CucumberCompletionContributor.INTELLIJ_IDEA_RULEZZZ;
+        String placeholder = "\\((.*)(" + CucumberCompletionContributor.INTELLIJ_IDEA_RULEZZZ + " )\\)";
         return addCompletions(parameters, result, placeholder, TagCompletion.ACTIONS);
     }
 
     static boolean addPageElements(CompletionParameters parameters, CompletionResultSet result) {
-        String placeholder = "\"" + CucumberCompletionContributor.INTELLIJ_IDEA_RULEZZZ;
+        String placeholder = "\"(.*)(" + CucumberCompletionContributor.INTELLIJ_IDEA_RULEZZZ + " \")";
         return addCompletions(parameters, result, placeholder, TagCompletion.ELEMENTS);
     }
 
@@ -122,6 +126,12 @@ class TagCompletionUtils {
     }
 
     private static String getStartWith(String stepName, String placeholder) {
-        return stepName != null && stepName.contains(placeholder) ? stepName.substring(0, stepName.indexOf(placeholder) + 1) : null;
+        Pattern regex = Pattern.compile(placeholder);
+        Matcher matcher = regex.matcher(stepName);
+        if (matcher.find() && matcher.groupCount() >= 2) {
+            return stepName.substring(0, stepName.indexOf(matcher.group(1) + matcher.group(2)));
+        } else {
+            return null;
+        }
     }
 }
