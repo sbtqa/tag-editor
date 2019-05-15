@@ -11,6 +11,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.plugins.cucumber.psi.GherkinFeature;
 import org.jetbrains.plugins.cucumber.psi.GherkinScenario;
 import org.jetbrains.plugins.cucumber.psi.GherkinStep;
+import org.jetbrains.plugins.cucumber.psi.GherkinStepsHolder;
 import org.jetbrains.plugins.cucumber.steps.AbstractStepDefinition;
 import ru.sbtqa.tag.editor.idea.utils.TagProject;
 
@@ -55,17 +56,24 @@ public class TagContext {
     }
 
     private String getCurrentTitle(boolean isUi) {
-        boolean isBackground = ((GherkinScenario) ((GherkinStep) currentElement).getStepHolder()).isBackground();
-
         String currentTitle = getTitle(isUi, currentElement);
+        GherkinStepsHolder stepsHolder = ((GherkinStep) currentElement).getStepHolder();
 
-        if (!isBackground
+        if (!isBackground(stepsHolder)
                 && currentTitle.isEmpty()
                 && background.length > 0) {
             currentTitle = getTitle(isUi, background[background.length - 1]);
         }
 
         return currentTitle;
+    }
+
+    private boolean isBackground(GherkinStepsHolder stepsHolder) {
+        if (!(stepsHolder instanceof GherkinScenario)) {
+            return false;
+        }
+
+        return ((GherkinScenario) stepsHolder).isBackground();
     }
 
     private String getTitle(boolean isUi, PsiElement element) {
