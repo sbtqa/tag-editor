@@ -21,6 +21,9 @@ import ru.sbtqa.tag.editor.idea.utils.TagProject;
 
 class TagCompletionUtils {
 
+    private static final String PLACEHOLDER_QUOTED = "\"(.*)(" + CucumberCompletionContributor.INTELLIJ_IDEA_RULEZZZ + " \")";
+    private static final String PLACEHOLDER_PARENTHESESED = "\\((.*)(" + CucumberCompletionContributor.INTELLIJ_IDEA_RULEZZZ + " )\\)";
+
     private TagCompletionUtils() {}
 
     public enum TagCompletion {
@@ -33,7 +36,7 @@ class TagCompletionUtils {
 
         if (element instanceof GherkinStep && ((GherkinStep) element).findDefinitions().stream().allMatch(AbstractStepDefinition::isUiContextChanger)) {
             // TODO вынести в final
-            final String startWith = getStartWith(stepName, "\"(.*)(" + CucumberCompletionContributor.INTELLIJ_IDEA_RULEZZZ + " \")");
+            final String startWith = getStartWith(stepName, PLACEHOLDER_QUOTED);
 
             if (startWith != null) {
                 Module module = ModuleUtilCore.findModuleForPsiElement(element);
@@ -54,7 +57,7 @@ class TagCompletionUtils {
         String stepName = element instanceof GherkinStepImpl ? ((GherkinStepImpl) element).getStepName() : null;
 
         if (element instanceof GherkinStep && ((GherkinStep) element).findDefinitions().stream().allMatch(AbstractStepDefinition::isApiContextChanger)) {
-            final String startWith = getStartWith(stepName, "\"(.*)(" + CucumberCompletionContributor.INTELLIJ_IDEA_RULEZZZ + " \")");
+            final String startWith = getStartWith(stepName, PLACEHOLDER_QUOTED);
 
             if (startWith != null) {
                 Module module = ModuleUtilCore.findModuleForPsiElement(element);
@@ -71,13 +74,11 @@ class TagCompletionUtils {
     }
 
     static boolean addPageActions(CompletionParameters parameters, CompletionResultSet result) {
-        String placeholder = "\\((.*)(" + CucumberCompletionContributor.INTELLIJ_IDEA_RULEZZZ + " )\\)";
-        return addCompletions(parameters, result, placeholder, TagCompletion.ACTIONS);
+        return addCompletions(parameters, result, PLACEHOLDER_PARENTHESESED, TagCompletion.ACTIONS);
     }
 
     static boolean addPageElements(CompletionParameters parameters, CompletionResultSet result) {
-        String placeholder = "\"(.*)(" + CucumberCompletionContributor.INTELLIJ_IDEA_RULEZZZ + " \")";
-        return addCompletions(parameters, result, placeholder, TagCompletion.ELEMENTS);
+        return addCompletions(parameters, result, PLACEHOLDER_QUOTED, TagCompletion.ELEMENTS);
     }
 
     private static boolean addCompletions(CompletionParameters parameters, CompletionResultSet result, String placeholder, TagCompletion tagCompletion) {
