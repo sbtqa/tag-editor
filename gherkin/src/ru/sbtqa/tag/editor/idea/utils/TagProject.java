@@ -1,10 +1,12 @@
 package ru.sbtqa.tag.editor.idea.utils;
 
-import com.intellij.openapi.project.Project;
+import com.intellij.openapi.module.Module;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiModifierListOwner;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.AnnotatedElementsSearch;
 import com.intellij.util.Query;
@@ -14,6 +16,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import kotlin.Pair;
+import org.jetbrains.plugins.cucumber.completion.TagCompletionElement;
+import org.jetbrains.plugins.cucumber.completion.TagContext;
 
 public class TagProject {
 
@@ -22,18 +26,38 @@ public class TagProject {
     private static final String PAGE_ENTRY_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.PageEntry";
     private static final String ELEMENT_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.ElementTitle";
 
+    private static final String ENDPOINT_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.rest.Endpoint";
+    private static final String VALIDATION_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.api.annotation.Validation";
+    private static final String QUERY_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.api.annotation.Query";
+    private static final String BODY_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.api.annotation.Body";
+    private static final String COOKIE_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.api.annotation.Cookie";
+    private static final String FROMRESPONSE_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.api.annotation.FromResponse";
+    private static final String HEADER_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.api.annotation.Header";
+
     private static final String VALUE = "value";
     private static final String TITLE = "title";
+    private static final String NAME = "name";
+
+    private static ArrayList<String> elementAnnotations = new ArrayList() {
+        {
+            add(VALIDATION_ANNOTATION_QUALIFIED_NAME);
+            add(ELEMENT_ANNOTATION_QUALIFIED_NAME);
+            add(QUERY_ANNOTATION_QUALIFIED_NAME);
+            add(BODY_ANNOTATION_QUALIFIED_NAME);
+            add(COOKIE_ANNOTATION_QUALIFIED_NAME);
+            add(FROMRESPONSE_ANNOTATION_QUALIFIED_NAME);
+            add(HEADER_ANNOTATION_QUALIFIED_NAME);
+        }
+    };
 
     private TagProject() {}
 
     /**
      * Найти все экшены на странице
      */
-    public static List<String> getActionTitles(PsiClass page) {
-        return getActionAnnotations(page).stream()
-                .map(psiAnnotationIntegerPair -> psiAnnotationIntegerPair.component1().findAttributeValue(VALUE).getText())
-                .map(StringUtils::unquote)
+    public static List<TagCompletionElement> getActionTitles(TagContext context) {
+        return getActionAnnotations(context.getUi()).stream()
+                .map(psiAnnotationIntegerPair -> new TagCompletionElement(getAnnotationTitle(psiAnnotationIntegerPair.component1()), psiAnnotationIntegerPair.component1().getQualifiedName()) )
                 .collect(Collectors.toList());
     }
 
@@ -64,15 +88,79 @@ public class TagProject {
         return actionTitleAnnotations;
     }
 
+    private static List<TagCompletionElement> getApiMethods(TagContext context) {
+        if (context.getApi() == null) {
+            return new ArrayList<>();
+        }
+
+        return Arrays.stream(context.getApi().getAllMethods())
+                .filter(method -> method.getContainingClass() != null && method.getContainingClass().getQualifiedName() != null)
+                .filter(TagProject::isAnnotated)
+                .map(TagProject::getTitle)
+                .filter(completionElement -> StringUtils.isNotBlank(completionElement.getPresentableText()))
+                .collect(Collectors.toList());
+    }
+
+    private static boolean isAnnotated(PsiMethod method) {
+        return elementAnnotations.stream().anyMatch(method::hasAnnotation);
+    }
+
+    private static boolean isAnnotated(PsiField field) {
+        return elementAnnotations.stream().anyMatch(field::hasAnnotation);
+    }
+
     /**
      * Найти все элементы на странице
      */
-    public static List<String> getElements(PsiClass page) {
-        return Arrays.stream(page.getAllFields())
-                .filter(field -> field.hasAnnotation(ELEMENT_ANNOTATION_QUALIFIED_NAME))
-                .map(field -> field.getAnnotation(ELEMENT_ANNOTATION_QUALIFIED_NAME).findAttributeValue(VALUE).getText())
-                .map(StringUtils::unquote)
+    public static List<TagCompletionElement> getElements(TagContext context) {
+        ArrayList<PsiField> allFields = new ArrayList<>();
+        if (context.getApi() != null) {
+            allFields.addAll(Arrays.asList(context.getApi().getAllFields()));
+        }
+        if (context.getUi() != null) {
+            allFields.addAll(Arrays.asList(context.getUi().getAllFields()));
+        }
+
+        List<TagCompletionElement> elements = allFields.stream()
+                .filter(TagProject::isAnnotated)
+                .map(TagProject::getTitle)
+                .filter(completionElement -> StringUtils.isNotBlank(completionElement.getPresentableText()))
                 .collect(Collectors.toList());
+
+        return Stream
+                .concat(elements.stream(), getApiMethods(context).stream())
+                .collect(Collectors.toList());
+    }
+
+    private static TagCompletionElement getTitle(PsiModifierListOwner element) {
+        String annotationFqdn = elementAnnotations.stream().filter(element::hasAnnotation).findFirst().orElse("");
+        String title = getAnnotationTitle(element.getAnnotation(annotationFqdn));
+
+        return new TagCompletionElement(title, annotationFqdn);
+    }
+
+    private static boolean hasTitledAnnotation(PsiModifierListOwner element) {
+        for (PsiAnnotation annotation : element.getAnnotations()) {
+            if (!getAnnotationTitle(annotation).equals("")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    private static String getAnnotationTitle(PsiAnnotation annotation) {
+        if (annotation != null) {
+            if (annotation.findAttributeValue(NAME) != null) {
+                return annotation.findAttributeValue(NAME).getText();
+            } else if (annotation.findAttributeValue(TITLE) != null) {
+                return annotation.findAttributeValue(TITLE).getText();
+            } else if (annotation.findAttributeValue(VALUE) != null) {
+                return annotation.findAttributeValue(VALUE).getText();
+            }
+        }
+
+        return "";
     }
 
     /**
@@ -85,22 +173,52 @@ public class TagProject {
     }
 
     /**
+     * Найти значения title() для аннотации PageEntry
+     */
+    public static String findEndpointName(PsiClass endpoint) {
+        String annotationTitle = endpoint.getAnnotation(ENDPOINT_ANNOTATION_QUALIFIED_NAME).findAttributeValue(TITLE).getText();
+
+        return StringUtils.unquote(annotationTitle);
+    }
+
+    /**
      * Поиск всех страниц в проекте имеющих аннотацию PageEntry
      */
-    public static Stream<PsiClass> getPages(Project project) {
-        PsiClass pageEntry = JavaPsiFacade.getInstance(project)
-                .findClass(PAGE_ENTRY_ANNOTATION_QUALIFIED_NAME, GlobalSearchScope.everythingScope(project));
-        Query<PsiClass> psiClasses = AnnotatedElementsSearch.searchPsiClasses(pageEntry, GlobalSearchScope.projectScope(project));
+    public static Stream<PsiClass> getPages(Module module) {
+        return getEntries(module, PAGE_ENTRY_ANNOTATION_QUALIFIED_NAME);
+    }
 
-        return psiClasses.findAll().stream();
+    /**
+     * Поиск всех страниц в проекте имеющих аннотацию Endpoint
+     */
+    public static Stream<PsiClass> getEndpoints(Module module) {
+        return getEntries(module, ENDPOINT_ANNOTATION_QUALIFIED_NAME);
+    }
+
+    private static Stream<PsiClass> getEntries(Module module, String annotation) {
+        PsiClass pageEntry = JavaPsiFacade.getInstance(module.getProject())
+                .findClass(annotation, GlobalSearchScope.moduleWithDependenciesAndLibrariesScope(module));
+        if (pageEntry != null) {
+            Query<PsiClass> psiClasses = AnnotatedElementsSearch.searchPsiClasses(pageEntry, GlobalSearchScope.moduleScope(module));
+            return psiClasses.findAll().stream();
+        } else {
+            return Stream.empty();
+        }
     }
 
     /**
      * Поиск страницы по имени
      */
-    public static PsiClass getPageByName(Project project, String pageTitle) {
-        return getPages(project)
+    public static PsiClass getPageByName(Module module, String pageTitle) {
+        return getPages(module)
                 .filter(pageClass -> findPageName(pageClass).equals(pageTitle))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public static PsiClass getEndpointByName(Module module, String endpointTitle) {
+        return getEndpoints(module)
+                .filter(entryClass -> findEndpointName(entryClass).equals(endpointTitle))
                 .findFirst()
                 .orElse(null);
     }

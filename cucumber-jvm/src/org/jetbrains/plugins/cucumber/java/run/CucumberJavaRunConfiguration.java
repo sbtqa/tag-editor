@@ -197,13 +197,13 @@ public class CucumberJavaRunConfiguration extends ApplicationConfiguration {
         return getOptions().getGlue();
     }
 
+    public void setGlue(NullableComputable<String> value) {
+        glueInitializer = value;
+    }
+
     public void setGlue(String value) {
         getOptions().setGlue(value);
         glueInitializer = null;
-    }
-
-    public void setGlue(NullableComputable<String> value) {
-        glueInitializer = value;
     }
 
     public String getFilePath() {
