@@ -55,7 +55,7 @@ public class TagContext {
         return TagProject.getPageByName(ModuleUtilCore.findModuleForPsiElement(currentElement), getCurrentTitle(true));
     }
 
-    private String getCurrentTitle(boolean isUi) {
+    public String getCurrentTitle(boolean isUi) {
         String currentTitle = getTitle(isUi, currentElement);
         GherkinStepsHolder stepsHolder = ((GherkinStep) currentElement).getStepHolder();
 
@@ -110,4 +110,11 @@ public class TagContext {
     public boolean isEmpty() {
         return api == null && ui == null;
     }
+
+    public boolean isCurrentElementContextChanger() {
+        return currentElement instanceof GherkinStep && (((GherkinStep) currentElement).findDefinitions().stream().findFirst().get().isUiContextChanger()
+                || (((GherkinStep) currentElement).findDefinitions().stream().findFirst().get().isApiContextChanger()));
+
+    }
+
 }

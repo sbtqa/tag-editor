@@ -4,14 +4,14 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.jetbrains.plugins.cucumber.CucumberJvmExtensionPoint;
-import org.jetbrains.plugins.cucumber.psi.GherkinStep;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.plugins.cucumber.CucumberJvmExtensionPoint;
+import org.jetbrains.plugins.cucumber.completion.TagContext;
+import org.jetbrains.plugins.cucumber.psi.GherkinStep;
 
 public abstract class AbstractCucumberExtension implements CucumberJvmExtensionPoint {
   @Override
@@ -26,14 +26,35 @@ public abstract class AbstractCucumberExtension implements CucumberJvmExtensionP
       return Collections.emptyList();
     }
 
-    final List<AbstractStepDefinition> stepDefinitions = loadStepsFor(element.getContainingFile(), module);
     final List<PsiElement> result = new ArrayList<>();
 
+    // TODO move to method
+    final List<AbstractStepDefinition> stepDefinitions = loadStepsFor(element.getContainingFile(), module);
     for (final AbstractStepDefinition stepDefinition : stepDefinitions) {
       if (stepDefinition.matches(stepVariant) && stepDefinition.supportsStep(element)) {
         result.add(stepDefinition.getElement());
       }
     }
+
+    // TODO move to method
+    List<Entry> entries = loadEntriesFor(element.getContainingFile(), module);
+    TagContext context = new TagContext(element, element.getContainingFile());
+    for (Entry entry : entries) {
+      if (context.isCurrentElementContextChanger()) {
+        if (!entry.getTitle().equals("") && stepVariant.contains("\"" + entry.getTitle() + "\"")) {
+          result.add(entry.getElement());
+          break;
+        }
+      } else {
+        if ((entry.getTitle().equals(context.getCurrentTitle(false)) || entry.getTitle().equals(context.getCurrentTitle(true)))) {
+          result.addAll(entry.getSupportsActions(stepVariant));
+          result.addAll(entry.getSupportsElements(stepVariant, context));
+        }
+      }
+    }
+
+
+
 
     return result;
   }

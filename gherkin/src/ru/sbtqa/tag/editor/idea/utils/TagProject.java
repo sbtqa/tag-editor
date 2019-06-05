@@ -21,12 +21,13 @@ import org.jetbrains.plugins.cucumber.completion.TagContext;
 
 public class TagProject {
 
+    public static final String ENDPOINT_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.rest.Endpoint";
+    public static final String PAGE_ENTRY_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.PageEntry";
+
     private static final String ACTION_TITLE_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.ActionTitle";
     private static final String ACTION_TITLES_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.ActionTitles";
-    private static final String PAGE_ENTRY_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.PageEntry";
     private static final String ELEMENT_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.ElementTitle";
 
-    private static final String ENDPOINT_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.rest.Endpoint";
     private static final String VALIDATION_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.api.annotation.Validation";
     private static final String QUERY_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.api.annotation.Query";
     private static final String BODY_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.api.annotation.Body";
@@ -50,7 +51,29 @@ public class TagProject {
         }
     };
 
+    // TODO вынести completion методы в TagCompletionUtils
     private TagProject() {}
+
+//    public static List<PsiMethod> getActions(TagContext context) {
+//
+//        // TODO вааа, вот эту дичь надо вынести прям в контекст что ли
+//        PsiClass actionAnnotation = JavaPsiFacade.getInstance(context.getUi().getProject())
+//                .findClass(TagProject.ACTION_TITLE_ANNOTATION_QUALIFIED_NAME,
+//                        GlobalSearchScope.moduleWithDependenciesAndLibrariesScope(ModuleUtilCore.findModuleForPsiElement(context.getUi())));
+//
+//        return getActionAnnotations(context.getUi()).stream()
+//                .map(psiAnnotationIntegerPair ->
+//
+//
+//
+//
+//
+////                    AnnotatedElementsSearch.searchPsiMethods(actionAnnotation, GlobalSearchScope.fileScope(context.getUi().getContainingFile()))
+//
+//
+//                 )
+//                .collect(Collectors.toList());
+//    }
 
     /**
      * Найти все экшены на странице
@@ -61,7 +84,7 @@ public class TagProject {
                 .collect(Collectors.toList());
     }
 
-    private static List<Pair<PsiAnnotation, Integer>> getActionAnnotations(PsiClass page) {
+    public static List<Pair<PsiAnnotation, Integer>> getActionAnnotations(PsiClass page) {
         List<Pair<PsiAnnotation, PsiMethod>> allAnnotations = new ArrayList<>();
 
         Arrays.stream(page.getAllMethods())
@@ -112,6 +135,28 @@ public class TagProject {
     /**
      * Найти все элементы на странице
      */
+    public static List<PsiField> getElementsss(TagContext context) {
+        ArrayList<PsiField> allFields = new ArrayList<>();
+        if (context.getApi() != null) {
+            allFields.addAll(Arrays.asList(context.getApi().getAllFields()));
+        }
+        if (context.getUi() != null) {
+            allFields.addAll(Arrays.asList(context.getUi().getAllFields()));
+        }
+
+        return allFields.stream()
+                .filter(TagProject::isAnnotated)
+                .collect(Collectors.toList());
+
+        // TODO добавить апи методы
+//        return Stream
+//                .concat(elements.stream(), getApiMethods(context).stream())
+//                .collect(Collectors.toList());
+    }
+
+    /**
+     * Найти все элементы на странице
+     */
     public static List<TagCompletionElement> getElements(TagContext context) {
         ArrayList<PsiField> allFields = new ArrayList<>();
         if (context.getApi() != null) {
@@ -132,6 +177,11 @@ public class TagProject {
                 .collect(Collectors.toList());
     }
 
+    public static String getTitleee(PsiModifierListOwner element) {
+        String annotationFqdn = elementAnnotations.stream().filter(element::hasAnnotation).findFirst().orElse("");
+        return getAnnotationTitle(element.getAnnotation(annotationFqdn));
+    }
+
     private static TagCompletionElement getTitle(PsiModifierListOwner element) {
         String annotationFqdn = elementAnnotations.stream().filter(element::hasAnnotation).findFirst().orElse("");
         String title = getAnnotationTitle(element.getAnnotation(annotationFqdn));
@@ -148,8 +198,7 @@ public class TagProject {
         return false;
     }
 
-
-    private static String getAnnotationTitle(PsiAnnotation annotation) {
+    public static String getAnnotationTitle(PsiAnnotation annotation) {
         if (annotation != null) {
             if (annotation.findAttributeValue(NAME) != null) {
                 return annotation.findAttributeValue(NAME).getText();
@@ -195,7 +244,13 @@ public class TagProject {
         return getEntries(module, ENDPOINT_ANNOTATION_QUALIFIED_NAME);
     }
 
-    private static Stream<PsiClass> getEntries(Module module, String annotation) {
+    /**
+     * TODO
+     * @param module
+     * @param annotation
+     * @return
+     */
+    public static Stream<PsiClass> getEntries(Module module, String annotation) {
         PsiClass pageEntry = JavaPsiFacade.getInstance(module.getProject())
                 .findClass(annotation, GlobalSearchScope.moduleWithDependenciesAndLibrariesScope(module));
         if (pageEntry != null) {

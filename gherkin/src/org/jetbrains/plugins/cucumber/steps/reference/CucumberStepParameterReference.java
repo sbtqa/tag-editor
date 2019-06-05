@@ -21,14 +21,14 @@ import org.jetbrains.plugins.cucumber.steps.CucumberStepsIndex;
 /**
  * @author yole
  */
-public class CucumberStepReference implements PsiPolyVariantReference {
+public class CucumberStepParameterReference implements PsiPolyVariantReference {
 
     private static final MyResolver RESOLVER = new MyResolver();
 
     private final PsiElement myStep;
     private final TextRange myRange;
 
-    public CucumberStepReference(PsiElement step, TextRange range) {
+    public CucumberStepParameterReference(PsiElement step, TextRange range) {
         myStep = step;
         myRange = range;
     }
@@ -48,6 +48,9 @@ public class CucumberStepReference implements PsiPolyVariantReference {
     @Override
     public PsiElement resolve() {
         final ResolveResult[] result = multiResolve(true);
+        if(result.length == 1) {
+            System.out.println("!!="+result[0].getElement());
+        }
         return result.length == 1 ? result[0].getElement() : null;
     }
 
@@ -87,7 +90,9 @@ public class CucumberStepReference implements PsiPolyVariantReference {
     @Override
     public ResolveResult[] multiResolve(boolean incompleteCode) {
         Project project = getElement().getProject();
-        return ResolveCache.getInstance(project).resolveWithCaching(this, RESOLVER, false, incompleteCode);
+        ResolveResult[] result = ResolveCache.getInstance(project).resolveWithCaching(this, RESOLVER, false, incompleteCode);
+        System.out.println(result);
+        return result;
     }
 
     private ResolveResult[] multiResolveInner() {
@@ -98,7 +103,6 @@ public class CucumberStepReference implements PsiPolyVariantReference {
             final List<PsiElement> extensionResult = e.resolveStep(myStep);
             for (final PsiElement element : extensionResult) {
                 if (element != null && !resolvedElements.contains(element)) {
-                    System.out.println(element);
                     resolvedElements.add(element);
                     result.add(new ResolveResult() {
                         @Override
@@ -138,11 +142,11 @@ public class CucumberStepReference implements PsiPolyVariantReference {
         return index.findStepDefinitions(myStep.getContainingFile(), ((GherkinStepImpl) myStep));
     }
 
-    private static class MyResolver implements ResolveCache.PolyVariantResolver<CucumberStepReference> {
+    private static class MyResolver implements ResolveCache.PolyVariantResolver<CucumberStepParameterReference> {
 
         @Override
         @NotNull
-        public ResolveResult[] resolve(@NotNull CucumberStepReference ref, boolean incompleteCode) {
+        public ResolveResult[] resolve(@NotNull CucumberStepParameterReference ref, boolean incompleteCode) {
             return ref.multiResolveInner();
         }
     }

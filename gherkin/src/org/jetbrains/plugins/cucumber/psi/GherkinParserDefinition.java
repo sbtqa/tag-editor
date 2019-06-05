@@ -64,6 +64,7 @@ public class GherkinParserDefinition implements ParserDefinition {
     if (node.getElementType() == GherkinElementTypes.FEATURE) return new GherkinFeatureImpl(node);
     if (node.getElementType() == GherkinElementTypes.FEATURE_HEADER) return new GherkinFeatureHeaderImpl(node);
     if (node.getElementType() == GherkinElementTypes.SCENARIO) return new GherkinScenarioImpl(node);
+    if (node.getElementType() == GherkinElementTypes.STEP_PARAMETER) return new GherkinStepParameterImpl(node);
     if (node.getElementType() == GherkinElementTypes.STEP) return new GherkinStepImpl(node);
     if (node.getElementType() == GherkinElementTypes.SCENARIO_OUTLINE) return new GherkinScenarioOutlineImpl(node);
     if (node.getElementType() == GherkinElementTypes.EXAMPLES_BLOCK) return new GherkinExamplesBlockImpl(node);
@@ -72,7 +73,6 @@ public class GherkinParserDefinition implements ParserDefinition {
     if (node.getElementType() == GherkinElementTypes.TABLE_CELL) return new GherkinTableCellImpl(node);
     if (node.getElementType() == GherkinElementTypes.TABLE_HEADER_ROW) return new GherkinTableHeaderRowImpl(node);
     if (node.getElementType() == GherkinElementTypes.TAG) return new GherkinTagImpl(node);
-    if (node.getElementType() == GherkinElementTypes.STEP_PARAMETER) return new GherkinStepParameterImpl(node);
     if (node.getElementType() == GherkinElementTypes.PYSTRING) return new GherkinPystringImpl(node);
     return PsiUtilCore.NULL_PSI_ELEMENT;
   }

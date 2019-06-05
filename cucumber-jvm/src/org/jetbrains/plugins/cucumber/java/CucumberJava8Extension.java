@@ -26,6 +26,7 @@ import com.intellij.psi.search.TextOccurenceProcessor;
 import com.intellij.psi.search.UsageSearchContext;
 import com.intellij.psi.util.PsiTreeUtil;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,6 +35,7 @@ import org.jetbrains.plugins.cucumber.StepDefinitionCreator;
 import org.jetbrains.plugins.cucumber.java.steps.Java8StepDefinition;
 import org.jetbrains.plugins.cucumber.java.steps.Java8StepDefinitionCreator;
 import org.jetbrains.plugins.cucumber.steps.AbstractStepDefinition;
+import org.jetbrains.plugins.cucumber.steps.Entry;
 
 public class CucumberJava8Extension extends AbstractCucumberJavaExtension {
 
@@ -65,6 +67,21 @@ public class CucumberJava8Extension extends AbstractCucumberJavaExtension {
                     UsageSearchContext.IN_CODE, true);
         }
         return result;
+    }
+
+    @Override
+    public List<Entry> loadEntriesFor(@Nullable PsiFile featureFile, @NotNull Module module) {
+//        final List<AbstractStepDefinition> result = new ArrayList<>();
+//
+//        final GlobalSearchScope dependenciesScope = module.getModuleWithDependenciesAndLibrariesScope(true);
+//        final GlobalSearchScope javaFiles = GlobalSearchScope.getScopeRestrictedByFileTypes(dependenciesScope, JavaFileType.INSTANCE);
+//
+//        for (String method : KEYWORDS) {
+//            CucumberJava8TextOccurenceProcessor occurenceProcessor = new CucumberJava8TextOccurenceProcessor(result);
+//            PsiSearchHelper.getInstance(module.getProject()).processElementsWithWord(occurenceProcessor, javaFiles, method,
+//                    UsageSearchContext.IN_CODE, true);
+//        }
+        return Collections.emptyList();
     }
 
     private static class CucumberJava8TextOccurenceProcessor implements TextOccurenceProcessor {
