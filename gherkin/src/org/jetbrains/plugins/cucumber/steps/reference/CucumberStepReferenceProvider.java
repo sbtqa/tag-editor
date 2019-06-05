@@ -39,7 +39,7 @@ public class CucumberStepReferenceProvider extends PsiReferenceProvider {
                 }
                 TextRange textRange = new TextRange(start, endBeforeSpace);
                 CucumberStepReference reference = new CucumberStepReference(element, textRange.shiftRight(-element.getTextOffset()));
-                return new PsiReference[]{new CucumberStepReference(element, textRange.shiftRight(-element.getTextOffset()))};
+                return new PsiReference[]{reference};
             }
         }
         return PsiReference.EMPTY_ARRAY;

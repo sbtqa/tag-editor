@@ -71,16 +71,6 @@ public class CucumberJava8Extension extends AbstractCucumberJavaExtension {
 
     @Override
     public List<Entry> loadEntriesFor(@Nullable PsiFile featureFile, @NotNull Module module) {
-//        final List<AbstractStepDefinition> result = new ArrayList<>();
-//
-//        final GlobalSearchScope dependenciesScope = module.getModuleWithDependenciesAndLibrariesScope(true);
-//        final GlobalSearchScope javaFiles = GlobalSearchScope.getScopeRestrictedByFileTypes(dependenciesScope, JavaFileType.INSTANCE);
-//
-//        for (String method : KEYWORDS) {
-//            CucumberJava8TextOccurenceProcessor occurenceProcessor = new CucumberJava8TextOccurenceProcessor(result);
-//            PsiSearchHelper.getInstance(module.getProject()).processElementsWithWord(occurenceProcessor, javaFiles, method,
-//                    UsageSearchContext.IN_CODE, true);
-//        }
         return Collections.emptyList();
     }
 

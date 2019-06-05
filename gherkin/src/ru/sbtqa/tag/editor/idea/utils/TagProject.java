@@ -51,30 +51,6 @@ public class TagProject {
         }
     };
 
-    // TODO вынести completion методы в TagCompletionUtils
-    private TagProject() {}
-
-//    public static List<PsiMethod> getActions(TagContext context) {
-//
-//        // TODO вааа, вот эту дичь надо вынести прям в контекст что ли
-//        PsiClass actionAnnotation = JavaPsiFacade.getInstance(context.getUi().getProject())
-//                .findClass(TagProject.ACTION_TITLE_ANNOTATION_QUALIFIED_NAME,
-//                        GlobalSearchScope.moduleWithDependenciesAndLibrariesScope(ModuleUtilCore.findModuleForPsiElement(context.getUi())));
-//
-//        return getActionAnnotations(context.getUi()).stream()
-//                .map(psiAnnotationIntegerPair ->
-//
-//
-//
-//
-//
-////                    AnnotatedElementsSearch.searchPsiMethods(actionAnnotation, GlobalSearchScope.fileScope(context.getUi().getContainingFile()))
-//
-//
-//                 )
-//                .collect(Collectors.toList());
-//    }
-
     /**
      * Найти все экшены на странице
      */

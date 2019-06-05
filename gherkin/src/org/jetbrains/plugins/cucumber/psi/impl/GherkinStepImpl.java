@@ -12,27 +12,21 @@ import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.IncorrectOperationException;
+import org.jetbrains.annotations.NonNls;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.plugins.cucumber.CucumberUtil;
+import org.jetbrains.plugins.cucumber.psi.*;
+import org.jetbrains.plugins.cucumber.psi.refactoring.GherkinChangeUtil;
+import org.jetbrains.plugins.cucumber.steps.AbstractStepDefinition;
+import org.jetbrains.plugins.cucumber.steps.reference.CucumberStepReference;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.jetbrains.annotations.NonNls;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.jetbrains.plugins.cucumber.CucumberUtil;
-import org.jetbrains.plugins.cucumber.psi.GherkinElementTypes;
-import org.jetbrains.plugins.cucumber.psi.GherkinElementVisitor;
-import org.jetbrains.plugins.cucumber.psi.GherkinPystring;
-import org.jetbrains.plugins.cucumber.psi.GherkinScenarioOutline;
-import org.jetbrains.plugins.cucumber.psi.GherkinStep;
-import org.jetbrains.plugins.cucumber.psi.GherkinStepsHolder;
-import org.jetbrains.plugins.cucumber.psi.GherkinTable;
-import org.jetbrains.plugins.cucumber.psi.GherkinTokenTypes;
-import org.jetbrains.plugins.cucumber.psi.refactoring.GherkinChangeUtil;
-import org.jetbrains.plugins.cucumber.steps.AbstractStepDefinition;
-import org.jetbrains.plugins.cucumber.steps.reference.CucumberStepReference;
 
 /**
  * @author yole
@@ -40,13 +34,8 @@ import org.jetbrains.plugins.cucumber.steps.reference.CucumberStepReference;
 public class GherkinStepImpl extends GherkinPsiElementBase implements GherkinStep, PsiCheckedRenameElement {
 
   private static final TokenSet TEXT_FILTER = TokenSet
-    .create(
-            GherkinTokenTypes.TEXT,
-            GherkinElementTypes.STEP_PARAMETER,
-            TokenType.WHITE_SPACE,
-            GherkinTokenTypes.STEP_PARAMETER_TEXT,
-            GherkinTokenTypes.STEP_PARAMETER_BRACE
-    );
+          .create(GherkinTokenTypes.TEXT, GherkinElementTypes.STEP_PARAMETER, TokenType.WHITE_SPACE, GherkinTokenTypes.STEP_PARAMETER_TEXT,
+                  GherkinTokenTypes.STEP_PARAMETER_BRACE);
 
   private static final Pattern PARAMETER_SUBSTITUTION_PATTERN = Pattern.compile("<([^>\n\r]+)>");
   private final Object LOCK = new Object();
@@ -106,12 +95,10 @@ public class GherkinStepImpl extends GherkinPsiElementBase implements GherkinSte
   @Override
   public PsiReference[] getReferences() {
     return CachedValuesManager.getCachedValue(this, () -> CachedValueProvider.Result.create(getReferencesInner(), this));
-//    return new PsiReference[1];
   }
 
   private PsiReference[] getReferencesInner() {
     return ReferenceProvidersRegistry.getReferencesFromProviders(this);
-//    return null;
   }
 
   @Override

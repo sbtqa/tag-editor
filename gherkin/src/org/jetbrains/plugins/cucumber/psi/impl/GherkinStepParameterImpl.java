@@ -57,15 +57,4 @@ public class GherkinStepParameterImpl extends GherkinPsiElementBase implements G
   public SearchScope getUseScope() {
     return new LocalSearchScope(getContainingFile());
   }
-//
-//
-//  @NotNull
-//  @Override
-//  public PsiReference[] getReferences() {
-//    return CachedValuesManager.getCachedValue(this, () -> CachedValueProvider.Result.create(getReferencesInner(), this));
-//  }
-//
-//  private PsiReference[] getReferencesInner() {
-//    return ReferenceProvidersRegistry.getReferencesFromProviders(this);
-//  }
 }

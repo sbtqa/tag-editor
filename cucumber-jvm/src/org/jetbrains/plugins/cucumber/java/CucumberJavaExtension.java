@@ -105,7 +105,6 @@ public class CucumberJavaExtension extends AbstractCucumberJavaExtension {
         return result;
     }
 
-
     @Override
     public List<Entry> loadEntriesFor(@Nullable PsiFile featureFile, @NotNull Module module) {
         Stream<PsiClass> entries = Stream.concat(TagProject.getEndpoints(module), TagProject.getPages(module));
