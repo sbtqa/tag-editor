@@ -4,34 +4,29 @@ import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.SmartPointerManager;
-import com.intellij.psi.SmartPsiElementPointer;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.cucumber.completion.TagContext;
 import ru.sbtqa.tag.editor.idea.utils.StringUtils;
 import ru.sbtqa.tag.editor.idea.utils.TagProject;
 
 public class Entry {
 
-    private final SmartPsiElementPointer<PsiElement> myElementPointer;
-    PsiElement element;
+    private PsiElement element;
     private PsiClass clazz;
 
     public Entry(@NotNull final PsiElement element) {
-        myElementPointer = SmartPointerManager.getInstance(element.getProject()).createSmartPsiElementPointer(element);
-        clazz = (PsiClass) element;
         this.element = element;
-    }
-
-    @Nullable
-    public PsiElement getElement() {
-        return myElementPointer.getElement();
+        this.clazz = (PsiClass) element;
     }
 
     public String getTitle() {
         return StringUtils.unquote(TagProject.getAnnotationTitle(getClassAnnotation()));
+    }
+
+    public PsiElement getEntryAnnotation() {
+        return SmartPointerManager.getInstance(element.getProject()).createSmartPsiElementPointer(getClassAnnotation()).getElement();
     }
 
     private PsiAnnotation getClassAnnotation() {
@@ -58,14 +53,9 @@ public class Entry {
 
     public List<PsiElement> getSupportsElements(String stepDef, TagContext context) {
         return TagProject.getElementsss(context).stream()
-                .map(field -> {
-
-                    if (stepDef.contains("\"" +  StringUtils.unquote(TagProject.getTitleee(field)) + "\"")) {
-                        return SmartPointerManager.getInstance(element.getProject()).createSmartPsiElementPointer(field).getElement();
-                    }
-                    return null;
-                })
+                .filter(field -> stepDef.contains("\"" + StringUtils.unquote(TagProject.getTitleee(field)) + "\""))
+                .map(field -> field.getAnnotation(TagProject.ELEMENT_ANNOTATION_QUALIFIED_NAME))
+                .map(annotation -> SmartPointerManager.getInstance(annotation.getProject()).createSmartPsiElementPointer(annotation).getElement())
                 .collect(Collectors.toList());
-
     }
 }

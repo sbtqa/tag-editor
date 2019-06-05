@@ -42,7 +42,7 @@ public abstract class AbstractCucumberExtension implements CucumberJvmExtensionP
     for (Entry entry : entries) {
       if (context.isCurrentElementContextChanger()) {
         if (!entry.getTitle().equals("") && stepVariant.contains("\"" + entry.getTitle() + "\"")) {
-          result.add(entry.getElement());
+          result.add(entry.getEntryAnnotation());
           break;
         }
       } else {
