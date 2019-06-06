@@ -194,6 +194,16 @@ public class CucumberStepsIndex {
     return result;
   }
 
+  public Map<String, Entry> loadEntriesFor(@Nullable final PsiFile featureFile, @NotNull final Module module) {
+    Map<String, Entry> result = new HashMap<>();
+
+    for (CucumberJvmExtensionPoint extension : myExtensionMap.values()) {
+      result = extension.loadEntriesFor(featureFile, module);
+    }
+
+    return result;
+  }
+
   public Set<CucumberStepDefinitionCreationContext> getStepDefinitionContainers(@NotNull final GherkinFile featureFile) {
     Set<CucumberStepDefinitionCreationContext> result = new HashSet<>();
     for (CucumberJvmExtensionPoint ep : myExtensionMap.values()) {

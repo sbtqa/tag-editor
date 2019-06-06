@@ -7,6 +7,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -71,7 +72,7 @@ public interface CucumberJvmExtensionPoint {
   /**
    * TODO
    */
-  List<Entry> loadEntriesFor(@Nullable PsiFile featureFile, @NotNull Module module);
+  Map<String, Entry> loadEntriesFor(@Nullable PsiFile featureFile, @NotNull Module module);
 
   void flush(@NotNull Project project);
 

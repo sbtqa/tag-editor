@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -106,12 +107,23 @@ public class CucumberJavaExtension extends AbstractCucumberJavaExtension {
     }
 
     @Override
-    public List<Entry> loadEntriesFor(@Nullable PsiFile featureFile, @NotNull Module module) {
+    public Map<String, Entry> loadEntriesFor(@Nullable PsiFile featureFile, @NotNull Module module) {
         Stream<PsiClass> entries = Stream.concat(TagProject.getEndpoints(module), TagProject.getPages(module));
+
+
+//        Map<String, Entry> entriesz = new HashMap<>();
 
         return entries.filter(Objects::nonNull)
                 .distinct()
                 .map(Entry::new)
-                .collect(Collectors.toList());
+                .collect(Collectors.toMap(Entry::getTitle, entry -> entry));
+
+
+//        return entries.filter(Objects::nonNull)
+//                .distinct()
+//                .map(Entry::new)
+//                .collect(Collectors.toList());
+
+
     }
 }

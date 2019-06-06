@@ -91,7 +91,7 @@ public class TagContext {
         return "";
     }
 
-    private String parseTitle(String step) {
+    public static String parseTitle(String step) {
         Matcher matcher = QUOTES_VALUE_EXTRACTOR_PATTERN.matcher(step);
         if (matcher.find()) {
             return matcher.group().replaceAll("\"", "");
@@ -111,7 +111,7 @@ public class TagContext {
         return api == null && ui == null;
     }
 
-    public boolean isCurrentElementContextChanger() {
+    public boolean isContextChanger() {
         return currentElement instanceof GherkinStep && (((GherkinStep) currentElement).findDefinitions().stream().findFirst().get().isUiContextChanger()
                 || (((GherkinStep) currentElement).findDefinitions().stream().findFirst().get().isApiContextChanger()));
 

@@ -28,6 +28,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.cucumber.BDDFrameworkType;
@@ -70,8 +71,8 @@ public class CucumberJava8Extension extends AbstractCucumberJavaExtension {
     }
 
     @Override
-    public List<Entry> loadEntriesFor(@Nullable PsiFile featureFile, @NotNull Module module) {
-        return Collections.emptyList();
+    public Map<String, Entry> loadEntriesFor(@Nullable PsiFile featureFile, @NotNull Module module) {
+        return Collections.emptyMap();
     }
 
     private static class CucumberJava8TextOccurenceProcessor implements TextOccurenceProcessor {

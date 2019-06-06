@@ -7,6 +7,7 @@ import com.intellij.psi.PsiElement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.cucumber.CucumberJvmExtensionPoint;
@@ -37,24 +38,25 @@ public abstract class AbstractCucumberExtension implements CucumberJvmExtensionP
     }
 
     // TODO move to method
-    List<Entry> entries = loadEntriesFor(element.getContainingFile(), module);
+    final Map<String, Entry> entries = loadEntriesFor(element.getContainingFile(), module);
     TagContext context = new TagContext(element, element.getContainingFile());
-    for (Entry entry : entries) {
-      if (context.isCurrentElementContextChanger()) {
-        if (!entry.getTitle().equals("") && stepVariant.contains("\"" + entry.getTitle() + "\"")) {
-          result.add(entry.getEntryAnnotation());
-          break;
+    if (entries.size() > 0) {
+      if (context.isContextChanger()) {
+        String title = TagContext.parseTitle(stepVariant);
+        if (entries.get(title) != null) {
+            result.add(entries.get(title).getEntryAnnotation());
         }
       } else {
-        if ((entry.getTitle().equals(context.getCurrentTitle(false)) || entry.getTitle().equals(context.getCurrentTitle(true)))) {
-          result.addAll(entry.getSupportsActions(stepVariant));
-          result.addAll(entry.getSupportsElements(stepVariant, context));
+        if (context.getUi() != null) {
+            result.addAll(entries.get(context.getCurrentTitle(true)).getSupportsActions(stepVariant));
+            result.addAll(entries.get(context.getCurrentTitle(true)).getSupportsElements(stepVariant));
+        }
+        if (context.getApi() != null) {
+          result.addAll(entries.get(context.getCurrentTitle(false)).getSupportsActions(stepVariant));
+          result.addAll(entries.get(context.getCurrentTitle(false)).getSupportsElements(stepVariant));
         }
       }
     }
-
-
-
 
     return result;
   }

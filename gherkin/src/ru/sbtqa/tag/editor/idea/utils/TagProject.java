@@ -104,30 +104,8 @@ public class TagProject {
         return elementAnnotations.stream().anyMatch(method::hasAnnotation);
     }
 
-    private static boolean isAnnotated(PsiField field) {
+    public static boolean isAnnotated(PsiField field) {
         return elementAnnotations.stream().anyMatch(field::hasAnnotation);
-    }
-
-    /**
-     * Найти все элементы на странице
-     */
-    public static List<PsiField> getElementsss(TagContext context) {
-        ArrayList<PsiField> allFields = new ArrayList<>();
-        if (context.getApi() != null) {
-            allFields.addAll(Arrays.asList(context.getApi().getAllFields()));
-        }
-        if (context.getUi() != null) {
-            allFields.addAll(Arrays.asList(context.getUi().getAllFields()));
-        }
-
-        return allFields.stream()
-                .filter(TagProject::isAnnotated)
-                .collect(Collectors.toList());
-
-        // TODO добавить апи методы
-//        return Stream
-//                .concat(elements.stream(), getApiMethods(context).stream())
-//                .collect(Collectors.toList());
     }
 
     /**
@@ -165,7 +143,7 @@ public class TagProject {
         return new TagCompletionElement(title, annotationFqdn);
     }
 
-    private static boolean hasTitledAnnotation(PsiModifierListOwner element) {
+    public static boolean hasTitledAnnotation(PsiModifierListOwner element) {
         for (PsiAnnotation annotation : element.getAnnotations()) {
             if (!getAnnotationTitle(annotation).equals("")) {
                 return true;
@@ -186,6 +164,18 @@ public class TagProject {
         }
 
         return "";
+    }
+
+    public static PsiAnnotation getAnnotation(PsiModifierListOwner element) {
+        for (PsiAnnotation annotation : element.getAnnotations()) {
+        if (annotation != null && (annotation.findAttributeValue(NAME) != null
+                    || annotation.findAttributeValue(TITLE) != null
+                    || annotation.findAttributeValue(VALUE) != null)) {
+                return annotation;
+            }
+        }
+
+        return null;
     }
 
     /**
