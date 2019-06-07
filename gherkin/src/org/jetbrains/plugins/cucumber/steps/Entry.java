@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import kotlin.Pair;
 import org.jetbrains.annotations.NotNull;
-import ru.sbtqa.tag.editor.idea.utils.StringUtils;
 import ru.sbtqa.tag.editor.idea.utils.TagProject;
 
 public class Entry {
@@ -51,7 +50,7 @@ public class Entry {
     }
 
     public String getTitle() {
-        return StringUtils.unquote(TagProject.getAnnotationTitle(getAnnotation()));
+        return TagProject.getAnnotationTitle(getAnnotation());
     }
 
     public PsiAnnotation getAnnotation() {
@@ -63,13 +62,13 @@ public class Entry {
 
     public List<PsiElement> getSupportsActions(String stepDef) {
         return actions.stream()
-                .filter(annotation -> stepDef.contains("(" + StringUtils.unquote( StringUtils.unquote(TagProject.getAnnotationTitle(annotation)) + ")")))
+                .filter(action -> stepDef.contains("(" +  TagProject.getAnnotationTitle(action) + ")"))
                 .collect(Collectors.toList());
     }
 
     public List<PsiElement> getSupportsElements(String stepDef) {
         return elements.stream()
-                .filter(field -> stepDef.contains("\"" + StringUtils.unquote(TagProject.getAnnotationTitle(field)) + "\""))
+                .filter(element -> stepDef.contains("\"" + TagProject.getAnnotationTitle(element) + "\""))
                 .collect(Collectors.toList());
     }
 }

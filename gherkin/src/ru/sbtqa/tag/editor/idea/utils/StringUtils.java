@@ -5,10 +5,9 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
     private StringUtils() {}
 
     public static String unquote(String string) {
-        if (string.startsWith("\"") && string.endsWith("\"")) {
-            return string.substring(1, string.length() - 1);
+        while(string.startsWith("\"") && string.endsWith("\"")) {
+            string = string.substring(1, string.length() - 1);
         }
-
         return string;
     }
 }

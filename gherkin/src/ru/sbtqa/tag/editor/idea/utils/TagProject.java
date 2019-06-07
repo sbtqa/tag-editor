@@ -56,7 +56,7 @@ public class TagProject {
      */
     public static List<TagCompletionElement> getActionTitles(TagContext context) {
         return getActionAnnotations(context.getUi()).stream()
-                .map(psiAnnotationIntegerPair -> new TagCompletionElement(getAnnotationTitle(psiAnnotationIntegerPair.component1()), psiAnnotationIntegerPair.component1().getQualifiedName()) )
+                .map(psiAnnotationIntegerPair -> new TagCompletionElement(getAnnotationTitle(psiAnnotationIntegerPair.component1()), psiAnnotationIntegerPair.component1().getQualifiedName()))
                 .collect(Collectors.toList());
     }
 
@@ -148,22 +148,22 @@ public class TagProject {
     }
 
     public static String getAnnotationTitle(PsiAnnotation annotation) {
+        String title = "";
         if (annotation != null) {
             if (annotation.findAttributeValue(NAME) != null) {
-                return annotation.findAttributeValue(NAME).getText();
+                title = annotation.findAttributeValue(NAME).getText();
             } else if (annotation.findAttributeValue(TITLE) != null) {
-                return annotation.findAttributeValue(TITLE).getText();
+                title = annotation.findAttributeValue(TITLE).getText();
             } else if (annotation.findAttributeValue(VALUE) != null) {
-                return annotation.findAttributeValue(VALUE).getText();
+                title = annotation.findAttributeValue(VALUE).getText();
             }
         }
-
-        return "";
+        return StringUtils.unquote(title);
     }
 
     public static PsiAnnotation getAnnotation(PsiModifierListOwner element) {
         for (PsiAnnotation annotation : element.getAnnotations()) {
-        if (annotation != null && (annotation.findAttributeValue(NAME) != null
+            if (annotation != null && (annotation.findAttributeValue(NAME) != null
                     || annotation.findAttributeValue(TITLE) != null
                     || annotation.findAttributeValue(VALUE) != null)) {
                 return annotation;
@@ -207,6 +207,7 @@ public class TagProject {
 
     /**
      * TODO
+     *
      * @param module
      * @param annotation
      * @return
