@@ -109,21 +109,9 @@ public class CucumberJavaExtension extends AbstractCucumberJavaExtension {
     @Override
     public Map<String, Entry> loadEntriesFor(@Nullable PsiFile featureFile, @NotNull Module module) {
         Stream<PsiClass> entries = Stream.concat(TagProject.getEndpoints(module), TagProject.getPages(module));
-
-
-//        Map<String, Entry> entriesz = new HashMap<>();
-
         return entries.filter(Objects::nonNull)
                 .distinct()
                 .map(Entry::new)
                 .collect(Collectors.toMap(Entry::getTitle, entry -> entry));
-
-
-//        return entries.filter(Objects::nonNull)
-//                .distinct()
-//                .map(Entry::new)
-//                .collect(Collectors.toList());
-
-
     }
 }

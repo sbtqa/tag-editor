@@ -91,6 +91,7 @@ public class TagContext {
         return "";
     }
 
+    // TODO вынестив утилз
     public static String parseTitle(String step) {
         Matcher matcher = QUOTES_VALUE_EXTRACTOR_PATTERN.matcher(step);
         if (matcher.find()) {
@@ -112,9 +113,8 @@ public class TagContext {
     }
 
     public boolean isContextChanger() {
-        return currentElement instanceof GherkinStep && (((GherkinStep) currentElement).findDefinitions().stream().findFirst().get().isUiContextChanger()
-                || (((GherkinStep) currentElement).findDefinitions().stream().findFirst().get().isApiContextChanger()));
-
+        return currentElement instanceof GherkinStep
+                && (((GherkinStep) currentElement).findDefinitions().stream().findFirst().get().isUiContextChanger()
+                    || (((GherkinStep) currentElement).findDefinitions().stream().findFirst().get().isApiContextChanger()));
     }
-
 }

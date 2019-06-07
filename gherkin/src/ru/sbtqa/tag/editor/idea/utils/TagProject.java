@@ -206,11 +206,7 @@ public class TagProject {
     }
 
     /**
-     * TODO
-     *
-     * @param module
-     * @param annotation
-     * @return
+     * Поиск всех страниц в проекте по заданной аннотации
      */
     public static Stream<PsiClass> getEntries(Module module, String annotation) {
         PsiClass pageEntry = JavaPsiFacade.getInstance(module.getProject())
@@ -224,7 +220,7 @@ public class TagProject {
     }
 
     /**
-     * Поиск страницы по имени
+     * Поиск страницы имеющей аннотацию PageEntry по имени
      */
     public static PsiClass getPageByName(Module module, String pageTitle) {
         return getPages(module)
@@ -233,6 +229,9 @@ public class TagProject {
                 .orElse(null);
     }
 
+    /**
+     * Поиск страницы имеющей аннотацию Endpoint по имени
+     */
     public static PsiClass getEndpointByName(Module module, String endpointTitle) {
         return getEndpoints(module)
                 .filter(entryClass -> findEndpointName(entryClass).equals(endpointTitle))

@@ -63,14 +63,11 @@ public interface CucumberJvmExtensionPoint {
 
   /**
    * Provides all possible step definitions available from current feature file.
-   * @param featureFile
-   * @param module
-   * @return
    */
   List<AbstractStepDefinition> loadStepsFor(@Nullable PsiFile featureFile, @NotNull Module module);
 
   /**
-   * TODO
+   * Provides all classes with annotation @PageEntry or @Endpoint
    */
   Map<String, Entry> loadEntriesFor(@Nullable PsiFile featureFile, @NotNull Module module);
 
