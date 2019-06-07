@@ -42,9 +42,10 @@ public abstract class AbstractCucumberExtension implements CucumberJvmExtensionP
     TagContext context = new TagContext(element, element.getContainingFile());
     if (entries.size() > 0) {
       if (context.isContextChanger()) {
-        String title = TagContext.parseTitle(stepVariant);
-        if (entries.get(title) != null) {
-            result.add(entries.get(title).getEntryAnnotation());
+          String title = TagContext.parseTitle(stepVariant);
+          Entry entry = entries.get(title);
+          if (entry != null) {
+            result.add(entry.getAnnotation());
         }
       } else {
         if (context.getUi() != null) {
