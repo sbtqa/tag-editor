@@ -5,8 +5,6 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiTreeUtil;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.plugins.cucumber.psi.GherkinFeature;
 import org.jetbrains.plugins.cucumber.psi.GherkinScenario;
@@ -16,8 +14,6 @@ import org.jetbrains.plugins.cucumber.steps.AbstractStepDefinition;
 import ru.sbtqa.tag.editor.idea.utils.TagProjectUtils;
 
 public class TagContext {
-
-    private static final Pattern QUOTES_VALUE_EXTRACTOR_PATTERN = Pattern.compile("\"([^\"]*)\"");
 
     private GherkinStep[] background;
     private PsiElement currentElement;
@@ -83,20 +79,11 @@ public class TagContext {
                 boolean isStepChanger = isUi ? prevStep.findDefinitions().stream().anyMatch(AbstractStepDefinition::isUiContextChanger)
                         : prevStep.findDefinitions().stream().anyMatch(AbstractStepDefinition::isApiContextChanger);
                 if (isStepChanger) {
-                    return parseTitle(prevStep.getName());
+                    return TagProjectUtils.parseTitle(prevStep.getName());
                 }
             }
         } while ((element = element.getPrevSibling()) != null);
 
-        return "";
-    }
-
-    // TODO вынестив утилз
-    public static String parseTitle(String step) {
-        Matcher matcher = QUOTES_VALUE_EXTRACTOR_PATTERN.matcher(step);
-        if (matcher.find()) {
-            return matcher.group().replaceAll("\"", "");
-        }
         return "";
     }
 

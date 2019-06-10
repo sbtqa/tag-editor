@@ -13,6 +13,8 @@ import com.intellij.util.Query;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import kotlin.Pair;
@@ -32,6 +34,8 @@ public class TagProjectUtils {
     private static final String COOKIE_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.api.annotation.Cookie";
     private static final String FROMRESPONSE_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.api.annotation.FromResponse";
     private static final String HEADER_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.api.annotation.Header";
+
+    private static final Pattern QUOTES_VALUE_EXTRACTOR_PATTERN = Pattern.compile("\"([^\"]*)\"");
 
     private static final String VALUE = "value";
     private static final String TITLE = "title";
@@ -183,5 +187,16 @@ public class TagProjectUtils {
                 .filter(entryClass -> findEndpointName(entryClass).equals(endpointTitle))
                 .findFirst()
                 .orElse(null);
+    }
+
+    /**
+     * Получить тайтл по регэкспу
+     */
+    public static String parseTitle(String step) {
+        Matcher matcher = QUOTES_VALUE_EXTRACTOR_PATTERN.matcher(step);
+        if (matcher.find()) {
+            return matcher.group().replaceAll("\"", "");
+        }
+        return "";
     }
 }

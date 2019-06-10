@@ -136,7 +136,7 @@ public class CucumberCompletionContributor extends CompletionContributor {
         });
     }
 
-    private void addScenarioKeywords(CompletionResultSet result, PsiFile originalFile, PsiElement originalPosition) {
+    private static void addScenarioKeywords(CompletionResultSet result, PsiFile originalFile, PsiElement originalPosition) {
         final Project project = originalFile.getProject();
         final GherkinKeywordTable table = GherkinKeywordTable.getKeywordsTable(originalFile, project);
         final List<String> keywords = new ArrayList<>();

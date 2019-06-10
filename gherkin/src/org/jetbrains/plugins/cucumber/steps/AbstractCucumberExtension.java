@@ -14,6 +14,7 @@ import org.jetbrains.plugins.cucumber.CucumberJvmExtensionPoint;
 import org.jetbrains.plugins.cucumber.completion.TagContext;
 import org.jetbrains.plugins.cucumber.psi.Entry;
 import org.jetbrains.plugins.cucumber.psi.GherkinStep;
+import ru.sbtqa.tag.editor.idea.utils.TagProjectUtils;
 
 public abstract class AbstractCucumberExtension implements CucumberJvmExtensionPoint {
   @Override
@@ -56,7 +57,7 @@ public abstract class AbstractCucumberExtension implements CucumberJvmExtensionP
     if (entries.size() > 0) {
       if (context.isContextChanger()) {
         // add entry
-        String title = TagContext.parseTitle(step);
+        String title = TagProjectUtils.parseTitle(step);
         Entry entry = entries.get(title);
         if (entry != null) {
           result.add(entry.getAnnotation());
