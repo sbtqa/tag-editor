@@ -8,16 +8,23 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiField;
+import com.intellij.psi.PsiModifierListOwner;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.plugins.cucumber.psi.GherkinStep;
 import org.jetbrains.plugins.cucumber.psi.impl.GherkinStepImpl;
 import org.jetbrains.plugins.cucumber.steps.AbstractStepDefinition;
-import ru.sbtqa.tag.editor.idea.utils.TagProject;
+import ru.sbtqa.tag.editor.idea.utils.StringUtils;
+import ru.sbtqa.tag.editor.idea.utils.TagProjectUtils;
 
 class TagCompletionUtils {
 
@@ -40,9 +47,9 @@ class TagCompletionUtils {
 
             if (startWith != null) {
                 Module module = ModuleUtilCore.findModuleForPsiElement(element);
-                TagProject.getPages(module)
+                TagProjectUtils.getPages(module)
                         .filter(Objects::nonNull)
-                        .map(TagProject::findPageName)
+                        .map(TagProjectUtils::findPageName)
                         .forEach(x -> result.addElement(LookupElementBuilder.create(startWith + x).withPresentableText(x)));
                 result.stopHere();
             }
@@ -61,9 +68,9 @@ class TagCompletionUtils {
 
             if (startWith != null) {
                 Module module = ModuleUtilCore.findModuleForPsiElement(element);
-                TagProject.getEndpoints(module)
+                TagProjectUtils.getEndpoints(module)
                         .filter(Objects::nonNull)
-                        .map(TagProject::findEndpointName)
+                        .map(TagProjectUtils::findEndpointName)
                         .forEach(x -> result.addElement(LookupElementBuilder.create(startWith + x).withPresentableText(x)));
                 result.stopHere();
             }
@@ -100,10 +107,10 @@ class TagCompletionUtils {
             List<TagCompletionElement> completions;
             switch (tagCompletion) {
                 case ACTIONS:
-                    completions = TagProject.getActionTitles(tagContext);
+                    completions = getActionTitles(tagContext);
                     break;
                 case ELEMENTS:
-                    completions = TagProject.getElements(tagContext);
+                    completions = getElements(tagContext);
                     break;
                 default:
                     return false;
@@ -134,5 +141,53 @@ class TagCompletionUtils {
         } else {
             return null;
         }
+    }
+
+    private static List<TagCompletionElement> getActionTitles(TagContext context) {
+        return TagProjectUtils.getActionAnnotations(context.getUi()).stream()
+                .map(psiAnnotationIntegerPair ->
+                        new TagCompletionElement(TagProjectUtils.getAnnotationTitle(psiAnnotationIntegerPair.component1()),
+                                psiAnnotationIntegerPair.component1().getQualifiedName()))
+                .collect(Collectors.toList());
+    }
+
+    private static List<TagCompletionElement> getApiMethods(TagContext context) {
+        if (context.getApi() == null) {
+            return new ArrayList<>();
+        }
+
+        return Arrays.stream(context.getApi().getAllMethods())
+                .filter(method -> method.getContainingClass() != null && method.getContainingClass().getQualifiedName() != null)
+                .filter(TagProjectUtils::isAnnotated)
+                .map(TagCompletionUtils::getTitle)
+                .filter(completionElement -> StringUtils.isNotBlank(completionElement.getPresentableText()))
+                .collect(Collectors.toList());
+    }
+
+    private static List<TagCompletionElement> getElements(TagContext context) {
+        ArrayList<PsiField> allFields = new ArrayList<>();
+        if (context.getApi() != null) {
+            allFields.addAll(Arrays.asList(context.getApi().getAllFields()));
+        }
+        if (context.getUi() != null) {
+            allFields.addAll(Arrays.asList(context.getUi().getAllFields()));
+        }
+
+        List<TagCompletionElement> elements = allFields.stream()
+                .filter(TagProjectUtils::isAnnotated)
+                .map(TagCompletionUtils::getTitle)
+                .filter(completionElement -> StringUtils.isNotBlank(completionElement.getPresentableText()))
+                .collect(Collectors.toList());
+
+        return Stream
+                .concat(elements.stream(), getApiMethods(context).stream())
+                .collect(Collectors.toList());
+    }
+
+    private static TagCompletionElement getTitle(PsiModifierListOwner element) {
+        String annotationFqdn = TagProjectUtils.elementAnnotations.stream().filter(element::hasAnnotation).findFirst().orElse("");
+        String title = TagProjectUtils.getAnnotationTitle(element.getAnnotation(annotationFqdn));
+
+        return new TagCompletionElement(title, annotationFqdn);
     }
 }

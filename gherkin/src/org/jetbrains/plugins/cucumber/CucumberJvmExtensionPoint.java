@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.cucumber.psi.GherkinFile;
 import org.jetbrains.plugins.cucumber.steps.AbstractStepDefinition;
-import org.jetbrains.plugins.cucumber.steps.Entry;
+import org.jetbrains.plugins.cucumber.psi.Entry;
 
 public interface CucumberJvmExtensionPoint {
   ExtensionPointName<CucumberJvmExtensionPoint> EP_NAME =

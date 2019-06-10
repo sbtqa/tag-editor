@@ -26,8 +26,8 @@ import org.jetbrains.plugins.cucumber.StepDefinitionCreator;
 import org.jetbrains.plugins.cucumber.java.steps.JavaStepDefinition;
 import org.jetbrains.plugins.cucumber.java.steps.JavaStepDefinitionCreator;
 import org.jetbrains.plugins.cucumber.steps.AbstractStepDefinition;
-import org.jetbrains.plugins.cucumber.steps.Entry;
-import ru.sbtqa.tag.editor.idea.utils.TagProject;
+import org.jetbrains.plugins.cucumber.psi.Entry;
+import ru.sbtqa.tag.editor.idea.utils.TagProjectUtils;
 
 public class CucumberJavaExtension extends AbstractCucumberJavaExtension {
 
@@ -108,7 +108,7 @@ public class CucumberJavaExtension extends AbstractCucumberJavaExtension {
 
     @Override
     public Map<String, Entry> loadEntriesFor(@Nullable PsiFile featureFile, @NotNull Module module) {
-        Stream<PsiClass> entries = Stream.concat(TagProject.getEndpoints(module), TagProject.getPages(module));
+        Stream<PsiClass> entries = Stream.concat(TagProjectUtils.getEndpoints(module), TagProjectUtils.getPages(module));
         return entries.filter(Objects::nonNull)
                 .distinct()
                 .map(Entry::new)

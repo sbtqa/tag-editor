@@ -16,16 +16,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import kotlin.Pair;
-import org.jetbrains.plugins.cucumber.completion.TagCompletionElement;
-import org.jetbrains.plugins.cucumber.completion.TagContext;
 
-public class TagProject {
+public class TagProjectUtils {
 
     public static final String ENDPOINT_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.rest.Endpoint";
     public static final String PAGE_ENTRY_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.PageEntry";
-    public static final String ELEMENT_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.ElementTitle";
     public static final String VALIDATION_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.api.annotation.Validation";
 
+    private static final String ELEMENT_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.ElementTitle";
     private static final String ACTION_TITLE_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.ActionTitle";
     private static final String ACTION_TITLES_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.ActionTitles";
 
@@ -39,7 +37,7 @@ public class TagProject {
     private static final String TITLE = "title";
     private static final String NAME = "name";
 
-    private static ArrayList<String> elementAnnotations = new ArrayList() {
+    public static ArrayList<String> elementAnnotations = new ArrayList() {
         {
             add(VALIDATION_ANNOTATION_QUALIFIED_NAME);
             add(ELEMENT_ANNOTATION_QUALIFIED_NAME);
@@ -50,15 +48,6 @@ public class TagProject {
             add(HEADER_ANNOTATION_QUALIFIED_NAME);
         }
     };
-
-    /**
-     * Найти все экшены на странице
-     */
-    public static List<TagCompletionElement> getActionTitles(TagContext context) {
-        return getActionAnnotations(context.getUi()).stream()
-                .map(psiAnnotationIntegerPair -> new TagCompletionElement(getAnnotationTitle(psiAnnotationIntegerPair.component1()), psiAnnotationIntegerPair.component1().getQualifiedName()))
-                .collect(Collectors.toList());
-    }
 
     public static List<Pair<PsiAnnotation, Integer>> getActionAnnotations(PsiClass page) {
         List<Pair<PsiAnnotation, PsiMethod>> allAnnotations = new ArrayList<>();
@@ -87,55 +76,12 @@ public class TagProject {
         return actionTitleAnnotations;
     }
 
-    private static List<TagCompletionElement> getApiMethods(TagContext context) {
-        if (context.getApi() == null) {
-            return new ArrayList<>();
-        }
-
-        return Arrays.stream(context.getApi().getAllMethods())
-                .filter(method -> method.getContainingClass() != null && method.getContainingClass().getQualifiedName() != null)
-                .filter(TagProject::isAnnotated)
-                .map(TagProject::getTitle)
-                .filter(completionElement -> StringUtils.isNotBlank(completionElement.getPresentableText()))
-                .collect(Collectors.toList());
-    }
-
-    private static boolean isAnnotated(PsiMethod method) {
+    public static boolean isAnnotated(PsiMethod method) {
         return elementAnnotations.stream().anyMatch(method::hasAnnotation);
     }
 
     public static boolean isAnnotated(PsiField field) {
         return elementAnnotations.stream().anyMatch(field::hasAnnotation);
-    }
-
-    /**
-     * Найти все элементы на странице
-     */
-    public static List<TagCompletionElement> getElements(TagContext context) {
-        ArrayList<PsiField> allFields = new ArrayList<>();
-        if (context.getApi() != null) {
-            allFields.addAll(Arrays.asList(context.getApi().getAllFields()));
-        }
-        if (context.getUi() != null) {
-            allFields.addAll(Arrays.asList(context.getUi().getAllFields()));
-        }
-
-        List<TagCompletionElement> elements = allFields.stream()
-                .filter(TagProject::isAnnotated)
-                .map(TagProject::getTitle)
-                .filter(completionElement -> StringUtils.isNotBlank(completionElement.getPresentableText()))
-                .collect(Collectors.toList());
-
-        return Stream
-                .concat(elements.stream(), getApiMethods(context).stream())
-                .collect(Collectors.toList());
-    }
-
-    private static TagCompletionElement getTitle(PsiModifierListOwner element) {
-        String annotationFqdn = elementAnnotations.stream().filter(element::hasAnnotation).findFirst().orElse("");
-        String title = getAnnotationTitle(element.getAnnotation(annotationFqdn));
-
-        return new TagCompletionElement(title, annotationFqdn);
     }
 
     public static boolean hasTitledAnnotation(PsiModifierListOwner element) {

@@ -13,7 +13,7 @@ import org.jetbrains.plugins.cucumber.psi.GherkinScenario;
 import org.jetbrains.plugins.cucumber.psi.GherkinStep;
 import org.jetbrains.plugins.cucumber.psi.GherkinStepsHolder;
 import org.jetbrains.plugins.cucumber.steps.AbstractStepDefinition;
-import ru.sbtqa.tag.editor.idea.utils.TagProject;
+import ru.sbtqa.tag.editor.idea.utils.TagProjectUtils;
 
 public class TagContext {
 
@@ -48,11 +48,11 @@ public class TagContext {
     }
 
     private PsiClass getCurrentEndpoint() {
-        return TagProject.getEndpointByName(ModuleUtilCore.findModuleForPsiElement(currentElement), getCurrentTitle(false));
+        return TagProjectUtils.getEndpointByName(ModuleUtilCore.findModuleForPsiElement(currentElement), getCurrentTitle(false));
     }
 
     private PsiClass getCurrentPage() {
-        return TagProject.getPageByName(ModuleUtilCore.findModuleForPsiElement(currentElement), getCurrentTitle(true));
+        return TagProjectUtils.getPageByName(ModuleUtilCore.findModuleForPsiElement(currentElement), getCurrentTitle(true));
     }
 
     public String getCurrentTitle(boolean isUi) {

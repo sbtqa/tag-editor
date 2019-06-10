@@ -36,7 +36,7 @@ import org.jetbrains.plugins.cucumber.StepDefinitionCreator;
 import org.jetbrains.plugins.cucumber.java.steps.Java8StepDefinition;
 import org.jetbrains.plugins.cucumber.java.steps.Java8StepDefinitionCreator;
 import org.jetbrains.plugins.cucumber.steps.AbstractStepDefinition;
-import org.jetbrains.plugins.cucumber.steps.Entry;
+import org.jetbrains.plugins.cucumber.psi.Entry;
 
 public class CucumberJava8Extension extends AbstractCucumberJavaExtension {
 

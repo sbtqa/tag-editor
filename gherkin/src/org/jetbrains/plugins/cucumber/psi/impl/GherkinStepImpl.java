@@ -34,8 +34,8 @@ import java.util.regex.Pattern;
 public class GherkinStepImpl extends GherkinPsiElementBase implements GherkinStep, PsiCheckedRenameElement {
 
   private static final TokenSet TEXT_FILTER = TokenSet
-      .create(GherkinTokenTypes.TEXT, GherkinElementTypes.STEP_PARAMETER, TokenType.WHITE_SPACE, GherkinTokenTypes.STEP_PARAMETER_TEXT,
-              GherkinTokenTypes.STEP_PARAMETER_BRACE);
+    .create(GherkinTokenTypes.TEXT, GherkinElementTypes.STEP_PARAMETER, TokenType.WHITE_SPACE, GherkinTokenTypes.STEP_PARAMETER_TEXT,
+            GherkinTokenTypes.STEP_PARAMETER_BRACE);
 
   private static final Pattern PARAMETER_SUBSTITUTION_PATTERN = Pattern.compile("<([^>\n\r]+)>");
   private final Object LOCK = new Object();
