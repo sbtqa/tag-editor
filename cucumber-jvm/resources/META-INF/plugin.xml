@@ -20,7 +20,7 @@
       ]]>
    </description>
   <depends>gherkin-tag</depends>
-  <idea-version since-build="136.0"/>
+  <idea-version since-build="191.6183"/>
   <vendor>JetBrains</vendor>
 
   <extensions defaultExtensionNs="com.intellij">

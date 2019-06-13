@@ -100,8 +100,15 @@ public class TagContext {
     }
 
     public boolean isContextChanger() {
-        return currentElement instanceof GherkinStep
-                && (((GherkinStep) currentElement).findDefinitions().stream().findFirst().get().isUiContextChanger()
-                    || (((GherkinStep) currentElement).findDefinitions().stream().findFirst().get().isApiContextChanger()));
+        if (currentElement instanceof GherkinStep) {
+            GherkinStep step = (GherkinStep) currentElement;
+
+            boolean isUiContextChanger = step.findDefinitions().stream().findFirst().get().isUiContextChanger();
+            boolean isApiContextChanger = step.findDefinitions().stream().findFirst().get().isUiContextChanger();
+
+            return isUiContextChanger || isApiContextChanger;
+        } else {
+            return false;
+        }
     }
 }

@@ -29,7 +29,7 @@ public class Entry {
     }
 
     private List<PsiAnnotation> getElements() {
-        List<PsiAnnotation> list = Arrays.stream(clazz.getAllFields())
+        List<PsiAnnotation> elementsList = Arrays.stream(clazz.getAllFields())
                 .filter(TagProjectUtils::isAnnotated)
                 .filter(TagProjectUtils::hasTitledAnnotation)
                 .filter(field -> TagProjectUtils.getAnnotation(field) != null)
@@ -37,9 +37,9 @@ public class Entry {
                 .collect(Collectors.toList());
 
         // add @Validation methods of Endpoints as element
-        list.addAll(getValidations());
+        elementsList.addAll(getValidations());
 
-        return list;
+        return elementsList;
     }
 
     private List<PsiAnnotation> getValidations() {

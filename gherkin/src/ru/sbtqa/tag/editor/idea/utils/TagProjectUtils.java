@@ -90,7 +90,7 @@ public class TagProjectUtils {
 
     public static boolean hasTitledAnnotation(PsiModifierListOwner element) {
         for (PsiAnnotation annotation : element.getAnnotations()) {
-            if (!getAnnotationTitle(annotation).equals("")) {
+            if (!getAnnotationTitle(annotation).equals(StringUtils.EMPTY_STRING)) {
                 return true;
             }
         }
@@ -98,7 +98,7 @@ public class TagProjectUtils {
     }
 
     public static String getAnnotationTitle(PsiAnnotation annotation) {
-        String title = "";
+        String title = StringUtils.EMPTY_STRING;
         if (annotation != null) {
             if (annotation.findAttributeValue(NAME) != null) {
                 title = annotation.findAttributeValue(NAME).getText();
@@ -195,8 +195,8 @@ public class TagProjectUtils {
     public static String parseTitle(String step) {
         Matcher matcher = QUOTES_VALUE_EXTRACTOR_PATTERN.matcher(step);
         if (matcher.find()) {
-            return matcher.group().replaceAll("\"", "");
+            return matcher.group().replaceAll(StringUtils.QUOTE, StringUtils.EMPTY_STRING);
         }
-        return "";
+        return StringUtils.EMPTY_STRING;
     }
 }
