@@ -1,0 +1,14 @@
+intellij {
+    version project.property('ideaVersion')
+    type project.property('ideaType')
+}
+
+sourceSets.main.java.srcDirs = ['src/']
+sourceSets.main.resources.srcDirs = ['resources/']
+sourceSets.test.java.srcDirs = ['test/']
+
+patchPluginXml {
+    changeNotes """
+      Add change notes here.<br>
+      <em>most HTML tags may be used</em>"""
+}
