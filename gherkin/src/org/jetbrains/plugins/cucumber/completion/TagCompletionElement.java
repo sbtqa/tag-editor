@@ -2,7 +2,6 @@ package org.jetbrains.plugins.cucumber.completion;
 
 import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
-import ru.sbtqa.tag.editor.idea.utils.StringUtils;
 
 public class TagCompletionElement implements Comparable<TagCompletionElement> {
 
@@ -10,7 +9,7 @@ public class TagCompletionElement implements Comparable<TagCompletionElement> {
     private String typeText;
 
     public TagCompletionElement(String presentableText, String typeText) {
-        this.presentableText = StringUtils.unquote(presentableText);
+        this.presentableText = presentableText;
         this.typeText = typeText;
     }
 

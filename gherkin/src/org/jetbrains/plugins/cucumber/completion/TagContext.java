@@ -5,19 +5,15 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiTreeUtil;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.plugins.cucumber.psi.GherkinFeature;
 import org.jetbrains.plugins.cucumber.psi.GherkinScenario;
 import org.jetbrains.plugins.cucumber.psi.GherkinStep;
 import org.jetbrains.plugins.cucumber.psi.GherkinStepsHolder;
 import org.jetbrains.plugins.cucumber.steps.AbstractStepDefinition;
-import ru.sbtqa.tag.editor.idea.utils.TagProject;
+import ru.sbtqa.tag.editor.idea.utils.TagProjectUtils;
 
 public class TagContext {
-
-    private static final Pattern QUOTES_VALUE_EXTRACTOR_PATTERN = Pattern.compile("\"([^\"]*)\"");
 
     private GherkinStep[] background;
     private PsiElement currentElement;
@@ -48,14 +44,14 @@ public class TagContext {
     }
 
     private PsiClass getCurrentEndpoint() {
-        return TagProject.getEndpointByName(ModuleUtilCore.findModuleForPsiElement(currentElement), getCurrentTitle(false));
+        return TagProjectUtils.getEndpointByName(ModuleUtilCore.findModuleForPsiElement(currentElement), getCurrentTitle(false));
     }
 
     private PsiClass getCurrentPage() {
-        return TagProject.getPageByName(ModuleUtilCore.findModuleForPsiElement(currentElement), getCurrentTitle(true));
+        return TagProjectUtils.getPageByName(ModuleUtilCore.findModuleForPsiElement(currentElement), getCurrentTitle(true));
     }
 
-    private String getCurrentTitle(boolean isUi) {
+    public String getCurrentTitle(boolean isUi) {
         String currentTitle = getTitle(isUi, currentElement);
         GherkinStepsHolder stepsHolder = ((GherkinStep) currentElement).getStepHolder();
 
@@ -83,19 +79,11 @@ public class TagContext {
                 boolean isStepChanger = isUi ? prevStep.findDefinitions().stream().anyMatch(AbstractStepDefinition::isUiContextChanger)
                         : prevStep.findDefinitions().stream().anyMatch(AbstractStepDefinition::isApiContextChanger);
                 if (isStepChanger) {
-                    return parseTitle(prevStep.getName());
+                    return TagProjectUtils.parseTitle(prevStep.getName());
                 }
             }
         } while ((element = element.getPrevSibling()) != null);
 
-        return "";
-    }
-
-    private String parseTitle(String step) {
-        Matcher matcher = QUOTES_VALUE_EXTRACTOR_PATTERN.matcher(step);
-        if (matcher.find()) {
-            return matcher.group().replaceAll("\"", "");
-        }
         return "";
     }
 
@@ -109,5 +97,18 @@ public class TagContext {
 
     public boolean isEmpty() {
         return api == null && ui == null;
+    }
+
+    public boolean isContextChanger() {
+        if (currentElement instanceof GherkinStep) {
+            GherkinStep step = (GherkinStep) currentElement;
+
+            boolean isUiContextChanger = step.findDefinitions().stream().findFirst().get().isUiContextChanger();
+            boolean isApiContextChanger = step.findDefinitions().stream().findFirst().get().isUiContextChanger();
+
+            return isUiContextChanger || isApiContextChanger;
+        } else {
+            return false;
+        }
     }
 }

@@ -15,7 +15,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.cucumber.BDDFrameworkType;
@@ -23,6 +26,8 @@ import org.jetbrains.plugins.cucumber.StepDefinitionCreator;
 import org.jetbrains.plugins.cucumber.java.steps.JavaStepDefinition;
 import org.jetbrains.plugins.cucumber.java.steps.JavaStepDefinitionCreator;
 import org.jetbrains.plugins.cucumber.steps.AbstractStepDefinition;
+import org.jetbrains.plugins.cucumber.psi.Entry;
+import ru.sbtqa.tag.editor.idea.utils.TagProjectUtils;
 
 public class CucumberJavaExtension extends AbstractCucumberJavaExtension {
 
@@ -99,5 +104,14 @@ public class CucumberJavaExtension extends AbstractCucumberJavaExtension {
             }
         }
         return result;
+    }
+
+    @Override
+    public Map<String, Entry> loadEntriesFor(@Nullable PsiFile featureFile, @NotNull Module module) {
+        Stream<PsiClass> entries = Stream.concat(TagProjectUtils.getEndpoints(module), TagProjectUtils.getPages(module));
+        return entries.filter(Objects::nonNull)
+                .distinct()
+                .map(Entry::new)
+                .collect(Collectors.toMap(Entry::getTitle, entry -> entry));
     }
 }

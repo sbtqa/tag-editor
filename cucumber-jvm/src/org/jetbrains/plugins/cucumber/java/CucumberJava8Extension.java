@@ -26,7 +26,9 @@ import com.intellij.psi.search.TextOccurenceProcessor;
 import com.intellij.psi.search.UsageSearchContext;
 import com.intellij.psi.util.PsiTreeUtil;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.cucumber.BDDFrameworkType;
@@ -34,6 +36,7 @@ import org.jetbrains.plugins.cucumber.StepDefinitionCreator;
 import org.jetbrains.plugins.cucumber.java.steps.Java8StepDefinition;
 import org.jetbrains.plugins.cucumber.java.steps.Java8StepDefinitionCreator;
 import org.jetbrains.plugins.cucumber.steps.AbstractStepDefinition;
+import org.jetbrains.plugins.cucumber.psi.Entry;
 
 public class CucumberJava8Extension extends AbstractCucumberJavaExtension {
 
@@ -65,6 +68,11 @@ public class CucumberJava8Extension extends AbstractCucumberJavaExtension {
                     UsageSearchContext.IN_CODE, true);
         }
         return result;
+    }
+
+    @Override
+    public Map<String, Entry> loadEntriesFor(@Nullable PsiFile featureFile, @NotNull Module module) {
+        return Collections.emptyMap();
     }
 
     private static class CucumberJava8TextOccurenceProcessor implements TextOccurenceProcessor {

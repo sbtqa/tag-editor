@@ -13,32 +13,35 @@ import com.intellij.util.Query;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import kotlin.Pair;
-import org.jetbrains.plugins.cucumber.completion.TagCompletionElement;
-import org.jetbrains.plugins.cucumber.completion.TagContext;
 
-public class TagProject {
+public class TagProjectUtils {
 
+    public static final String ENDPOINT_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.rest.Endpoint";
+    public static final String PAGE_ENTRY_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.PageEntry";
+    public static final String VALIDATION_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.api.annotation.Validation";
+
+    private static final String ELEMENT_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.ElementTitle";
     private static final String ACTION_TITLE_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.ActionTitle";
     private static final String ACTION_TITLES_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.ActionTitles";
-    private static final String PAGE_ENTRY_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.PageEntry";
-    private static final String ELEMENT_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.ElementTitle";
 
-    private static final String ENDPOINT_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.pagefactory.annotations.rest.Endpoint";
-    private static final String VALIDATION_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.api.annotation.Validation";
     private static final String QUERY_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.api.annotation.Query";
     private static final String BODY_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.api.annotation.Body";
     private static final String COOKIE_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.api.annotation.Cookie";
     private static final String FROMRESPONSE_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.api.annotation.FromResponse";
     private static final String HEADER_ANNOTATION_QUALIFIED_NAME = "ru.sbtqa.tag.api.annotation.Header";
 
+    private static final Pattern QUOTES_VALUE_EXTRACTOR_PATTERN = Pattern.compile("\"([^\"]*)\"");
+
     private static final String VALUE = "value";
     private static final String TITLE = "title";
     private static final String NAME = "name";
 
-    private static ArrayList<String> elementAnnotations = new ArrayList() {
+    public static ArrayList<String> elementAnnotations = new ArrayList() {
         {
             add(VALIDATION_ANNOTATION_QUALIFIED_NAME);
             add(ELEMENT_ANNOTATION_QUALIFIED_NAME);
@@ -50,18 +53,7 @@ public class TagProject {
         }
     };
 
-    private TagProject() {}
-
-    /**
-     * Найти все экшены на странице
-     */
-    public static List<TagCompletionElement> getActionTitles(TagContext context) {
-        return getActionAnnotations(context.getUi()).stream()
-                .map(psiAnnotationIntegerPair -> new TagCompletionElement(getAnnotationTitle(psiAnnotationIntegerPair.component1()), psiAnnotationIntegerPair.component1().getQualifiedName()) )
-                .collect(Collectors.toList());
-    }
-
-    private static List<Pair<PsiAnnotation, Integer>> getActionAnnotations(PsiClass page) {
+    public static List<Pair<PsiAnnotation, Integer>> getActionAnnotations(PsiClass page) {
         List<Pair<PsiAnnotation, PsiMethod>> allAnnotations = new ArrayList<>();
 
         Arrays.stream(page.getAllMethods())
@@ -88,79 +80,47 @@ public class TagProject {
         return actionTitleAnnotations;
     }
 
-    private static List<TagCompletionElement> getApiMethods(TagContext context) {
-        if (context.getApi() == null) {
-            return new ArrayList<>();
-        }
-
-        return Arrays.stream(context.getApi().getAllMethods())
-                .filter(method -> method.getContainingClass() != null && method.getContainingClass().getQualifiedName() != null)
-                .filter(TagProject::isAnnotated)
-                .map(TagProject::getTitle)
-                .filter(completionElement -> StringUtils.isNotBlank(completionElement.getPresentableText()))
-                .collect(Collectors.toList());
-    }
-
-    private static boolean isAnnotated(PsiMethod method) {
+    public static boolean isAnnotated(PsiMethod method) {
         return elementAnnotations.stream().anyMatch(method::hasAnnotation);
     }
 
-    private static boolean isAnnotated(PsiField field) {
+    public static boolean isAnnotated(PsiField field) {
         return elementAnnotations.stream().anyMatch(field::hasAnnotation);
     }
 
-    /**
-     * Найти все элементы на странице
-     */
-    public static List<TagCompletionElement> getElements(TagContext context) {
-        ArrayList<PsiField> allFields = new ArrayList<>();
-        if (context.getApi() != null) {
-            allFields.addAll(Arrays.asList(context.getApi().getAllFields()));
-        }
-        if (context.getUi() != null) {
-            allFields.addAll(Arrays.asList(context.getUi().getAllFields()));
-        }
-
-        List<TagCompletionElement> elements = allFields.stream()
-                .filter(TagProject::isAnnotated)
-                .map(TagProject::getTitle)
-                .filter(completionElement -> StringUtils.isNotBlank(completionElement.getPresentableText()))
-                .collect(Collectors.toList());
-
-        return Stream
-                .concat(elements.stream(), getApiMethods(context).stream())
-                .collect(Collectors.toList());
-    }
-
-    private static TagCompletionElement getTitle(PsiModifierListOwner element) {
-        String annotationFqdn = elementAnnotations.stream().filter(element::hasAnnotation).findFirst().orElse("");
-        String title = getAnnotationTitle(element.getAnnotation(annotationFqdn));
-
-        return new TagCompletionElement(title, annotationFqdn);
-    }
-
-    private static boolean hasTitledAnnotation(PsiModifierListOwner element) {
+    public static boolean hasTitledAnnotation(PsiModifierListOwner element) {
         for (PsiAnnotation annotation : element.getAnnotations()) {
-            if (!getAnnotationTitle(annotation).equals("")) {
+            if (!getAnnotationTitle(annotation).equals(StringUtils.EMPTY_STRING)) {
                 return true;
             }
         }
         return false;
     }
 
-
-    private static String getAnnotationTitle(PsiAnnotation annotation) {
+    public static String getAnnotationTitle(PsiAnnotation annotation) {
+        String title = StringUtils.EMPTY_STRING;
         if (annotation != null) {
             if (annotation.findAttributeValue(NAME) != null) {
-                return annotation.findAttributeValue(NAME).getText();
+                title = annotation.findAttributeValue(NAME).getText();
             } else if (annotation.findAttributeValue(TITLE) != null) {
-                return annotation.findAttributeValue(TITLE).getText();
+                title = annotation.findAttributeValue(TITLE).getText();
             } else if (annotation.findAttributeValue(VALUE) != null) {
-                return annotation.findAttributeValue(VALUE).getText();
+                title = annotation.findAttributeValue(VALUE).getText();
+            }
+        }
+        return StringUtils.unquote(title);
+    }
+
+    public static PsiAnnotation getAnnotation(PsiModifierListOwner element) {
+        for (PsiAnnotation annotation : element.getAnnotations()) {
+            if (annotation != null && (annotation.findAttributeValue(NAME) != null
+                    || annotation.findAttributeValue(TITLE) != null
+                    || annotation.findAttributeValue(VALUE) != null)) {
+                return annotation;
             }
         }
 
-        return "";
+        return null;
     }
 
     /**
@@ -195,7 +155,10 @@ public class TagProject {
         return getEntries(module, ENDPOINT_ANNOTATION_QUALIFIED_NAME);
     }
 
-    private static Stream<PsiClass> getEntries(Module module, String annotation) {
+    /**
+     * Поиск всех страниц в проекте по заданной аннотации
+     */
+    public static Stream<PsiClass> getEntries(Module module, String annotation) {
         PsiClass pageEntry = JavaPsiFacade.getInstance(module.getProject())
                 .findClass(annotation, GlobalSearchScope.moduleWithDependenciesAndLibrariesScope(module));
         if (pageEntry != null) {
@@ -207,7 +170,7 @@ public class TagProject {
     }
 
     /**
-     * Поиск страницы по имени
+     * Поиск страницы имеющей аннотацию PageEntry по имени
      */
     public static PsiClass getPageByName(Module module, String pageTitle) {
         return getPages(module)
@@ -216,10 +179,24 @@ public class TagProject {
                 .orElse(null);
     }
 
+    /**
+     * Поиск страницы имеющей аннотацию Endpoint по имени
+     */
     public static PsiClass getEndpointByName(Module module, String endpointTitle) {
         return getEndpoints(module)
                 .filter(entryClass -> findEndpointName(entryClass).equals(endpointTitle))
                 .findFirst()
                 .orElse(null);
+    }
+
+    /**
+     * Получить тайтл по регэкспу
+     */
+    public static String parseTitle(String step) {
+        Matcher matcher = QUOTES_VALUE_EXTRACTOR_PATTERN.matcher(step);
+        if (matcher.find()) {
+            return matcher.group().replaceAll(StringUtils.QUOTE, StringUtils.EMPTY_STRING);
+        }
+        return StringUtils.EMPTY_STRING;
     }
 }

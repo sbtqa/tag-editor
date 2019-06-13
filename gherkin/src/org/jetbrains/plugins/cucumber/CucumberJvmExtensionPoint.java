@@ -1,20 +1,19 @@
 package org.jetbrains.plugins.cucumber;
 
 import com.intellij.openapi.extensions.ExtensionPointName;
-import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.cucumber.psi.GherkinFile;
 import org.jetbrains.plugins.cucumber.steps.AbstractStepDefinition;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import org.jetbrains.plugins.cucumber.psi.Entry;
 
 public interface CucumberJvmExtensionPoint {
   ExtensionPointName<CucumberJvmExtensionPoint> EP_NAME =
@@ -64,11 +63,13 @@ public interface CucumberJvmExtensionPoint {
 
   /**
    * Provides all possible step definitions available from current feature file.
-   * @param featureFile
-   * @param module
-   * @return
    */
   List<AbstractStepDefinition> loadStepsFor(@Nullable PsiFile featureFile, @NotNull Module module);
+
+  /**
+   * Provides all classes with annotation @PageEntry or @Endpoint
+   */
+  Map<String, Entry> loadEntriesFor(@Nullable PsiFile featureFile, @NotNull Module module);
 
   void flush(@NotNull Project project);
 
