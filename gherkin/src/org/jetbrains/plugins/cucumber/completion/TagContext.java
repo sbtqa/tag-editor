@@ -104,7 +104,7 @@ public class TagContext {
             GherkinStep step = (GherkinStep) currentElement;
 
             boolean isUiContextChanger = step.findDefinitions().stream().findFirst().get().isUiContextChanger();
-            boolean isApiContextChanger = step.findDefinitions().stream().findFirst().get().isUiContextChanger();
+            boolean isApiContextChanger = step.findDefinitions().stream().findFirst().get().isApiContextChanger();
 
             return isUiContextChanger || isApiContextChanger;
         } else {
