@@ -3,9 +3,14 @@ package org.jetbrains.plugins.cucumber.psi;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import com.intellij.psi.PsiModifierListOwner;
 import kotlin.Pair;
 import org.jetbrains.annotations.NotNull;
 import ru.sbtqa.tag.editor.idea.utils.TagProjectUtils;
@@ -29,23 +34,19 @@ public class Entry {
     }
 
     private List<PsiAnnotation> getElements() {
-        List<PsiAnnotation> elementsList = Arrays.stream(clazz.getAllFields())
-                .filter(TagProjectUtils::isAnnotated)
-                .filter(TagProjectUtils::hasTitledAnnotation)
-                .filter(field -> TagProjectUtils.getAnnotation(field) != null)
-                .map(TagProjectUtils::getAnnotation)
-                .collect(Collectors.toList());
+        List<PsiAnnotation> elementsList = new ArrayList<>();
 
-        // add @Validation methods of Endpoints as element
-        elementsList.addAll(getValidations());
+        elementsList.addAll(getElementsAnnotations(clazz.getAllFields()));
+        elementsList.addAll(getElementsAnnotations(clazz.getAllMethods()));
 
         return elementsList;
     }
 
-    private List<PsiAnnotation> getValidations() {
-        return Arrays.stream(clazz.getAllMethods())
-                .filter(psiMethod -> psiMethod.hasAnnotation(TagProjectUtils.VALIDATION_ANNOTATION_QUALIFIED_NAME))
-                .map(psiMethod -> psiMethod.getAnnotation(TagProjectUtils.VALIDATION_ANNOTATION_QUALIFIED_NAME))
+    private List<PsiAnnotation> getElementsAnnotations(PsiModifierListOwner[] elements) {
+        return Arrays.stream(elements)
+                .map(TagProjectUtils::getElementAnnotation)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .collect(Collectors.toList());
     }
 

@@ -13,6 +13,7 @@ import com.intellij.util.Query;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -111,16 +112,11 @@ public class TagProjectUtils {
         return StringUtils.unquote(title);
     }
 
-    public static PsiAnnotation getAnnotation(PsiModifierListOwner element) {
-        for (PsiAnnotation annotation : element.getAnnotations()) {
-            if (annotation != null && (annotation.findAttributeValue(NAME) != null
-                    || annotation.findAttributeValue(TITLE) != null
-                    || annotation.findAttributeValue(VALUE) != null)) {
-                return annotation;
-            }
-        }
-
-        return null;
+    public static Optional<PsiAnnotation> getElementAnnotation(PsiModifierListOwner element) {
+        return Arrays.stream(element.getAnnotations())
+                .filter(annotation ->
+                        elementAnnotations.stream().anyMatch(elementAnnotation -> elementAnnotation.equals(annotation.getQualifiedName())))
+                .findFirst();
     }
 
     /**
