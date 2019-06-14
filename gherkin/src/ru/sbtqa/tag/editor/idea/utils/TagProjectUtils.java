@@ -115,7 +115,7 @@ public class TagProjectUtils {
     public static Optional<PsiAnnotation> getElementAnnotation(PsiModifierListOwner element) {
         return Arrays.stream(element.getAnnotations())
                 .filter(annotation ->
-                        elementAnnotations.stream().anyMatch(ea -> ea.equals(annotation.getQualifiedName())))
+                        elementAnnotations.stream().anyMatch(elementAnnotation -> elementAnnotation.equals(annotation.getQualifiedName())))
                 .findFirst();
     }
 
