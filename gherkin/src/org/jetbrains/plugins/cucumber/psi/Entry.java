@@ -5,6 +5,7 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import kotlin.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -30,10 +31,9 @@ public class Entry {
 
     private List<PsiAnnotation> getElements() {
         List<PsiAnnotation> elementsList = Arrays.stream(clazz.getAllFields())
-                .filter(TagProjectUtils::isAnnotated)
-                .filter(TagProjectUtils::hasTitledAnnotation)
-                .filter(field -> TagProjectUtils.getAnnotation(field) != null)
-                .map(TagProjectUtils::getAnnotation)
+                .map(TagProjectUtils::getElementAnnotation)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .collect(Collectors.toList());
 
         // add @Validation methods of Endpoints as element
