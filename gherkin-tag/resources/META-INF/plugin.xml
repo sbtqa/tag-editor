@@ -6,7 +6,7 @@
   <description>Provides support of Gherkin language for TAG Framework</description>
   <version>1.0.0</version>
   <depends>com.intellij.modules.xml</depends>
-  <idea-version since-build="171"/>
+  <idea-version since-build="162"/>
   <vendor>sbtqa.ru</vendor>
 
   <extensions defaultExtensionNs="com.intellij">

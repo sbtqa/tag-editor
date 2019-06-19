@@ -20,7 +20,7 @@
       ]]>
    </description>
   <depends>gherkin-tag</depends>
-  <idea-version since-build="171"/>
+  <idea-version since-build="162"/>
   <vendor>sbtqa.ru</vendor>
 
   <extensions defaultExtensionNs="com.intellij">
