@@ -1,7 +1,7 @@
 intellij {
     version project.property('ideaVersion')
     type project.property('ideaType')
-    plugins = [project(':gherkin')]
+    plugins = [project(':gherkin-tag')]
 }
 
 sourceSets.main.java.srcDirs = ['src/']
@@ -15,5 +15,5 @@ patchPluginXml {
 }
 
 dependencies {
-    implementation project(':gherkin')
+    implementation project(':gherkin-tag')
 }
