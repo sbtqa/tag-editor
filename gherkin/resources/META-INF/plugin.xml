@@ -4,10 +4,10 @@
   <id>gherkin-tag</id>
   <name>Gherkin TAG Editor</name>
   <description>Provides support of Gherkin language for TAG Framework</description>
-  <version>999.999</version>
+  <version>1.0.0</version>
   <depends>com.intellij.modules.xml</depends>
-  <idea-version since-build="191.6183"/>
-  <vendor>JetBrains</vendor>
+  <idea-version since-build="171"/>
+  <vendor>sbtqa.ru</vendor>
 
   <extensions defaultExtensionNs="com.intellij">
     <fileTypeFactory implementation="org.jetbrains.plugins.cucumber.psi.CucumberFileTypeFactory"/>
@@ -88,7 +88,7 @@
   </extensions>
 
   <extensionPoints>
-    <extensionPoint qualifiedName="org.jetbrains.plugins.cucumber.steps.cucumberJvmExtensionPoint"
+    <extensionPoint qualifiedName="ru.sbtqa.tag.editor.cucumber.steps.cucumberJvmExtensionPoint"
                     interface="org.jetbrains.plugins.cucumber.CucumberJvmExtensionPoint"/>
   </extensionPoints>
 </idea-plugin>
