@@ -6,7 +6,7 @@
   <description>Provides support of Gherkin language for TAG Framework</description>
   <version>999.999</version>
   <depends>com.intellij.modules.xml</depends>
-  <idea-version since-build="191.6183"/>
+  <idea-version since-build="171"/>
   <vendor>JetBrains</vendor>
 
   <extensions defaultExtensionNs="com.intellij">
@@ -88,7 +88,7 @@
   </extensions>
 
   <extensionPoints>
-    <extensionPoint qualifiedName="org.jetbrains.plugins.cucumber.steps.cucumberJvmExtensionPoint"
+    <extensionPoint qualifiedName="ru.sbtqa.tag.editor.cucumber.steps.cucumberJvmExtensionPoint"
                     interface="org.jetbrains.plugins.cucumber.CucumberJvmExtensionPoint"/>
   </extensionPoints>
 </idea-plugin>

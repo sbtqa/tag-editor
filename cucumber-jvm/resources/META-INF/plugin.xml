@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <idea-plugin>
-  <id>cucumber-java</id>
-  <name>Cucumber for Java</name>
+  <id>cucumber-tag</id>
+  <name>Cucumber for TAG</name>
   <description>
       <![CDATA[
       This plugin enables <a href="http://cukes.info/">Cucumber</a> support with step definitions written in Java.
@@ -20,7 +20,7 @@
       ]]>
    </description>
   <depends>gherkin-tag</depends>
-  <idea-version since-build="191.6183"/>
+  <idea-version since-build="171"/>
   <vendor>JetBrains</vendor>
 
   <extensions defaultExtensionNs="com.intellij">
@@ -45,7 +45,7 @@
     <pom.declarationSearcher implementation="org.jetbrains.plugins.cucumber.java.steps.search.CucumberJavaPomDeclarationSearcher"/>
   </extensions>
 
-  <extensions defaultExtensionNs="org.jetbrains.plugins.cucumber.steps">
+  <extensions defaultExtensionNs="ru.sbtqa.tag.editor.cucumber.steps">
     <cucumberJvmExtensionPoint implementation="org.jetbrains.plugins.cucumber.java.CucumberJavaExtension"/>
     <cucumberJvmExtensionPoint implementation="org.jetbrains.plugins.cucumber.java.CucumberJava8Extension"/>
   </extensions>
