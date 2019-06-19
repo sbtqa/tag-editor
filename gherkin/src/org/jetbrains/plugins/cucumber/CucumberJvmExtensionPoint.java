@@ -17,7 +17,7 @@ import org.jetbrains.plugins.cucumber.psi.Entry;
 
 public interface CucumberJvmExtensionPoint {
   ExtensionPointName<CucumberJvmExtensionPoint> EP_NAME =
-    ExtensionPointName.create("org.jetbrains.plugins.cucumber.steps.cucumberJvmExtensionPoint");
+    ExtensionPointName.create("ru.sbtqa.tag.editor.cucumber.steps.cucumberJvmExtensionPoint");
 
   // ToDo: remove parent
   /**
