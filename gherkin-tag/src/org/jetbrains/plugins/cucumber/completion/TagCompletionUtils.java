@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.plugins.cucumber.psi.GherkinStep;
+import org.jetbrains.plugins.cucumber.psi.GherkinStepsHolder;
 import org.jetbrains.plugins.cucumber.psi.impl.GherkinStepImpl;
 import org.jetbrains.plugins.cucumber.steps.AbstractStepDefinition;
 import ru.sbtqa.tag.editor.idea.utils.StringUtils;
@@ -71,6 +72,27 @@ class TagCompletionUtils {
                 TagProjectUtils.getEndpoints(module)
                         .filter(Objects::nonNull)
                         .map(TagProjectUtils::findEndpointName)
+                        .forEach(x -> result.addElement(LookupElementBuilder.create(startWith + x).withPresentableText(x)));
+                result.stopHere();
+            }
+
+            return true;
+        }
+        return false;
+    }
+
+    static boolean addFragments(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet result) {
+        PsiElement element = parameters.getPosition().getContext();
+        String stepName = element instanceof GherkinStepImpl ? ((GherkinStepImpl) element).getStepName() : null;
+
+        if (element instanceof GherkinStep && ((GherkinStep) element).findDefinitions().stream().allMatch(AbstractStepDefinition::isFragment)) {
+            final String startWith = getStartWith(stepName, PLACEHOLDER_QUOTED);
+
+            if (startWith != null) {
+                Module module = ModuleUtilCore.findModuleForPsiElement(element);
+                TagProjectUtils.getScenarios(module)
+                        .filter(Objects::nonNull)
+                        .map(GherkinStepsHolder::getScenarioName)
                         .forEach(x -> result.addElement(LookupElementBuilder.create(startWith + x).withPresentableText(x)));
                 result.stopHere();
             }

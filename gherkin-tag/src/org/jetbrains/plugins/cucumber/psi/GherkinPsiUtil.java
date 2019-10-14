@@ -36,13 +36,13 @@ public class GherkinPsiUtil {
   @Nullable
   public static List<TextRange> buildParameterRanges(@NotNull GherkinStep step,
                                                      @NotNull AbstractStepDefinition definition,
-                                                     final int shiftOffset) {
-
+                                                     int shiftOffset) {
     OutlineStepSubstitution substitution = convertOutlineStepName(step);
-
     final List<TextRange> parameterRanges = new ArrayList<>();
-    final Pattern pattern = definition.getPattern();
+    Pattern pattern = definition.getPattern();
     if (pattern == null) return null;
+
+    pattern = Pattern.compile(pattern.toString().replaceAll("^\\^", "^(\\\\s*\\\\?\\\\s*)*"), Pattern.CASE_INSENSITIVE);
 
     Matcher matcher = pattern.matcher(substitution.getSubstitution());
     if (matcher.find()) {

@@ -48,6 +48,7 @@ import org.jetbrains.plugins.cucumber.psi.impl.GherkinExamplesBlockImpl;
 import org.jetbrains.plugins.cucumber.psi.impl.GherkinScenarioOutlineImpl;
 import org.jetbrains.plugins.cucumber.steps.AbstractStepDefinition;
 import org.jetbrains.plugins.cucumber.steps.CucumberStepsIndex;
+import ru.sbtqa.tag.editor.idea.utils.StringUtils;
 
 import static com.intellij.patterns.PlatformPatterns.psiElement;
 
@@ -117,6 +118,9 @@ public class CucumberCompletionContributor extends CompletionContributor {
             protected void addCompletions(@NotNull CompletionParameters parameters,
                                           @NotNull ProcessingContext context,
                                           @NotNull CompletionResultSet result) {
+                if (TagCompletionUtils.addFragments(parameters, result)) {
+                    return;
+                }
                 if (TagCompletionUtils.addPageTitles(parameters, result)) {
                     return;
                 }

@@ -35,6 +35,7 @@ public class CucumberJavaExtension extends AbstractCucumberJavaExtension {
     static final String CUCUMBER_RUNTIME_JAVA_STEP_DEF_ANNOTATION = "cucumber.runtime.java.StepDefAnnotation";
     static final String ZUCHINI_RUNTIME_JAVA_STEP_DEF_ANNOTATION = "org.zuchini.annotations.StepAnnotation";
     static final String METHOD_NAME_OPEN_PAGE = "openPage";
+    static final String METHOD_NAME_INSERT_FRAGMENT = "userInsertsFragment";
     static final String CLASS_NAME_CORE_STEP_DEFS = "CoreStepDefs";
     static final String METHOD_NAME_SEND_REQUEST = "send";
     static final String METHOD_NAME_FILL_REQUEST = "fill";
@@ -97,6 +98,10 @@ public class CucumberJavaExtension extends AbstractCucumberJavaExtension {
                         boolean isUi = stepDefMethod.getName().equals(METHOD_NAME_OPEN_PAGE)
                                 && stepDefMethod.getContainingClass().getName().equals(CLASS_NAME_CORE_STEP_DEFS);
                         javaStepDefinition.setUiContextChanger(isUi);
+
+                        boolean isFragment = stepDefMethod.getName().equals(METHOD_NAME_INSERT_FRAGMENT)
+                                && stepDefMethod.getContainingClass().getName().equals(CLASS_NAME_CORE_STEP_DEFS);
+                        javaStepDefinition.setFragment(isFragment);
 
                         result.add(javaStepDefinition);
                     }

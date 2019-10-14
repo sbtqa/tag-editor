@@ -33,6 +33,7 @@ public abstract class AbstractStepDefinition {
 
     private boolean isUiContextChanger = false;
     private boolean isApiContextChanger = false;
+    private boolean isFragment = false;
 
     public AbstractStepDefinition(@NotNull final PsiElement element) {
         myElementPointer = SmartPointerManager.getInstance(element.getProject()).createSmartPsiElementPointer(element);
@@ -178,5 +179,13 @@ public abstract class AbstractStepDefinition {
 
     public void setApiContextChanger(boolean apiContextChanger) {
         isApiContextChanger = apiContextChanger;
+    }
+
+    public boolean isFragment() {
+        return isFragment;
+    }
+
+    public void setFragment(boolean fragment) {
+        isFragment = fragment;
     }
 }
