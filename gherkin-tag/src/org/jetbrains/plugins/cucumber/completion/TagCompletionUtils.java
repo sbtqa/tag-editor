@@ -83,9 +83,9 @@ class TagCompletionUtils {
 
     static boolean addFragments(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet result) {
         PsiElement element = parameters.getPosition().getContext();
-        String stepName = element instanceof GherkinStepImpl ? ((GherkinStepImpl) element).getStepName() : null;
-
-        if (element instanceof GherkinStep && ((GherkinStep) element).findDefinitions().stream().allMatch(AbstractStepDefinition::isFragment)) {
+        String stepName = element instanceof GherkinStep ? ((GherkinStep) element).getStepName() : null;
+        boolean isFragment = element instanceof GherkinStep && ((GherkinStep) element).findDefinitions().stream().allMatch(AbstractStepDefinition::isFragment);
+        if (isFragment) {
             final String startWith = getStartWith(stepName, PLACEHOLDER_QUOTED);
 
             if (startWith != null) {
