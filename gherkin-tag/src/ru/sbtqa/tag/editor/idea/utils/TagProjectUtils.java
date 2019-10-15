@@ -196,9 +196,9 @@ public class TagProjectUtils {
     }
 
     /**
-     * Поиск всех страниц в проекте по заданной аннотации
+     * Поиск всех фрагментов в проекте
      */
-    public static Stream<GherkinStepsHolder> getScenarios(Module module) {
+    public static Stream<GherkinStepsHolder> getFragments(Module module) {
         final List<GherkinStepsHolder> result = new ArrayList<>();
 
         GlobalSearchScope scope = GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.moduleScope(module), GherkinFileType.INSTANCE);
@@ -207,13 +207,11 @@ public class TagProjectUtils {
             GherkinFile gherkinFile = (GherkinFile) PsiManager.getInstance(scope.getProject()).findFile(virtualFile);
             for (GherkinFeature feature : gherkinFile.getFeatures()) {
                 for (GherkinStepsHolder scenario : feature.getScenarios()) {
-                    // TODO проверить что сценарий имеет тэг @fragment
                     for (GherkinTag tag : scenario.getTags()) {
                         if (tag.getName().equals("@fragment")) {
                             result.add(scenario);
                         }
                     }
-
                 }
             }
         }

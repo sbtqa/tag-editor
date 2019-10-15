@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.cucumber.CucumberJvmExtensionPoint;
 import org.jetbrains.plugins.cucumber.completion.TagContext;
 import org.jetbrains.plugins.cucumber.psi.*;
+import ru.sbtqa.tag.editor.idea.utils.StringUtils;
 import ru.sbtqa.tag.editor.idea.utils.TagProjectUtils;
 
 public abstract class AbstractCucumberExtension implements CucumberJvmExtensionPoint {
@@ -29,14 +30,14 @@ public abstract class AbstractCucumberExtension implements CucumberJvmExtensionP
     }
 
     final List<PsiElement> result = new ArrayList<>();
-    result.addAll(getFragment(stepVariant, element, module));
+    result.addAll(getFragment(stepVariant, module));
     result.addAll(getStepDefinitions(stepVariant, element, module));
     result.addAll(getTagEntities(stepVariant, element, module));
 
     return result;
   }
 
-    private List<PsiElement> getFragment(String step, PsiElement element, Module module) {
+    private List<PsiElement> getFragment(String step, Module module) {
         final List<PsiElement> result = new ArrayList<>();
 
         GlobalSearchScope scope = GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.moduleScope(module), GherkinFileType.INSTANCE);
@@ -45,13 +46,6 @@ public abstract class AbstractCucumberExtension implements CucumberJvmExtensionP
             GherkinFile gherkinFile = (GherkinFile) PsiManager.getInstance(scope.getProject()).findFile(virtualFile);
             for (GherkinFeature feature : gherkinFile.getFeatures()) {
                 for (GherkinStepsHolder scenario : feature.getScenarios()) {
-                    // TODO проверить что сценарий имеет тэг @fragment
-//                    for (GherkinTag tag : scenario.getTags()) {
-//                        if (tag.getName().equals("@" + title)) {
-//                            result.add(scenario);
-//                        }
-//                    }
-
                     if (scenario.getScenarioName().trim().equals(title.trim())) {
                         result.add(scenario);
                     }
@@ -67,7 +61,7 @@ public abstract class AbstractCucumberExtension implements CucumberJvmExtensionP
     final List<AbstractStepDefinition> stepDefinitions = loadStepsFor(element.getContainingFile(), module);
 
     for (final AbstractStepDefinition stepDefinition : stepDefinitions) {
-        if (stepDefinition.matches(step.replaceAll("^(\\s*\\?\\s*)*", "")) && stepDefinition.supportsStep(element)) {
+      if (stepDefinition.matches(step.replaceAll("^" + StringUtils.NON_CRITICAL, "")) && stepDefinition.supportsStep(element)) {
         result.add(stepDefinition.getElement());
       }
     }

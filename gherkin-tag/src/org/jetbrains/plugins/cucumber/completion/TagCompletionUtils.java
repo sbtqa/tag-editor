@@ -90,7 +90,7 @@ class TagCompletionUtils {
 
             if (startWith != null) {
                 Module module = ModuleUtilCore.findModuleForPsiElement(element);
-                TagProjectUtils.getScenarios(module)
+                TagProjectUtils.getFragments(module)
                         .filter(Objects::nonNull)
                         .map(GherkinStepsHolder::getScenarioName)
                         .forEach(x -> result.addElement(LookupElementBuilder.create(startWith + x).withPresentableText(x)));
