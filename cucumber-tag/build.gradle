@@ -2,6 +2,7 @@ intellij {
     version project.property('ideaVersion')
     type project.property('ideaType')
     plugins = [project(':gherkin-tag')]
+    intellij.updateSinceUntilBuild false
 }
 
 sourceSets.main.java.srcDirs = ['src/']

@@ -1,6 +1,7 @@
 intellij {
     version project.property('ideaVersion')
     type project.property('ideaType')
+    intellij.updateSinceUntilBuild false
 }
 
 sourceSets.main.java.srcDirs = ['src/']
