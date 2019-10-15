@@ -1,12 +1,9 @@
 package ru.sbtqa.tag.editor.idea.utils;
 
 import com.intellij.openapi.module.Module;
-import com.intellij.psi.JavaPsiFacade;
-import com.intellij.psi.PsiAnnotation;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiField;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiModifierListOwner;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.*;
+import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.AnnotatedElementsSearch;
 import com.intellij.util.Query;
@@ -19,6 +16,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import kotlin.Pair;
+import org.jetbrains.plugins.cucumber.psi.*;
+import org.jetbrains.plugins.cucumber.psi.impl.GherkinStepsHolderBase;
 
 public class TagProjectUtils {
 
@@ -194,5 +193,29 @@ public class TagProjectUtils {
             return matcher.group().replaceAll(StringUtils.QUOTE, StringUtils.EMPTY_STRING);
         }
         return StringUtils.EMPTY_STRING;
+    }
+
+    /**
+     * Поиск всех фрагментов в проекте
+     */
+    public static Stream<GherkinStepsHolder> getFragments(Module module) {
+        final List<GherkinStepsHolder> result = new ArrayList<>();
+
+        GlobalSearchScope scope = GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.moduleScope(module), GherkinFileType.INSTANCE);
+
+        for (VirtualFile virtualFile : FilenameIndex.getAllFilesByExt(scope.getProject(), "feature", scope)) {
+            GherkinFile gherkinFile = (GherkinFile) PsiManager.getInstance(scope.getProject()).findFile(virtualFile);
+            for (GherkinFeature feature : gherkinFile.getFeatures()) {
+                for (GherkinStepsHolder scenario : feature.getScenarios()) {
+                    for (GherkinTag tag : scenario.getTags()) {
+                        if (tag.getName().equals("@fragment")) {
+                            result.add(scenario);
+                        }
+                    }
+                }
+            }
+        }
+
+        return result.stream();
     }
 }

@@ -48,6 +48,7 @@ import org.jetbrains.plugins.cucumber.psi.impl.GherkinExamplesBlockImpl;
 import org.jetbrains.plugins.cucumber.psi.impl.GherkinScenarioOutlineImpl;
 import org.jetbrains.plugins.cucumber.steps.AbstractStepDefinition;
 import org.jetbrains.plugins.cucumber.steps.CucumberStepsIndex;
+import ru.sbtqa.tag.editor.idea.utils.StringUtils;
 
 import static com.intellij.patterns.PlatformPatterns.psiElement;
 
@@ -117,12 +118,9 @@ public class CucumberCompletionContributor extends CompletionContributor {
             protected void addCompletions(@NotNull CompletionParameters parameters,
                                           @NotNull ProcessingContext context,
                                           @NotNull CompletionResultSet result) {
-                if (TagCompletionUtils.addPageTitles(parameters, result)) {
-                    return;
-                }
-                if (TagCompletionUtils.addEndpointTitles(parameters, result)) {
-                    return;
-                }
+                TagCompletionUtils.addFragments(parameters, result);
+                TagCompletionUtils.addPageTitles(parameters, result);
+                TagCompletionUtils.addEndpointTitles(parameters, result);
             }
         });
 
@@ -131,6 +129,12 @@ public class CucumberCompletionContributor extends CompletionContributor {
             protected void addCompletions(@NotNull CompletionParameters parameters,
                                           @NotNull ProcessingContext context,
                                           @NotNull CompletionResultSet result) {
+                if (TagCompletionUtils.addPageActions(parameters, result)) {
+                    return;
+                }
+                if (TagCompletionUtils.addPageElements(parameters, result)) {
+                    return;
+                }
                 addStepDefinitions(parameters, result, parameters.getOriginalFile());
             }
         });
@@ -240,16 +244,6 @@ public class CucumberCompletionContributor extends CompletionContributor {
 
 
     private static void addStepDefinitions(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet result, @NotNull PsiFile file) {
-
-        // TODO это должно быть на уровень выше
-        if (TagCompletionUtils.addPageActions(parameters, result)) {
-            return;
-        }
-
-        if (TagCompletionUtils.addPageElements(parameters, result)) {
-            return;
-        }
-
         final List<AbstractStepDefinition> definitions = CucumberStepsIndex.getInstance(file.getProject()).getAllStepDefinitions(file);
         for (AbstractStepDefinition definition : definitions) {
             String definitionText = definition.getStepDefinitionText();

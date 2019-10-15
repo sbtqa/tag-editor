@@ -4,6 +4,7 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
 
     public static final String QUOTE = "\"";
     public static final String EMPTY_STRING = "";
+    public static final String NON_CRITICAL = "(\\s*\\?\\s*)*";
 
     private StringUtils() {}
 

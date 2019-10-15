@@ -3,17 +3,17 @@ package org.jetbrains.plugins.cucumber.steps;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiElement;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.*;
+import com.intellij.psi.search.FilenameIndex;
+import com.intellij.psi.search.GlobalSearchScope;
+import java.util.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.cucumber.CucumberJvmExtensionPoint;
 import org.jetbrains.plugins.cucumber.completion.TagContext;
-import org.jetbrains.plugins.cucumber.psi.Entry;
-import org.jetbrains.plugins.cucumber.psi.GherkinStep;
+import org.jetbrains.plugins.cucumber.psi.*;
+import ru.sbtqa.tag.editor.idea.utils.StringUtils;
 import ru.sbtqa.tag.editor.idea.utils.TagProjectUtils;
 
 public abstract class AbstractCucumberExtension implements CucumberJvmExtensionPoint {
@@ -30,18 +30,38 @@ public abstract class AbstractCucumberExtension implements CucumberJvmExtensionP
     }
 
     final List<PsiElement> result = new ArrayList<>();
+    result.addAll(getFragment(stepVariant, module));
     result.addAll(getStepDefinitions(stepVariant, element, module));
     result.addAll(getTagEntities(stepVariant, element, module));
 
     return result;
   }
 
+    private List<PsiElement> getFragment(String step, Module module) {
+        final List<PsiElement> result = new ArrayList<>();
+
+        GlobalSearchScope scope = GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.moduleScope(module), GherkinFileType.INSTANCE);
+        String title = TagProjectUtils.parseTitle(step);
+        for (VirtualFile virtualFile : FilenameIndex.getAllFilesByExt(scope.getProject(), "feature", scope)) {
+            GherkinFile gherkinFile = (GherkinFile) PsiManager.getInstance(scope.getProject()).findFile(virtualFile);
+            for (GherkinFeature feature : gherkinFile.getFeatures()) {
+                for (GherkinStepsHolder scenario : feature.getScenarios()) {
+                    if (scenario.getScenarioName().trim().equals(title.trim())) {
+                        result.add(scenario);
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
   private List<PsiElement> getStepDefinitions(String step, PsiElement element, Module module) {
     final List<PsiElement> result = new ArrayList<>();
     final List<AbstractStepDefinition> stepDefinitions = loadStepsFor(element.getContainingFile(), module);
 
     for (final AbstractStepDefinition stepDefinition : stepDefinitions) {
-      if (stepDefinition.matches(step) && stepDefinition.supportsStep(element)) {
+      if (stepDefinition.matches(step.replaceAll("^" + StringUtils.NON_CRITICAL, "")) && stepDefinition.supportsStep(element)) {
         result.add(stepDefinition.getElement());
       }
     }

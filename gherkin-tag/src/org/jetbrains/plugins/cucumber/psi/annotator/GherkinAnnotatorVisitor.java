@@ -101,6 +101,10 @@ public class GherkinAnnotatorVisitor extends GherkinElementVisitor {
     return left.endsWith("(") && right.startsWith(")");
   }
 
+  private boolean isNonCritical(GherkinStep step, TextRange range) {
+    return step.getText().substring(range.getStartOffset(), range.getEndOffset()).trim().equals("?");
+  }
+
   private void highlightDataJack(GherkinPsiElement element, TextRange range, int offset, boolean isCollection) {
     String stepText = element.getText();
     String parameterContent = stepText.substring(range.getStartOffset(), range.getEndOffset()).trim();
