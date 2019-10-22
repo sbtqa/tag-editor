@@ -4,7 +4,7 @@
   <name>Cucumber for TAG</name>
   <description>
       <![CDATA[
-      This plugin enables <a href="http://cukes.info/">Cucumber</a> support with step definitions written in Java.
+      This plugin enables <a href="https://github.com/sbtqa/page-factory-2">Page Factory 2</a> support with step definitions written in Java.
         The following coding assistance features are available:
         <ul>
           <li>Error and syntax highlighting.</li>
@@ -16,6 +16,8 @@
           <li>Code completion.</li>
           <li>Search for usages.</li>
           <li>Commenting and uncommenting lines.</li>
+          <li>Optional Steps.</li>
+          <li>Scenario Fragments.</li>
         </ul>
       ]]>
    </description>
