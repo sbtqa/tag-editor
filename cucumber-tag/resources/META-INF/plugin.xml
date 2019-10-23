@@ -23,7 +23,7 @@
    </description>
   <depends>gherkin-tag</depends>
   <depends>com.intellij.modules.java</depends>
-  <idea-version since-build="162"/>
+  <idea-version since-build="183"/>
   <vendor>sbtqa.ru</vendor>
 
   <extensions defaultExtensionNs="com.intellij">
