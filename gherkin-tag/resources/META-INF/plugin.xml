@@ -5,6 +5,7 @@
   <name>Gherkin TAG Editor</name>
   <description>Provides support of Gherkin language for TAG Framework</description>
   <depends>com.intellij.modules.xml</depends>
+  <depends>com.intellij.modules.java</depends>
   <idea-version since-build="162"/>
   <vendor>sbtqa.ru</vendor>
 

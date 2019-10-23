@@ -2,6 +2,7 @@ intellij {
     version project.property('ideaVersion')
     type project.property('ideaType')
     intellij.updateSinceUntilBuild false
+    plugins 'java'
 }
 
 sourceSets.main.java.srcDirs = ['src/']

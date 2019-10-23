@@ -1,7 +1,7 @@
 intellij {
     version project.property('ideaVersion')
     type project.property('ideaType')
-    plugins = [project(':gherkin-tag')]
+    plugins = [project(':gherkin-tag'), 'java']
     intellij.updateSinceUntilBuild false
 }
 
