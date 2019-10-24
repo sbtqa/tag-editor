@@ -30,7 +30,10 @@ public abstract class AbstractCucumberExtension implements CucumberJvmExtensionP
     }
 
     final List<PsiElement> result = new ArrayList<>();
-    result.addAll(getFragment(stepVariant, module));
+    boolean isFragment = element instanceof GherkinStep && ((GherkinStep) element).findDefinitions().stream().allMatch(AbstractStepDefinition::isFragment);
+    if (isFragment) {
+      result.addAll(getFragment(stepVariant, module));
+    }
     result.addAll(getStepDefinitions(stepVariant, element, module));
     result.addAll(getTagEntities(stepVariant, element, module));
 
