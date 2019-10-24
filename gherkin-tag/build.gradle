@@ -11,5 +11,5 @@ sourceSets.test.java.srcDirs = ['test/']
 
 patchPluginXml {
     changeNotes """
-      Initial release."""
+      Speed up references resolving."""
 }
