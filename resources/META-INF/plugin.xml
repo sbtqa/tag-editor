@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<idea-plugin>
+  <id>tag-editor</id>
+  <name>TAG Editor</name>
+  <description>Provides support of Gherkin language for TAG Framework</description>
+  <depends>com.intellij.modules.xml</depends>
+  <depends>com.intellij.modules.java</depends>
+  <idea-version since-build="183"/>
+  <vendor>sbtqa.ru</vendor>
+
+  <extensions defaultExtensionNs="com.intellij">
+    <referencesSearch implementation="org.jetbrains.plugins.cucumber.java.steps.search.CucumberJavaStepDefinitionSearch"/>
+    <methodReferencesSearch implementation="org.jetbrains.plugins.cucumber.java.steps.search.CucumberJavaMethodUsageSearcher"/>
+    <runConfigurationProducer implementation="org.jetbrains.plugins.cucumber.java.run.CucumberJavaFeatureRunConfigurationProducer"/>
+    <runConfigurationProducer implementation="org.jetbrains.plugins.cucumber.java.run.CucumberJavaScenarioRunConfigurationProducer"/>
+    <runConfigurationProducer implementation="org.jetbrains.plugins.cucumber.java.run.CucumberJavaAllFeaturesInFolderRunConfigurationProducer"/>
+    <configurationType implementation="org.jetbrains.plugins.cucumber.java.run.CucumberJavaRunConfigurationType"/>
+
+    <implicitUsageProvider implementation="org.jetbrains.plugins.cucumber.java.steps.reference.CucumberJavaImplicitUsageProvider"/>
+
+    <localInspection language="JAVA" shortName="CucumberJavaStepDefClassIsPublic" displayName="Step definition class is not public"
+                     groupBundle="org.jetbrains.plugins.cucumber.CucumberBundle" groupKey="cucumber.inspection.group.name" enabledByDefault="true"
+                     level="WARNING" implementationClass="org.jetbrains.plugins.cucumber.java.inspections.CucumberJavaStepDefClassIsPublicInspections"/>
+    <localInspection language="JAVA" shortName="CucumberJavaStepDefClassInDefaultPackage" displayName="Step definition class is in default package"
+                     groupBundle="org.jetbrains.plugins.cucumber.CucumberBundle" groupKey="cucumber.inspection.group.name" enabledByDefault="true"
+                     level="WARNING" implementationClass="org.jetbrains.plugins.cucumber.java.inspections.CucumberJavaStepDefClassInDefaultPackageInspection"/>
+
+    <multiHostInjector implementation="org.jetbrains.plugins.cucumber.java.CucumberJavaInjector"/>
+    <psi.referenceContributor implementation="org.jetbrains.plugins.cucumber.java.steps.reference.CucumberJavaReferenceContributor"/>
+    <pom.declarationSearcher implementation="org.jetbrains.plugins.cucumber.java.steps.search.CucumberJavaPomDeclarationSearcher"/>
+    <fileTypeFactory implementation="org.jetbrains.plugins.cucumber.psi.CucumberFileTypeFactory"/>
+    <lang.syntaxHighlighterFactory language="Gherkin"
+                                   implementationClass="org.jetbrains.plugins.cucumber.psi.GherkinSyntaxHighlighterFactory"/>
+
+    <lang.parserDefinition language="Gherkin" implementationClass="org.jetbrains.plugins.cucumber.psi.GherkinParserDefinition"/>
+    <lang.commenter language="Gherkin" implementationClass="org.jetbrains.plugins.cucumber.psi.GherkinCommenter"/>
+    <lang.psiStructureViewFactory language="Gherkin"
+                                  implementationClass="org.jetbrains.plugins.cucumber.psi.structure.GherkinStructureViewFactory"/>
+    <lang.formatter language="Gherkin"
+                    implementationClass="org.jetbrains.plugins.cucumber.psi.formatter.GherkinFormattingModelBuilder"/>
+    <annotator language="Gherkin" implementationClass="org.jetbrains.plugins.cucumber.psi.annotator.GherkinAnnotator"/>
+    <lang.foldingBuilder language="Gherkin" implementationClass="org.jetbrains.plugins.cucumber.psi.GherkinFoldingBuilder"/>
+    <langCodeStyleSettingsProvider
+        implementation="org.jetbrains.plugins.cucumber.psi.formatter.GherkinLanguageCodeStyleSettingsProvider"/>
+    <codeStyleSettingsProvider implementation="org.jetbrains.plugins.cucumber.psi.formatter.GherkinCodeStyleSettingsProvider"/>
+
+    <lang.findUsagesProvider language="Gherkin" implementationClass="org.jetbrains.plugins.cucumber.psi.GherkinFindUsagesProvider"/>
+    <colorSettingsPage implementation="org.jetbrains.plugins.cucumber.psi.GherkinColorsPage"/>
+
+    <projectService serviceInterface="org.jetbrains.plugins.cucumber.steps.CucumberStepsIndex"
+                    serviceImplementation="org.jetbrains.plugins.cucumber.steps.CucumberStepsIndex"/>
+    <psi.referenceContributor  language="Gherkin"
+                               implementation="org.jetbrains.plugins.cucumber.steps.reference.CucumberReferenceContributor"/>
+
+    <localInspection language="Gherkin" shortName="CucumberUndefinedStep" bundle="org.jetbrains.plugins.cucumber.CucumberBundle"
+                     key="cucumber.inspection.undefined.step.name" groupKey="cucumber.inspection.group.name" enabledByDefault="true" level="WARNING"
+                     implementationClass="org.jetbrains.plugins.cucumber.inspections.CucumberStepInspection" unfair="true"/>
+
+    <localInspection language="Gherkin" shortName="CucumberExamplesColon" bundle="org.jetbrains.plugins.cucumber.CucumberBundle"
+                     key="inspection.missed.colon.example.name" groupKey="cucumber.inspection.group.name" enabledByDefault="true"
+                     level="ERROR" implementationClass="org.jetbrains.plugins.cucumber.inspections.CucumberExamplesColonInspection"/>
+
+    <localInspection language="Gherkin" shortName="CucumberMissedExamples" bundle="org.jetbrains.plugins.cucumber.CucumberBundle"
+                     key="inspection.missed.example.name" groupKey="cucumber.inspection.group.name" enabledByDefault="true" level="ERROR"
+                     implementationClass="org.jetbrains.plugins.cucumber.inspections.CucumberMissedExamplesInspection"/>
+
+    <localInspection language="Gherkin" shortName="CucumberTableInspection" displayName="Unused or missing columns in Cucumber tables"
+                     groupBundle="org.jetbrains.plugins.cucumber.CucumberBundle" groupKey="cucumber.inspection.group.name" enabledByDefault="true"
+                     level="WARNING" implementationClass="org.jetbrains.plugins.cucumber.inspections.CucumberTableInspection"/>
+
+    <localInspection  language="Gherkin" shortName="GherkinBrokenTableInspection" bundle="org.jetbrains.plugins.cucumber.CucumberBundle"
+                      key="inspection.gherkin.table.is.broken.name" groupKey="cucumber.inspection.group.name" enabledByDefault="true"
+                      level="ERROR" implementationClass="org.jetbrains.plugins.cucumber.inspections.GherkinBrokenTableInspection"/>
+
+    <localInspection language="Gherkin" shortName="GherkinMisplacedBackground" bundle="org.jetbrains.plugins.cucumber.CucumberBundle"
+                     key="inspection.gherkin.background.after.scenario.name" groupKey="cucumber.inspection.group.name" enabledByDefault="true"
+                     level="ERROR" implementationClass="org.jetbrains.plugins.cucumber.inspections.GherkinMisplacedBackgroundInspection"/>
+
+    <localInspection language="Gherkin" shortName="GherkinScenarioToScenarioOutline" bundle="org.jetbrains.plugins.cucumber.CucumberBundle"
+                     key="inspection.gherkin.scenario.with.examples.section.name" groupKey="cucumber.inspection.group.name" enabledByDefault="true" level="ERROR"
+                     implementationClass="org.jetbrains.plugins.cucumber.inspections.GherkinScenarioToScenarioOutlineInspection"/>
+
+    <completion.contributor language="Gherkin"
+                            implementationClass="org.jetbrains.plugins.cucumber.completion.CucumberCompletionContributor"/>
+
+    <enterHandlerDelegate implementation="org.jetbrains.plugins.cucumber.codeinsight.CucumberEnterHandler"/>
+    <typedHandler implementation="org.jetbrains.plugins.cucumber.codeinsight.GherkinTypedHandler"/>
+
+    <spellchecker.support language="Gherkin" implementationClass="org.jetbrains.plugins.cucumber.spellchecker.GherkinSpellcheckerStrategy"/>
+    <lang.inspectionSuppressor language="Gherkin" implementationClass="org.jetbrains.plugins.cucumber.inspections.model.GherkinInspectionSuppressor"/>
+
+    <liveTemplateContext implementation="org.jetbrains.plugins.cucumber.GherkinLiveTemplateContextType"/>
+
+    <extendWordSelectionHandler implementation="org.jetbrains.plugins.cucumber.actions.GherkinStepParameterSelectioner"/>
+
+    <gotoRelatedProvider implementation="org.jetbrains.plugins.cucumber.navigation.CucumberGoToRelatedProvider"/>
+
+    <renameHandler implementation="org.jetbrains.plugins.cucumber.psi.refactoring.rename.GherkinInplaceRenameHandler"/>
+    <renameHandler implementation="org.jetbrains.plugins.cucumber.psi.refactoring.rename.GherkinStepRenameHandler"/>
+
+
+    <renamePsiElementProcessor implementation="org.jetbrains.plugins.cucumber.psi.refactoring.rename.CucumberStepRenameProcessor" order="first"/>
+
+    <additionalTextAttributes scheme="Default" file="colorSchemes/GherkinDefault.xml"/>
+    <additionalTextAttributes scheme="Darcula" file="colorSchemes/GherkinDarcula.xml"/>
+  </extensions>
+
+  <extensions defaultExtensionNs="ru.sbtqa.tag.editor.cucumber.steps">
+    <cucumberJvmExtensionPoint implementation="org.jetbrains.plugins.cucumber.java.CucumberJavaExtension"/>
+    <cucumberJvmExtensionPoint implementation="org.jetbrains.plugins.cucumber.java.CucumberJava8Extension"/>
+  </extensions>
+
+  <extensionPoints>
+    <extensionPoint qualifiedName="ru.sbtqa.tag.editor.cucumber.steps.cucumberJvmExtensionPoint"
+                    interface="org.jetbrains.plugins.cucumber.CucumberJvmExtensionPoint"/>
+  </extensionPoints>
+</idea-plugin>

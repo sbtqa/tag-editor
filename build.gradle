@@ -32,3 +32,19 @@ allprojects {
         compile 'io.cucumber:cucumber-expressions:3.0.0'
     }
 }
+
+intellij {
+    version project.property('ideaVersion')
+    type project.property('ideaType')
+    intellij.updateSinceUntilBuild false
+    plugins 'java'
+}
+
+sourceSets.main.java.srcDirs = ['src/']
+sourceSets.main.resources.srcDirs = ['resources/']
+sourceSets.test.java.srcDirs = ['test/']
+
+patchPluginXml {
+    changeNotes """
+      Speed up references resolving."""
+}
