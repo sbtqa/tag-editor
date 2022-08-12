@@ -23,6 +23,8 @@ public final class CucumberJavaRunConfigurationType extends ConfigurationTypeBas
                 return CucumberJavaRunConfigurationType.this.getIcon();
             }
 
+            public String getId() { return CucumberJavaRunConfigurationType.this.getId(); }
+
             @Override
             @NotNull
             public RunConfiguration createTemplateConfiguration(@NotNull Project project) {
