@@ -1,5 +1,6 @@
 package org.jetbrains.plugins.cucumber.java;
 
+import com.intellij.AbstractBundle;
 import com.intellij.CommonBundle;
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
@@ -18,7 +19,7 @@ public class CucumberJavaBundle {
     }
 
     public static String message(@NotNull @PropertyKey(resourceBundle = BUNDLE) String key, @NotNull Object... params) {
-        return CommonBundle.message(getBundle(), key, params);
+        return AbstractBundle.message(getBundle(), key, params);
     }
 
     private static ResourceBundle getBundle() {

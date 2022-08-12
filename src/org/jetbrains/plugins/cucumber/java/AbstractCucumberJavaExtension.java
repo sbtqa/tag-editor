@@ -50,7 +50,7 @@ public abstract class AbstractCucumberJavaExtension extends AbstractCucumberExte
     @Override
     public Collection<String> getGlues(@NotNull GherkinFile file, Set<String> gluesFromOtherFiles) {
         if (gluesFromOtherFiles == null) {
-            gluesFromOtherFiles = ContainerUtil.newHashSet();
+            gluesFromOtherFiles = new HashSet<>();
         }
         final Set<String> glues = gluesFromOtherFiles;
 
