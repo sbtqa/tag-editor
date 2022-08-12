@@ -26,7 +26,7 @@ allprojects {
 }
 
 intellij {
-    version.set("201.8743.12")
+    version.set("2022.2")
     type.set("IC")
     plugins.set(listOf("java"))
 }

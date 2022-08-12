@@ -33,7 +33,7 @@ public class CucumberJavaPomDeclarationSearcher extends PomDeclarationSearcher {
     }
 
     @Override
-    public void findDeclarationsAt(@NotNull PsiElement element, int offsetInElement, Consumer<PomTarget> consumer) {
+    public void findDeclarationsAt(@NotNull PsiElement element, int offsetInElement, @NotNull Consumer<? super PomTarget> consumer) {
         if (!(element instanceof PsiLiteralExpression)) {
             return;
         }
