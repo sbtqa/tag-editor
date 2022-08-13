@@ -108,7 +108,7 @@ public class CucumberStepsIndex {
   @NotNull
   public Collection<AbstractStepDefinition> findStepDefinitions(@NotNull final PsiFile featureFile, @NotNull final GherkinStep step) {
     final Module module = ModuleUtilCore.findModuleForPsiElement(featureFile);
-    if (module == null || step == null) {
+    if (module == null) {
       return Collections.emptyList();
     }
     String substitutedName = step.getSubstitutedName();
