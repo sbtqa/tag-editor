@@ -108,7 +108,7 @@ public class CucumberStepsIndex {
   @NotNull
   public Collection<AbstractStepDefinition> findStepDefinitions(@NotNull final PsiFile featureFile, @NotNull final GherkinStep step) {
     final Module module = ModuleUtilCore.findModuleForPsiElement(featureFile);
-    if (module == null) {
+    if (module == null || step == null) {
       return Collections.emptyList();
     }
     String substitutedName = step.getSubstitutedName();
@@ -121,7 +121,9 @@ public class CucumberStepsIndex {
     List<AbstractStepDefinition> allSteps = loadStepsFor(featureFile, module);
 
     for (AbstractStepDefinition stepDefinition : allSteps) {
-      if (stepDefinition.matches(substitutedName.replaceAll("^" + StringUtils.NON_CRITICAL, "")) && stepDefinition.supportsStep(step)) {
+      if (stepDefinition != null
+              && stepDefinition.matches(substitutedName.replaceAll("^" + StringUtils.NON_CRITICAL, ""))
+              && stepDefinition.supportsStep(step)) {
         final Pattern currentLongestPattern = getPatternByDefinition(definitionsByClass.get(stepDefinition.getClass()));
         final Pattern newPattern = getPatternByDefinition(stepDefinition);
         final int newPatternLength = ((newPattern != null) ? newPattern.pattern().length() : -1);
