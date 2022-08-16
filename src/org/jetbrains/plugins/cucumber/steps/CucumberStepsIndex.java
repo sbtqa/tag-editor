@@ -6,7 +6,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -58,7 +57,7 @@ public class CucumberStepsIndex {
    * Creates a file that will contain step definitions
    *
    * @param dir                      container for created file
-   * @param fileNameWithoutExtension name of the file with out "." and extension
+   * @param fileNameWithoutExtension name of the file without "." and extension
    * @param frameworkType            type of file to create
    */
   public PsiFile createStepDefinitionFile(@NotNull final PsiDirectory dir,
@@ -97,6 +96,8 @@ public class CucumberStepsIndex {
     return (definitions.isEmpty() ? null : definitions.iterator().next());
   }
 
+  static List<AbstractStepDefinition> allStepsCache = new ArrayList<>();
+
   /**
    * Searches for ALL step definitions, groups it by step definition class and sorts by pattern size.
    * For each step definition class it finds the largest pattern.
@@ -118,9 +119,12 @@ public class CucumberStepsIndex {
 
     Map<Class<? extends AbstractStepDefinition>, AbstractStepDefinition> definitionsByClass =
       new HashMap<>();
-    List<AbstractStepDefinition> allSteps = loadStepsFor(featureFile, module);
+    // Handle it's flushing
+    if (allStepsCache.isEmpty()) {
+        allStepsCache = loadStepsFor(featureFile, module);
+    }
 
-    for (AbstractStepDefinition stepDefinition : allSteps) {
+    for (AbstractStepDefinition stepDefinition : allStepsCache) {
       if (stepDefinition != null
               && stepDefinition.matches(substitutedName.replaceAll("^" + StringUtils.NON_CRITICAL, ""))
               && stepDefinition.supportsStep(step)) {
@@ -139,7 +143,7 @@ public class CucumberStepsIndex {
    * Returns pattern from step definition (if exists)
    *
    * @param definition step definition
-   * @return pattern or null if does not exist
+   * @return pattern or null if it does not exist
    */
   @Nullable
   private static Pattern getPatternByDefinition(@Nullable final AbstractStepDefinition definition) {
@@ -149,43 +153,10 @@ public class CucumberStepsIndex {
     return definition.getPattern();
   }
 
-  // ToDo: use binary search here
-  public List<AbstractStepDefinition> findStepDefinitionsByPattern(@NotNull final String pattern, @NotNull final Module module) {
-    final List<AbstractStepDefinition> allSteps = loadStepsFor(null, module);
-    final List<AbstractStepDefinition> result = new ArrayList<>();
-    for (AbstractStepDefinition stepDefinition : allSteps) {
-      final String elementText = stepDefinition.getCucumberRegex();
-      if (elementText != null && elementText.equals(pattern)) {
-        result.add(stepDefinition);
-      }
-    }
-    return result;
-  }
-
   public List<AbstractStepDefinition> getAllStepDefinitions(@NotNull final PsiFile featureFile) {
     final Module module = ModuleUtilCore.findModuleForPsiElement(featureFile);
     if (module == null) return Collections.emptyList();
     return loadStepsFor(featureFile, module);
-  }
-
-  @NotNull
-  public List<PsiFile> gatherStepDefinitionsFilesFromDirectory(@NotNull final PsiDirectory dir, final boolean writableOnly) {
-    final List<PsiFile> result = new ArrayList<>();
-
-    // find step definitions in current folder
-    for (PsiFile file : dir.getFiles()) {
-      final VirtualFile virtualFile = file.getVirtualFile();
-      boolean isStepFile = writableOnly ? isWritableStepLikeFile(file, file.getParent()) : isStepLikeFile(file, file.getParent());
-      if (isStepFile && virtualFile != null) {
-        result.add(file);
-      }
-    }
-    // process subfolders
-    for (PsiDirectory subDir : dir.getSubdirectories()) {
-      result.addAll(gatherStepDefinitionsFilesFromDirectory(subDir, writableOnly));
-    }
-
-    return result;
   }
 
   private List<AbstractStepDefinition> loadStepsFor(@Nullable final PsiFile featureFile, @NotNull final Module module) {
