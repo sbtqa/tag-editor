@@ -27,6 +27,7 @@ import ru.sbtqa.tag.editor.idea.utils.StringUtils;
  */
 public class CucumberStepsIndex {
   private static final Logger LOG = Logger.getInstance(CucumberStepsIndex.class.getName());
+  private static final Map<String, List<AbstractStepDefinition>> ALL_STEPS_CACHE = new HashMap<>();
 
   private final Map<BDDFrameworkType, CucumberJvmExtensionPoint> myExtensionMap;
   private final Map<CucumberJvmExtensionPoint, Object> myExtensionData;
@@ -96,8 +97,6 @@ public class CucumberStepsIndex {
     return (definitions.isEmpty() ? null : definitions.iterator().next());
   }
 
-  static List<AbstractStepDefinition> allStepsCache = new ArrayList<>();
-
   /**
    * Searches for ALL step definitions, groups it by step definition class and sorts by pattern size.
    * For each step definition class it finds the largest pattern.
@@ -117,14 +116,26 @@ public class CucumberStepsIndex {
       return Collections.emptyList();
     }
 
-    Map<Class<? extends AbstractStepDefinition>, AbstractStepDefinition> definitionsByClass =
-      new HashMap<>();
-    // Handle it's flushing
-    if (allStepsCache.isEmpty()) {
-        allStepsCache = loadStepsFor(featureFile, module);
+    // Initial caching
+    if (!ALL_STEPS_CACHE.containsKey(module.getName())) {
+        ALL_STEPS_CACHE.put(module.getName(), loadStepsFor(featureFile, module));
     }
 
-    for (AbstractStepDefinition stepDefinition : allStepsCache) {
+    // Get step definitions from cache
+    Collection<AbstractStepDefinition> stepDefs = getStepDefs(ALL_STEPS_CACHE.get(module.getName()), substitutedName, step);
+
+      // Attempt rescan if nothing returned
+    if (stepDefs.isEmpty()) {
+      ALL_STEPS_CACHE.put(module.getName(), loadStepsFor(featureFile, module));
+      stepDefs = getStepDefs(ALL_STEPS_CACHE.get(module.getName()), substitutedName, step);
+    }
+    return stepDefs;
+  }
+
+  private Collection<AbstractStepDefinition> getStepDefs(List<AbstractStepDefinition> stepDefinitions, String substitutedName, GherkinStep step) {
+    Map<Class<? extends AbstractStepDefinition>, AbstractStepDefinition> definitionsByClass = new HashMap<>();
+
+    for (AbstractStepDefinition stepDefinition : stepDefinitions) {
       if (stepDefinition != null
               && stepDefinition.matches(substitutedName.replaceAll("^" + StringUtils.NON_CRITICAL, ""))
               && stepDefinition.supportsStep(step)) {
