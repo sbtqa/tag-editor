@@ -9,7 +9,7 @@ plugins {
 allprojects {
 
     group = "ru.sbtqa.tag"
-    version = "1.5"
+    version = "1.5.2"
 
     repositories {
         mavenCentral()
