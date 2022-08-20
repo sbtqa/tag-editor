@@ -14,6 +14,7 @@ import com.intellij.lang.Language;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.module.Module;
@@ -75,7 +76,8 @@ public class JavaStepDefinitionCreator extends AbstractStepDefinitionCreator {
     static String escapeStepDefinition(@NotNull String stepDefinition, @NotNull PsiElement context) {
         return stepDefinition.replace("PendingException", CucumberJavaUtil.getCucumberPendingExceptionFqn(context))
                 .replaceAll("\\\\\\\\", "\\\\")
-                .replaceAll("\\\\d", "\\\\\\\\d");
+                .replaceAll("\\\\d", "\\\\\\\\d")
+                .replaceAll(" {4}", "\n    ");
     }
 
     private static PsiMethod buildStepDefinitionByStep(@NotNull final GherkinStep step, Language language) {
@@ -92,7 +94,8 @@ public class JavaStepDefinitionCreator extends AbstractStepDefinitionCreator {
         }
 
         snippet = escapeStepDefinition(snippet, step).replaceFirst("@", methodAnnotation);
-
+        // Change * to And cuz asterisk is not valid annotation name
+        snippet = snippet.replaceFirst("\\*", "And");
         JVMElementFactory factory = JVMElementFactories.requireFactory(language, step.getProject());
         PsiMethod methodFromCucumberLibraryTemplate = factory.createMethodFromText(snippet, step);
 
@@ -164,7 +167,6 @@ public class JavaStepDefinitionCreator extends AbstractStepDefinitionCreator {
         final PsiClass clazz = PsiTreeUtil.getChildOfType(file, PsiClass.class);
         if (clazz != null) {
             PsiDocumentManager.getInstance(project).commitAllDocuments();
-
             // snippet text
             final PsiMethod element = buildStepDefinitionByStep(step, file.getLanguage());
             PsiMethod addedElement = (PsiMethod) clazz.add(element);
@@ -209,10 +211,10 @@ public class JavaStepDefinitionCreator extends AbstractStepDefinitionCreator {
                     firstStatement.getText().substring(pendingRange.getStartOffset(), pendingRange.getEndOffset()));
         }
 
-        Template template = builder.buildInlineTemplate();
-
         final PsiDocumentManager documentManager = PsiDocumentManager.getInstance(project);
         documentManager.doPostponedOperationsAndUnblockDocument(editor.getDocument());
+
+        Template template = builder.buildInlineTemplate();
 
         editor.getCaretModel().moveToOffset(addedElement.getTextRange().getStartOffset());
         TemplateEditingAdapter adapter = new TemplateEditingAdapter() {

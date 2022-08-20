@@ -42,7 +42,6 @@ import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.cucumber.CucumberBundle;
-import org.jetbrains.plugins.cucumber.java.CucumberJavaBundle;
 
 
 public class CucumberJavaRunConfiguration extends ApplicationConfiguration {
@@ -171,12 +170,12 @@ public class CucumberJavaRunConfiguration extends ApplicationConfiguration {
         } else if (!(new File(filePath)).exists()) {
             throw new RuntimeConfigurationException(CucumberBundle.message("cucumber.run.error.file.doesnt.exist"));
         } else if (StringUtil.isEmpty(getGlue())) {
-            throw new RuntimeConfigurationException(CucumberJavaBundle.message("cucumber.java.run.configuration.glue.mustnt.be.empty"));
+            throw new RuntimeConfigurationException("\"Value of the \"--glue\" option can't be empty\"");
         }
 
         String programParameters = getProgramParameters();
         if (programParameters != null && programParameters.contains("--glue")) {
-            throw new RuntimeConfigurationException(CucumberJavaBundle.message("cucumber.java.run.configuration.glue.in.program.parameters"));
+            throw new RuntimeConfigurationException("Value of the option --glue must be specified in the textfield \"Glue\"");
         }
 
         super.checkConfiguration();

@@ -11,7 +11,6 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.PsiFile;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.plugins.cucumber.java.CucumberJavaBundle;
 import org.jetbrains.plugins.cucumber.java.CucumberJavaUtil;
 
 public class CucumberJavaStepDefClassInDefaultPackageInspection extends AbstractBaseJavaLocalInspectionTool {
@@ -20,7 +19,7 @@ public class CucumberJavaStepDefClassInDefaultPackageInspection extends Abstract
     @Nls
     @NotNull
     public String getDisplayName() {
-        return CucumberJavaBundle.message("cucumber.java.inspections.step.def.class.in.default.package.title");
+        return "Step definition class is in default package";
     }
 
     @Override
@@ -56,7 +55,7 @@ public class CucumberJavaStepDefClassInDefaultPackageInspection extends Abstract
                     PsiElement elementToHighlight = aClass.getNameIdentifier();
                     if (elementToHighlight != null) {
                         holder.registerProblem(elementToHighlight,
-                                CucumberJavaBundle.message("cucumber.java.inspections.step.def.class.in.default.package.message")
+                                "Step definition class must be in named package"
                         );
                     }
                 }

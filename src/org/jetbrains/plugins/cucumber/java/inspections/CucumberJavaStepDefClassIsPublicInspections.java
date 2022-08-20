@@ -9,7 +9,6 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.PsiModifier;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.plugins.cucumber.java.CucumberJavaBundle;
 import org.jetbrains.plugins.cucumber.java.CucumberJavaUtil;
 
 public class CucumberJavaStepDefClassIsPublicInspections extends AbstractBaseJavaLocalInspectionTool {
@@ -18,7 +17,7 @@ public class CucumberJavaStepDefClassIsPublicInspections extends AbstractBaseJav
     @Nls
     @NotNull
     public String getDisplayName() {
-        return CucumberJavaBundle.message("cucumber.java.inspections.step.def.class.is.public.title");
+        return "Step definition class is not public";
     }
 
     @Override
@@ -52,7 +51,7 @@ public class CucumberJavaStepDefClassIsPublicInspections extends AbstractBaseJav
                 if (elementToHighlight == null) {
                     elementToHighlight = aClass;
                 }
-                holder.registerProblem(elementToHighlight, CucumberJavaBundle.message("cucumber.java.inspection.step.def.class.is.public.message"));
+                holder.registerProblem(elementToHighlight, "Step definition class must be public");
             }
         }
     }

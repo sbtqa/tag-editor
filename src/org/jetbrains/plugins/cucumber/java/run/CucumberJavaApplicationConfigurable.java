@@ -32,7 +32,6 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.plugins.cucumber.java.CucumberJavaBundle;
 
 public class CucumberJavaApplicationConfigurable extends SettingsEditor<CucumberJavaRunConfiguration> implements PanelWithAnchor {
 
@@ -62,7 +61,7 @@ public class CucumberJavaApplicationConfigurable extends SettingsEditor<Cucumber
             @Override
             public void actionPerformed(ActionEvent e) {
                 FileChooserDescriptor fileChooserDescriptor = FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor();
-                fileChooserDescriptor.setTitle(CucumberJavaBundle.message("run.configuration.form.choose.file.or.folder.title"));
+                fileChooserDescriptor.setTitle("Choose Feature File or Directory");
                 fileChooserDescriptor.putUserData(LangDataKeys.MODULE_CONTEXT, myModuleContext);
                 VirtualFile file = FileChooser.chooseFile(fileChooserDescriptor, myProject, null);
                 if (file != null) {
@@ -78,7 +77,7 @@ public class CucumberJavaApplicationConfigurable extends SettingsEditor<Cucumber
         myShortenClasspathModeCombo.setAnchor(myModule.getLabel());
         myShortenClasspathModeCombo.setComponent(new ShortenCommandLineModeCombo(myProject, myJrePathEditor, moduleComponent));
 
-        myGlue.getComponent().setDialogCaption(CucumberJavaBundle.message("run.configuration.form.glue.title"));
+        myGlue.getComponent().setDialogCaption("Glue");
     }
 
     public void setFeatureOrFolder(String path) {
