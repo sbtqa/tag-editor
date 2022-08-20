@@ -27,6 +27,7 @@ import com.intellij.psi.search.searches.AnnotatedElementsSearch;
 import com.intellij.util.Query;
 import com.intellij.util.containers.ContainerUtil;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -212,7 +213,7 @@ public abstract class CucumberJavaRunConfigurationProducer extends JavaRunConfig
     }
 
     protected Set<String> getHookGlue(final PsiElement element) {
-        final Set<String> packages = ContainerUtil.newLinkedHashSet();
+        final Set<String> packages = new LinkedHashSet<>();
 
         final Module module = ModuleUtilCore.findModuleForPsiElement(element);
         if (module == null) {

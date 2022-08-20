@@ -6,7 +6,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -28,6 +27,7 @@ import ru.sbtqa.tag.editor.idea.utils.StringUtils;
  */
 public class CucumberStepsIndex {
   private static final Logger LOG = Logger.getInstance(CucumberStepsIndex.class.getName());
+  private static final Map<String, List<AbstractStepDefinition>> ALL_STEPS_CACHE = new HashMap<>();
 
   private final Map<BDDFrameworkType, CucumberJvmExtensionPoint> myExtensionMap;
   private final Map<CucumberJvmExtensionPoint, Object> myExtensionData;
@@ -58,7 +58,7 @@ public class CucumberStepsIndex {
    * Creates a file that will contain step definitions
    *
    * @param dir                      container for created file
-   * @param fileNameWithoutExtension name of the file with out "." and extension
+   * @param fileNameWithoutExtension name of the file without "." and extension
    * @param frameworkType            type of file to create
    */
   public PsiFile createStepDefinitionFile(@NotNull final PsiDirectory dir,
@@ -116,12 +116,29 @@ public class CucumberStepsIndex {
       return Collections.emptyList();
     }
 
-    Map<Class<? extends AbstractStepDefinition>, AbstractStepDefinition> definitionsByClass =
-      new HashMap<>();
-    List<AbstractStepDefinition> allSteps = loadStepsFor(featureFile, module);
+    // Initial caching
+    if (!ALL_STEPS_CACHE.containsKey(module.getName())) {
+        ALL_STEPS_CACHE.put(module.getName(), loadStepsFor(featureFile, module));
+    }
 
-    for (AbstractStepDefinition stepDefinition : allSteps) {
-      if (stepDefinition.matches(substitutedName.replaceAll("^" + StringUtils.NON_CRITICAL, "")) && stepDefinition.supportsStep(step)) {
+    // Get step definitions from cache
+    Collection<AbstractStepDefinition> stepDefs = getStepDefs(ALL_STEPS_CACHE.get(module.getName()), substitutedName, step);
+
+      // Attempt rescan if nothing returned
+    if (stepDefs.isEmpty()) {
+      ALL_STEPS_CACHE.put(module.getName(), loadStepsFor(featureFile, module));
+      stepDefs = getStepDefs(ALL_STEPS_CACHE.get(module.getName()), substitutedName, step);
+    }
+    return stepDefs;
+  }
+
+  private Collection<AbstractStepDefinition> getStepDefs(List<AbstractStepDefinition> stepDefinitions, String substitutedName, GherkinStep step) {
+    Map<Class<? extends AbstractStepDefinition>, AbstractStepDefinition> definitionsByClass = new HashMap<>();
+
+    for (AbstractStepDefinition stepDefinition : stepDefinitions) {
+      if (stepDefinition != null
+              && stepDefinition.matches(substitutedName.replaceAll("^" + StringUtils.NON_CRITICAL, ""))
+              && stepDefinition.supportsStep(step)) {
         final Pattern currentLongestPattern = getPatternByDefinition(definitionsByClass.get(stepDefinition.getClass()));
         final Pattern newPattern = getPatternByDefinition(stepDefinition);
         final int newPatternLength = ((newPattern != null) ? newPattern.pattern().length() : -1);
@@ -137,7 +154,7 @@ public class CucumberStepsIndex {
    * Returns pattern from step definition (if exists)
    *
    * @param definition step definition
-   * @return pattern or null if does not exist
+   * @return pattern or null if it does not exist
    */
   @Nullable
   private static Pattern getPatternByDefinition(@Nullable final AbstractStepDefinition definition) {
@@ -147,43 +164,10 @@ public class CucumberStepsIndex {
     return definition.getPattern();
   }
 
-  // ToDo: use binary search here
-  public List<AbstractStepDefinition> findStepDefinitionsByPattern(@NotNull final String pattern, @NotNull final Module module) {
-    final List<AbstractStepDefinition> allSteps = loadStepsFor(null, module);
-    final List<AbstractStepDefinition> result = new ArrayList<>();
-    for (AbstractStepDefinition stepDefinition : allSteps) {
-      final String elementText = stepDefinition.getCucumberRegex();
-      if (elementText != null && elementText.equals(pattern)) {
-        result.add(stepDefinition);
-      }
-    }
-    return result;
-  }
-
   public List<AbstractStepDefinition> getAllStepDefinitions(@NotNull final PsiFile featureFile) {
     final Module module = ModuleUtilCore.findModuleForPsiElement(featureFile);
     if (module == null) return Collections.emptyList();
     return loadStepsFor(featureFile, module);
-  }
-
-  @NotNull
-  public List<PsiFile> gatherStepDefinitionsFilesFromDirectory(@NotNull final PsiDirectory dir, final boolean writableOnly) {
-    final List<PsiFile> result = new ArrayList<>();
-
-    // find step definitions in current folder
-    for (PsiFile file : dir.getFiles()) {
-      final VirtualFile virtualFile = file.getVirtualFile();
-      boolean isStepFile = writableOnly ? isWritableStepLikeFile(file, file.getParent()) : isStepLikeFile(file, file.getParent());
-      if (isStepFile && virtualFile != null) {
-        result.add(file);
-      }
-    }
-    // process subfolders
-    for (PsiDirectory subDir : dir.getSubdirectories()) {
-      result.addAll(gatherStepDefinitionsFilesFromDirectory(subDir, writableOnly));
-    }
-
-    return result;
   }
 
   private List<AbstractStepDefinition> loadStepsFor(@Nullable final PsiFile featureFile, @NotNull final Module module) {

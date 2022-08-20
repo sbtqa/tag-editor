@@ -1,7 +1,7 @@
 package org.jetbrains.plugins.cucumber.java.inspections;
 
+import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
 import com.intellij.codeInspection.ProblemsHolder;
-import com.intellij.codeInspection.ex.BaseLocalInspectionTool;
 import com.intellij.psi.JavaElementVisitor;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.plugins.cucumber.java.CucumberJavaBundle;
 import org.jetbrains.plugins.cucumber.java.CucumberJavaUtil;
 
-public class CucumberJavaStepDefClassIsPublicInspections extends BaseLocalInspectionTool {
+public class CucumberJavaStepDefClassIsPublicInspections extends AbstractBaseJavaLocalInspectionTool {
 
     @Override
     @Nls

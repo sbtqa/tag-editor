@@ -54,8 +54,7 @@ public class CucumberJavaApplicationConfigurable extends SettingsEditor<Cucumber
         ModuleDescriptionsComboBox moduleComponent = myModule.getComponent();
         myModuleSelector = new ConfigurationModuleSelector(project, moduleComponent);
         myJrePathEditor.setDefaultJreSelector(DefaultJreSelector.fromModuleDependencies(moduleComponent, false));
-
-        ClassBrowser.createApplicationClassBrowser(project, myModuleSelector).setField(myMainClass.getComponent());
+        new ClassBrowser.AppClassBrowser.AppClassBrowser(project, myModuleSelector).setField(myMainClass.getComponent());
         myModuleContext = myModuleSelector.getModule();
 
 

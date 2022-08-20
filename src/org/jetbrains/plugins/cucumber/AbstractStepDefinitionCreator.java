@@ -23,6 +23,7 @@ import org.jetbrains.plugins.cucumber.psi.GherkinStep;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public abstract class AbstractStepDefinitionCreator implements StepDefinitionCreator {
   @Override
@@ -98,7 +99,7 @@ public abstract class AbstractStepDefinitionCreator implements StepDefinitionCre
 
   protected void closeActiveTemplateBuilders(PsiFile file) {
     final Project project = file.getProject();
-    final VirtualFile vFile = ObjectUtils.assertNotNull(file.getVirtualFile());
+    final VirtualFile vFile = Objects.requireNonNull(file.getVirtualFile());
     final OpenFileDescriptor descriptor = new OpenFileDescriptor(project, vFile);
     FileEditorManager.getInstance(project).getAllEditors(vFile);
     FileEditorManager.getInstance(project).openTextEditor(descriptor, true);

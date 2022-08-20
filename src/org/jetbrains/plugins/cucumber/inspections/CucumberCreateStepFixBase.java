@@ -35,10 +35,7 @@ import org.jetbrains.plugins.cucumber.steps.CucumberStepsIndex;
 
 import javax.swing.*;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public abstract class CucumberCreateStepFixBase implements LocalQuickFix {
   private static final Logger LOG = Logger.getInstance("#org.jetbrains.plugins.cucumber.inspections.CucumberCreateStepFixBase");
@@ -60,14 +57,14 @@ public abstract class CucumberCreateStepFixBase implements LocalQuickFix {
     final GherkinStep step = (GherkinStep)descriptor.getPsiElement();
     final GherkinFile featureFile = (GherkinFile)step.getContainingFile();
     // TODO + step defs pairs from other content roots
-    final List<CucumberStepDefinitionCreationContext> pairs = ContainerUtil.newArrayList(getStepDefinitionContainers(featureFile));
+    final List<CucumberStepDefinitionCreationContext> pairs = new ArrayList<>(getStepDefinitionContainers(featureFile));
     if (!pairs.isEmpty()) {
       pairs.add(0, new CucumberStepDefinitionCreationContext());
 
       final JBPopupFactory popupFactory = JBPopupFactory.getInstance();
       final ListPopup popupStep =
         popupFactory.createListPopup(new BaseListPopupStep<CucumberStepDefinitionCreationContext>(
-          CucumberBundle.message("choose.step.definition.file"), ContainerUtil.newArrayList(pairs)) {
+          CucumberBundle.message("choose.step.definition.file"), new ArrayList<>(pairs)) {
           @Override
           public boolean isSpeedSearchEnabled() {
             return true;

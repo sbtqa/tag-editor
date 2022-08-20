@@ -55,6 +55,8 @@ import io.cucumber.cucumberexpressions.ParameterTypeRegistry;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Objects;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.plugins.cucumber.AbstractStepDefinitionCreator;
 import org.jetbrains.plugins.cucumber.java.CucumberJavaUtil;
@@ -310,7 +312,7 @@ public class JavaStepDefinitionCreator extends AbstractStepDefinitionCreator {
         }
 
         assert featureFile != null;
-        return ObjectUtils.assertNotNull(featureFile.getParent());
+        return Objects.requireNonNull(featureFile.getParent());
     }
 
     @NotNull
