@@ -4,13 +4,14 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.MalformedJsonException;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.vfs.CharsetToolkit;
 import com.intellij.psi.tree.IElementType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.cucumber.psi.*;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.*;
 
 public class JsonGherkinKeywordProvider implements GherkinKeywordProvider {
@@ -39,8 +40,8 @@ public class JsonGherkinKeywordProvider implements GherkinKeywordProvider {
     return myKeywordProvider;
   }
 
-  public JsonGherkinKeywordProvider(final File keywordsFile) throws FileNotFoundException {
-    this(new FileInputStream(keywordsFile));
+  public JsonGherkinKeywordProvider(final File keywordsFile) throws IOException {
+    this(Files.newInputStream(keywordsFile.toPath()));
 
     if (!(keywordsFile.exists() && !keywordsFile.isDirectory() && keywordsFile.canRead())){
       LOG.error("Cannot read keywords from: " + keywordsFile);
@@ -50,9 +51,9 @@ public class JsonGherkinKeywordProvider implements GherkinKeywordProvider {
   public JsonGherkinKeywordProvider(final InputStream inputStream) {
     Map<String, HashMap<Object, Object>> fromJson;
     try {
-      final Reader in = new InputStreamReader(inputStream, CharsetToolkit.UTF8_CHARSET);
-      try {
-        fromJson = new Gson().fromJson(in, new TypeToken<HashMap<String, HashMap<Object, Object>>>() {}.getType());
+      try (Reader in = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+        fromJson = new Gson().fromJson(in, new TypeToken<HashMap<String, HashMap<Object, Object>>>() {
+        }.getType());
 
         for (Map.Entry<String, HashMap<Object, Object>> entry : fromJson.entrySet()) {
           HashMap<Object, Object> translation = entry.getValue();
@@ -64,9 +65,6 @@ public class JsonGherkinKeywordProvider implements GherkinKeywordProvider {
             }
           }
         }
-      }
-      finally {
-        in.close();
       }
     }
     catch (MalformedJsonException e) {

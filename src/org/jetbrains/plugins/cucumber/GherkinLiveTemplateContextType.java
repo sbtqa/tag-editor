@@ -1,5 +1,6 @@
 package org.jetbrains.plugins.cucumber;
 
+import com.intellij.codeInsight.template.TemplateActionContext;
 import com.intellij.codeInsight.template.TemplateContextType;
 import com.intellij.openapi.fileTypes.SyntaxHighlighter;
 import com.intellij.psi.PsiFile;
@@ -22,8 +23,8 @@ public class GherkinLiveTemplateContextType extends TemplateContextType {
   }
 
   @Override
-  public boolean isInContext(@NotNull final PsiFile file, final int offset) {
-    return file instanceof GherkinFileImpl;
+  public boolean isInContext(TemplateActionContext templateActionContext) {
+    return templateActionContext.getFile() instanceof  GherkinFileImpl;
   }
 
   @Override
