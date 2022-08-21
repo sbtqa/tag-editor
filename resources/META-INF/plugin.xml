@@ -29,7 +29,7 @@
     <multiHostInjector implementation="org.jetbrains.plugins.cucumber.java.CucumberJavaInjector"/>
     <psi.referenceContributor implementation="org.jetbrains.plugins.cucumber.java.steps.reference.CucumberJavaReferenceContributor"/>
     <pom.declarationSearcher implementation="org.jetbrains.plugins.cucumber.java.steps.search.CucumberJavaPomDeclarationSearcher"/>
-    <fileTypeFactory implementation="org.jetbrains.plugins.cucumber.psi.CucumberFileTypeFactory"/>
+    <fileType name="Cucumber" implementationClass="org.jetbrains.plugins.cucumber.psi.GherkinFileType" />
     <lang.syntaxHighlighterFactory language="Gherkin"
                                    implementationClass="org.jetbrains.plugins.cucumber.psi.GherkinSyntaxHighlighterFactory"/>
 
