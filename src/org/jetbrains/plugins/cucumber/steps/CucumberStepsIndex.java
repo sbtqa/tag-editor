@@ -1,6 +1,7 @@
 // Copyright 2000-2018 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
 package org.jetbrains.plugins.cucumber.steps;
 
+import com.intellij.openapi.components.ComponentManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
@@ -34,7 +35,8 @@ public class CucumberStepsIndex {
   private Project myProject;
 
   public static CucumberStepsIndex getInstance(Project project) {
-    CucumberStepsIndex result = ServiceManager.getService(project, CucumberStepsIndex.class);
+
+    CucumberStepsIndex result = project.getService(CucumberStepsIndex.class);
     result.myProject = project;
 
     return result;
@@ -66,7 +68,7 @@ public class CucumberStepsIndex {
                                           @NotNull final BDDFrameworkType frameworkType) {
     final CucumberJvmExtensionPoint ep = myExtensionMap.get(frameworkType);
     if (ep == null) {
-      LOG.error(String.format("Unsupported step definition file type %s", frameworkType.toString()));
+      LOG.error(String.format("Unsupported step definition file type %s", frameworkType));
       return null;
     }
 
