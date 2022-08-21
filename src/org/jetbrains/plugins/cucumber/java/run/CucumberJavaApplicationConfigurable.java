@@ -23,13 +23,11 @@ import com.intellij.psi.JavaCodeFragment;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiMethodUtil;
-import com.intellij.refactoring.ui.ClassNameReferenceEditor;
 import com.intellij.ui.EditorTextField;
 import com.intellij.ui.EditorTextFieldWithBrowseButton;
 import com.intellij.ui.PanelWithAnchor;
 import com.intellij.ui.RawCommandLineEditor;
 import com.intellij.util.ui.UIUtil;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -65,16 +63,13 @@ public class CucumberJavaApplicationConfigurable extends SettingsEditor<Cucumber
         myModuleContext = myModuleSelector.getModule();
 
 
-        final ActionListener fileToRunActionListener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                FileChooserDescriptor fileChooserDescriptor = FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor();
-                fileChooserDescriptor.setTitle("Choose Feature File or Directory");
-                fileChooserDescriptor.putUserData(LangDataKeys.MODULE_CONTEXT, myModuleContext);
-                VirtualFile file = FileChooser.chooseFile(fileChooserDescriptor, myProject, null);
-                if (file != null) {
-                    setFeatureOrFolder(file.getPresentableUrl());
-                }
+        final ActionListener fileToRunActionListener = actionEvent -> {
+            FileChooserDescriptor fileChooserDescriptor = FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor();
+            fileChooserDescriptor.setTitle("Choose Feature File or Directory");
+            fileChooserDescriptor.putUserData(LangDataKeys.MODULE_CONTEXT, myModuleContext);
+            VirtualFile file = FileChooser.chooseFile(fileChooserDescriptor, myProject, null);
+            if (file != null) {
+                setFeatureOrFolder(file.getPresentableUrl());
             }
         };
         myFeatureOrFolder.getComponent().addActionListener(fileToRunActionListener);
