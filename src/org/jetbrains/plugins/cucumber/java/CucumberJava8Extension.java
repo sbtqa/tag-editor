@@ -60,7 +60,6 @@ public class CucumberJava8Extension extends AbstractCucumberJavaExtension {
         return new Java8StepDefinitionCreator();
     }
 
-    private static final Disposable parentDisposable = Disposer.newDisposable();
     @Override
     public List<AbstractStepDefinition> loadStepsFor(@Nullable PsiFile featureFile, @NotNull Module module) {
         DaemonProgressIndicator progressIndicator = new DaemonProgressIndicator();
@@ -68,21 +67,16 @@ public class CucumberJava8Extension extends AbstractCucumberJavaExtension {
         List<AbstractStepDefinition> definitions = new ArrayList<>();
 
         try {
-            definitions.addAll(ProgressManager.getInstance().runProcess(new Computable<List<AbstractStepDefinition>>() {
-                @Override
-                public List<AbstractStepDefinition> compute() {
-
-                    final List<AbstractStepDefinition> result = new ArrayList<>();
-
-                    final GlobalSearchScope dependenciesScope = module.getModuleWithDependenciesAndLibrariesScope(true);
-                    final GlobalSearchScope javaFiles = GlobalSearchScope.getScopeRestrictedByFileTypes(dependenciesScope, JavaFileType.INSTANCE);
-                    for (String method : KEYWORDS) {
-                        CucumberJava8TextOccurenceProcessor occurenceProcessor = new CucumberJava8TextOccurenceProcessor(result);
-                        PsiSearchHelper.getInstance(module.getProject()).processElementsWithWord(occurenceProcessor, javaFiles, method,
-                                UsageSearchContext.IN_CODE, true);
-                    }
-                    return result;
+            definitions.addAll(ProgressManager.getInstance().runProcess(() -> {
+                final List<AbstractStepDefinition> result = new ArrayList<>();
+                final GlobalSearchScope dependenciesScope = module.getModuleWithDependenciesAndLibrariesScope(true);
+                final GlobalSearchScope javaFiles = GlobalSearchScope.getScopeRestrictedByFileTypes(dependenciesScope, JavaFileType.INSTANCE);
+                for (String method : KEYWORDS) {
+                    CucumberJava8TextOccurenceProcessor occurenceProcessor = new CucumberJava8TextOccurenceProcessor(result);
+                    PsiSearchHelper.getInstance(module.getProject()).processElementsWithWord(occurenceProcessor, javaFiles, method,
+                            UsageSearchContext.IN_CODE, true);
                 }
+                return result;
             }, progressIndicator));
         } finally {
             progressIndicator.dispose();

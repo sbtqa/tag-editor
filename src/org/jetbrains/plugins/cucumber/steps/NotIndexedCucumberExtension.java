@@ -2,6 +2,7 @@ package org.jetbrains.plugins.cucumber.steps;
 
 import com.intellij.ProjectTopics;
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtilCore;
@@ -14,7 +15,6 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
-import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.messages.MessageBusConnection;
 import com.intellij.util.ui.update.MergingUpdateQueue;
 import com.intellij.util.ui.update.Update;
@@ -29,9 +29,10 @@ public abstract class NotIndexedCucumberExtension extends AbstractCucumberExtens
   public Object getDataObject(@NotNull final Project project) {
     final DataObject result = new DataObject();
     result.myUpdateQueue.setPassThrough(false);
+    Disposable disposable = Disposer.newDisposable();
 
-    PsiManager.getInstance(project).addPsiTreeChangeListener(result.myCucumberPsiTreeListener);
 
+    PsiManager.getInstance(project).addPsiTreeChangeListener(result.myCucumberPsiTreeListener, disposable);
     PsiManager.getInstance(project).addPsiTreeChangeListener(new PsiTreeChangeAdapter() {
       @Override
       public void childAdded(@NotNull PsiTreeChangeEvent event) {
@@ -64,7 +65,9 @@ public abstract class NotIndexedCucumberExtension extends AbstractCucumberExtens
           });
         }
       }
-    });
+    }, disposable);
+
+    disposable.dispose();
 
     // clear caches after modules roots were changed
     final MessageBusConnection connection = project.getMessageBus().connect();
