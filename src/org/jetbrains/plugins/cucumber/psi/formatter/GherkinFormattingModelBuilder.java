@@ -24,7 +24,7 @@ public class GherkinFormattingModelBuilder implements FormattingModelBuilder {
         final PsiFile file = context.getContainingFile();
         final FileElement fileElement = TreeUtil.getFileElement((TreeElement) Objects.requireNonNull(SourceTreeToPsiMap.psiElementToTree(context.getPsiElement())));
         final GherkinBlock rootBlock = new GherkinBlock(fileElement);
-        //FormattingModelDumper.dumpFormattingModel(rootBlock, 0, System.out);
+
         return new DocumentBasedFormattingModel(rootBlock, file.getProject(), context.getCodeStyleSettings(), file.getFileType(), file);
     }
 

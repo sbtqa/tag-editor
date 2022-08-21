@@ -1,6 +1,7 @@
 package org.jetbrains.plugins.cucumber.psi;
 
 import com.intellij.lexer.LexerBase;
+import com.intellij.openapi.util.text.Strings;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.ArrayUtil;
@@ -15,7 +16,7 @@ import java.util.List;
  * @author yole
  */
 public class GherkinLexer extends LexerBase {
-  protected CharSequence myBuffer = ArrayUtil.EMPTY_CHAR_SEQUENCE;
+  protected CharSequence myBuffer = Strings.EMPTY_CHAR_SEQUENCE;
   protected int myStartOffset = 0;
   protected int myEndOffset = 0;
   private int myPosition;

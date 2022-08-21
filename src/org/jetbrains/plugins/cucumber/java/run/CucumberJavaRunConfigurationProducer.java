@@ -54,10 +54,6 @@ public abstract class CucumberJavaRunConfigurationProducer extends JavaRunConfig
     private static final String CUCUMBER_CORE_VERSION_1_2 = "1.2";
     private static final String CUCUMBER_CORE_VERSION_1_0 = "1";
 
-    protected CucumberJavaRunConfigurationProducer() {
-        super(CucumberJavaRunConfigurationType.getInstance());
-    }
-
     private static void addPackagesOfMethods(final Collection<PsiMethod> psiMethods, final Set<String> packages) {
         for (final PsiMethod psiMethod : psiMethods) {
             final PsiClassOwner file = (PsiClassOwner) psiMethod.getContainingFile();

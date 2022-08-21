@@ -3,7 +3,7 @@ package org.jetbrains.plugins.cucumber.inspections;
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.PsiElementVisitor;
-import com.intellij.util.containers.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.plugins.cucumber.CucumberBundle;
@@ -81,7 +81,7 @@ public class CucumberTableInspection extends GherkinInspection {
     final int cellsCount = cells.size();
 
     final GherkinTable table = (GherkinTable) row.getParent();
-    for (int i : unusedIndices.toArray()) {
+    for (int i : unusedIndices) {
       if (i < cellsCount && cells.get(i).getTextLength() > 0) {
         holder.registerProblem(cells.get(i), CucumberBundle.message("unused.table.column"), ProblemHighlightType.LIKE_UNUSED_SYMBOL, new RemoveTableColumnFix(table, i));
       }
