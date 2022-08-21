@@ -1,0 +1,61 @@
+// Copyright 2000-2018 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+package ru.sbtqa.tag.cucumber.java.steps.search;
+
+import com.intellij.pom.PomDeclarationSearcher;
+import com.intellij.pom.PomTarget;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiExpressionList;
+import com.intellij.psi.PsiJavaCodeReferenceElement;
+import com.intellij.psi.PsiLiteralExpression;
+import com.intellij.psi.PsiNewExpression;
+import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.Consumer;
+import org.jetbrains.annotations.NotNull;
+import ru.sbtqa.tag.cucumber.java.CucumberJavaUtil;
+import ru.sbtqa.tag.cucumber.java.steps.reference.CucumberJavaParameterPomTarget;
+
+public class CucumberJavaPomDeclarationSearcher extends PomDeclarationSearcher {
+
+    private static boolean isFirstConstructorArgument(@NotNull PsiElement element, @NotNull PsiNewExpression newExp) {
+        PsiExpressionList argumentList = newExp.getArgumentList();
+        if (argumentList == null) {
+            return false;
+        }
+
+        if (argumentList.getExpressionCount() == 0) {
+            return false;
+        }
+
+        if (argumentList.getExpressions()[0] != element) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public void findDeclarationsAt(@NotNull PsiElement element, int offsetInElement, @NotNull Consumer<? super PomTarget> consumer) {
+        if (!(element instanceof PsiLiteralExpression)) {
+            return;
+        }
+
+        Object value = ((PsiLiteralExpression) element).getValue();
+        if (!(value instanceof String)) {
+            return;
+        }
+        String stringValue = (String) value;
+
+        PsiNewExpression newExp = PsiTreeUtil.getParentOfType(element, PsiNewExpression.class);
+        if (newExp != null) {
+            if (!isFirstConstructorArgument(element, newExp)) {
+                return;
+            }
+            PsiJavaCodeReferenceElement classReference = newExp.getClassReference();
+            if (classReference != null) {
+                String fqn = classReference.getQualifiedName();
+                if (CucumberJavaUtil.PARAMETER_TYPE_CLASS.equals(fqn)) {
+                    consumer.consume(new CucumberJavaParameterPomTarget(element, stringValue));
+                }
+            }
+        }
+    }
+}

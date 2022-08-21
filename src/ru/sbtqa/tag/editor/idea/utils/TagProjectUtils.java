@@ -16,8 +16,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import kotlin.Pair;
-import org.jetbrains.plugins.cucumber.psi.*;
-import org.jetbrains.plugins.cucumber.psi.impl.GherkinStepsHolderBase;
+import ru.sbtqa.tag.cucumber.psi.*;
 
 public class TagProjectUtils {
 
