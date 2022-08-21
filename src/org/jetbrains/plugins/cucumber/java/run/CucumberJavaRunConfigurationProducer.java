@@ -4,6 +4,7 @@ import com.intellij.execution.JavaExecutionUtil;
 import com.intellij.execution.JavaRunConfigurationExtensionManager;
 import com.intellij.execution.Location;
 import com.intellij.execution.actions.ConfigurationContext;
+import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.junit.JavaRunConfigurationProducerBase;
 import com.intellij.execution.junit2.info.LocationUtil;
 import com.intellij.openapi.module.Module;
@@ -54,6 +55,11 @@ public abstract class CucumberJavaRunConfigurationProducer extends JavaRunConfig
     private static final String CUCUMBER_CORE_VERSION_1_2 = "1.2";
     private static final String CUCUMBER_CORE_VERSION_1_0 = "1";
 
+    @Override
+    public @NotNull ConfigurationFactory getConfigurationFactory() {
+        return CucumberJavaRunConfigurationType.getInstance().getConfigurationFactories()[0];
+    }
+
     private static void addPackagesOfMethods(final Collection<PsiMethod> psiMethods, final Set<String> packages) {
         for (final PsiMethod psiMethod : psiMethods) {
             final PsiClassOwner file = (PsiClassOwner) psiMethod.getContainingFile();
@@ -78,14 +84,15 @@ public abstract class CucumberJavaRunConfigurationProducer extends JavaRunConfig
 
     @NotNull
     private static String getSMFormatterOptions(@NotNull String cucumberCoreVersion) {
-        if (cucumberCoreVersion.equals(CUCUMBER_CORE_VERSION_1_0)) {
-            return FORMATTER_OPTIONS_1_0;
-        } else if (cucumberCoreVersion.equals(CUCUMBER_CORE_VERSION_1_2)) {
-            return FORMATTER_OPTIONS_1_2;
-        } else if (cucumberCoreVersion.equals(CUCUMBER_CORE_VERSION_2)) {
-            return FORMATTER_OPTIONS_2;
-        } else {
-            return FORMATTER_OPTIONS_3;
+        switch (cucumberCoreVersion) {
+            case CUCUMBER_CORE_VERSION_1_0:
+                return FORMATTER_OPTIONS_1_0;
+            case CUCUMBER_CORE_VERSION_1_2:
+                return FORMATTER_OPTIONS_1_2;
+            case CUCUMBER_CORE_VERSION_2:
+                return FORMATTER_OPTIONS_2;
+            default:
+                return FORMATTER_OPTIONS_3;
         }
     }
 
@@ -170,7 +177,6 @@ public abstract class CucumberJavaRunConfigurationProducer extends JavaRunConfig
 
         configuration.setSuggestedName(getConfigurationName(context));
         configuration.setGeneratedName();
-
         setupConfigurationModule(context, configuration);
         JavaRunConfigurationExtensionManager.getInstance().extendCreatedConfiguration(configuration, location);
         return true;
