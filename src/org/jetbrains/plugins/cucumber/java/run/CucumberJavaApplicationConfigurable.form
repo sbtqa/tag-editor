@@ -3,7 +3,7 @@
   <grid id="27dc6" binding="myWholePanel" layout-manager="GridLayoutManager" row-count="8" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
-      <xy x="20" y="20" width="500" height="400"/>
+      <xy x="20" y="20" width="729" height="404"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -16,17 +16,7 @@
         </constraints>
         <properties>
           <labelLocation value="West"/>
-          <text resource-bundle="messages/ExecutionBundle" key="application.configuration.main.class.label"/>
-        </properties>
-      </component>
-      <component id="36fe8" class="com.intellij.openapi.ui.LabeledComponent" binding="myGlue">
-        <constraints>
-          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <componentClass value="com.intellij.ui.RawCommandLineEditor"/>
-          <labelLocation value="West"/>
-          <text resource-bundle="org/jetbrains/plugins/cucumber/java/CucumberJavaBundle" key="run.configuration.form.glue"/>
+          <text value="Main &amp;class:" noi18n="true"/>
         </properties>
       </component>
       <component id="4e853" class="com.intellij.openapi.ui.LabeledComponent" binding="myFeatureOrFolder">
@@ -36,7 +26,7 @@
         <properties>
           <componentClass value="com.intellij.openapi.ui.TextFieldWithBrowseButton"/>
           <labelLocation value="West"/>
-          <text resource-bundle="org/jetbrains/plugins/cucumber/java/CucumberJavaBundle" key="run.configuration.form.feature.or.folder.path"/>
+          <text value="Feature or folder path" noi18n="true"/>
         </properties>
       </component>
       <vspacer id="84c61">
@@ -57,7 +47,7 @@
         <properties>
           <componentClass value="com.intellij.application.options.ModuleDescriptionsComboBox"/>
           <labelLocation value="West"/>
-          <text resource-bundle="messages/ExecutionBundle" key="application.configuration.use.classpath.and.jdk.of.module.label"/>
+          <text value="Use classpath of m&amp;odule:" noi18n="true"/>
         </properties>
       </component>
       <component id="cf19a" class="com.intellij.openapi.ui.LabeledComponent" binding="myShortenClasspathModeCombo">
@@ -67,7 +57,7 @@
         <properties>
           <componentClass value="com.intellij.application.options.ModulesComboBox"/>
           <labelLocation value="West"/>
-          <text resource-bundle="messages/ExecutionBundle" key="application.configuration.shorten.command.line.label"/>
+          <text value="Feature or &amp;folder path" noi18n="true"/>
         </properties>
       </component>
       <component id="ca864" class="com.intellij.execution.ui.JrePathEditor" binding="myJrePathEditor">
@@ -75,6 +65,16 @@
           <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
+      </component>
+      <component id="36fe8" class="com.intellij.openapi.ui.LabeledComponent" binding="myGlue">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <componentClass value="com.intellij.ui.RawCommandLineEditor"/>
+          <labelLocation value="West"/>
+          <text value="Glue" noi18n="true"/>
+        </properties>
       </component>
     </children>
   </grid>

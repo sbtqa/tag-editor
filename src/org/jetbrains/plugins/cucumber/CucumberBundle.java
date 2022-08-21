@@ -1,7 +1,6 @@
 package org.jetbrains.plugins.cucumber;
 
 import com.intellij.AbstractBundle;
-import com.intellij.CommonBundle;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.PropertyKey;

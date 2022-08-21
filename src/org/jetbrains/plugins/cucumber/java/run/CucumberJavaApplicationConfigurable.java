@@ -15,6 +15,7 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.ComponentWithBrowseButton;
 import com.intellij.openapi.ui.LabeledComponent;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -22,17 +23,16 @@ import com.intellij.psi.JavaCodeFragment;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiMethodUtil;
+import com.intellij.ui.EditorTextField;
 import com.intellij.ui.EditorTextFieldWithBrowseButton;
 import com.intellij.ui.PanelWithAnchor;
 import com.intellij.ui.RawCommandLineEditor;
 import com.intellij.util.ui.UIUtil;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.plugins.cucumber.java.CucumberJavaBundle;
 
 public class CucumberJavaApplicationConfigurable extends SettingsEditor<CucumberJavaRunConfiguration> implements PanelWithAnchor {
 
@@ -40,7 +40,7 @@ public class CucumberJavaApplicationConfigurable extends SettingsEditor<Cucumber
     private final ConfigurationModuleSelector myModuleSelector;
     private final Module myModuleContext;
     private JComponent myAnchor;
-    private LabeledComponent<EditorTextFieldWithBrowseButton> myMainClass;
+    private LabeledComponent<ComponentWithBrowseButton<EditorTextField>> myMainClass;
     private JPanel myWholePanel;
     private LabeledComponent<ModuleDescriptionsComboBox> myModule;
     private LabeledComponent<RawCommandLineEditor> myGlue;
@@ -53,24 +53,26 @@ public class CucumberJavaApplicationConfigurable extends SettingsEditor<Cucumber
         myProject = project;
         ModuleDescriptionsComboBox moduleComponent = myModule.getComponent();
         myModuleSelector = new ConfigurationModuleSelector(project, moduleComponent);
-        myJrePathEditor.setDefaultJreSelector(DefaultJreSelector.fromModuleDependencies(moduleComponent, false));
-        new ClassBrowser.AppClassBrowser.AppClassBrowser(project, myModuleSelector).setField(myMainClass.getComponent());
+        myJrePathEditor.setDefaultJreSelector(DefaultJreSelector
+                .fromModuleDependencies(moduleComponent, false));
+
+        ClassBrowser.AppClassBrowser<EditorTextField> appClassBrowser = new ClassBrowser
+                .AppClassBrowser.AppClassBrowser<EditorTextField>(project, myModuleSelector);
+        appClassBrowser.setField(myMainClass.getComponent());
+
         myModuleContext = myModuleSelector.getModule();
 
 
-        final ActionListener fileToRunActionListener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                FileChooserDescriptor fileChooserDescriptor = FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor();
-                fileChooserDescriptor.setTitle(CucumberJavaBundle.message("run.configuration.form.choose.file.or.folder.title"));
-                fileChooserDescriptor.putUserData(LangDataKeys.MODULE_CONTEXT, myModuleContext);
-                VirtualFile file = FileChooser.chooseFile(fileChooserDescriptor, myProject, null);
-                if (file != null) {
-                    setFeatureOrFolder(file.getPresentableUrl());
-                }
+        final ActionListener fileToRunActionListener = actionEvent -> {
+            FileChooserDescriptor fileChooserDescriptor = FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor();
+            fileChooserDescriptor.setTitle("Choose Feature File or Directory");
+            fileChooserDescriptor.putUserData(LangDataKeys.MODULE_CONTEXT, myModuleContext);
+            VirtualFile file = FileChooser.chooseFile(fileChooserDescriptor, myProject, null);
+            if (file != null) {
+                setFeatureOrFolder(file.getPresentableUrl());
             }
         };
-        myFeatureOrFolder.getComponent().getButton().addActionListener(fileToRunActionListener);
+        myFeatureOrFolder.getComponent().addActionListener(fileToRunActionListener);
 
         myAnchor = UIUtil.mergeComponentsWithAnchor(myMainClass, myGlue, myFeatureOrFolder, myModule, myCommonProgramParameters);
 
@@ -78,7 +80,7 @@ public class CucumberJavaApplicationConfigurable extends SettingsEditor<Cucumber
         myShortenClasspathModeCombo.setAnchor(myModule.getLabel());
         myShortenClasspathModeCombo.setComponent(new ShortenCommandLineModeCombo(myProject, myJrePathEditor, moduleComponent));
 
-        myGlue.getComponent().setDialogCaption(CucumberJavaBundle.message("run.configuration.form.glue.title"));
+        myGlue.getComponent().setText("Glue");
     }
 
     public void setFeatureOrFolder(String path) {
@@ -121,7 +123,7 @@ public class CucumberJavaApplicationConfigurable extends SettingsEditor<Cucumber
         myModuleSelector.reset(configuration);
         myCommonProgramParameters.reset(configuration);
 
-        myMainClass.getComponent().setText(configuration.getMainClassName());
+        myMainClass.getComponent().getChildComponent().setText(configuration.getMainClassName());
         myGlue.getComponent().setText(configuration.getGlue());
         myFeatureOrFolder.getComponent().setText(configuration.getFilePath());
         myJrePathEditor.setPathOrName(configuration.getAlternativeJrePath(), configuration.isAlternativeJrePathEnabled());
@@ -133,7 +135,7 @@ public class CucumberJavaApplicationConfigurable extends SettingsEditor<Cucumber
         myCommonProgramParameters.applyTo(configuration);
         myModuleSelector.applyTo(configuration);
 
-        configuration.setMainClassName(myMainClass.getComponent().getText());
+        configuration.setMainClassName(myMainClass.getComponent().getChildComponent().getText());
         configuration.setGlue(myGlue.getComponent().getText());
         configuration.setFilePath(myFeatureOrFolder.getComponent().getText());
         configuration.setAlternativeJrePath(myJrePathEditor.getJrePathOrName());
