@@ -9,7 +9,7 @@ plugins {
 allprojects {
 
     group = "ru.sbtqa.tag"
-    version = "1.5.3"
+    version = "1.5.4"
 
     repositories {
         mavenCentral()
@@ -50,6 +50,6 @@ tasks {
 
     patchPluginXml {
         changeNotes.set("""
-      Allow latest Idea versions.""")
+      Fix deprecations and compatibility problems.""")
     }
 }
