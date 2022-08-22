@@ -1,12 +1,14 @@
 package ru.sbtqa.tag.cucumber.java;
 
 import com.intellij.codeInsight.AnnotationUtil;
+import com.intellij.codeInsight.daemon.impl.DaemonProgressIndicator;
 import com.intellij.execution.PsiLocation;
 import com.intellij.execution.junit2.info.LocationUtil;
 import com.intellij.find.findUsages.JavaFindUsagesHelper;
 import com.intellij.find.findUsages.JavaMethodFindUsagesOptions;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.util.Ref;
@@ -277,12 +279,19 @@ public class CucumberJavaUtil {
     public static MapParameterTypeManager getAllParameterTypes(@NotNull Module module) {
         Project project = module.getProject();
         PsiManager manager = PsiManager.getInstance(project);
-
         VirtualFile projectDir = ProjectUtil.guessProjectDir(project);
         PsiDirectory psiDirectory = projectDir != null ? manager.findDirectory(projectDir) : null;
+
         if (psiDirectory != null) {
-            return CachedValuesManager.getCachedValue(psiDirectory, () ->
-                    CachedValueProvider.Result.create(doGetAllParameterTypes(module), PsiModificationTracker.MODIFICATION_COUNT));
+            DaemonProgressIndicator progressIndicator = new DaemonProgressIndicator();
+            progressIndicator.setText("Get all parameter types for " + project.getName());
+            try {
+                return ProgressManager.getInstance().runProcess(() -> CachedValuesManager.getCachedValue(psiDirectory, () ->
+                        CachedValueProvider.Result
+                                .create(doGetAllParameterTypes(module), PsiModificationTracker.MODIFICATION_COUNT)), progressIndicator);
+            } finally {
+                progressIndicator.dispose();
+            }
         }
 
         return DEFAULT;
