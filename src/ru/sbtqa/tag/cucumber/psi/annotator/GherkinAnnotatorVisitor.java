@@ -36,12 +36,12 @@ public class GherkinAnnotatorVisitor extends GherkinElementVisitor {
   }
 
   private void highlight(final PsiElement element, final TextAttributesKey colorKey) {
-    myHolder.newAnnotation(HighlightSeverity.INFORMATION, "").range(element).textAttributes(colorKey).create();
+    myHolder.newSilentAnnotation(HighlightSeverity.INFORMATION).range(element).textAttributes(colorKey).create();
   }
 
   private void highlight(final PsiElement element, TextRange range, final TextAttributesKey colorKey) {
     range = range.shiftRight(element.getTextOffset());
-    myHolder.newAnnotation(HighlightSeverity.INFORMATION, "").range(range).textAttributes(colorKey).create();
+    myHolder.newSilentAnnotation(HighlightSeverity.INFORMATION).range(range).textAttributes(colorKey).create();
   }
 
   @Override
