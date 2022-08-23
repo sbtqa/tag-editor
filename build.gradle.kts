@@ -50,6 +50,6 @@ tasks {
 
     patchPluginXml {
         changeNotes.set("""
-      Fix deprecations and compatibility problems.""")
+      Bugfixes.""")
     }
 }
