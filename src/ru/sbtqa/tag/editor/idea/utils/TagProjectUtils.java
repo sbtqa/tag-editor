@@ -199,11 +199,10 @@ public class TagProjectUtils {
      */
     public static Stream<GherkinStepsHolder> getFragments(Module module) {
         final List<GherkinStepsHolder> result = new ArrayList<>();
+        GlobalSearchScope scope = GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.moduleScope(module));
 
-        GlobalSearchScope scope = GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.moduleScope(module), GherkinFileType.INSTANCE);
-
-        for (VirtualFile virtualFile : FilenameIndex.getAllFilesByExt(scope.getProject(), "feature", scope)) {
-            GherkinFile gherkinFile = (GherkinFile) PsiManager.getInstance(scope.getProject()).findFile(virtualFile);
+        for (VirtualFile virtualFile : FilenameIndex.getAllFilesByExt(module.getProject(), "feature", scope)) {
+            GherkinFile gherkinFile = (GherkinFile) PsiManager.getInstance(module.getProject()).findFile(virtualFile);
             for (GherkinFeature feature : gherkinFile.getFeatures()) {
                 for (GherkinStepsHolder scenario : feature.getScenarios()) {
                     for (GherkinTag tag : scenario.getTags()) {

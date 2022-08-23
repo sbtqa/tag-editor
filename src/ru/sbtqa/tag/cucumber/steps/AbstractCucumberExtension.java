@@ -42,11 +42,12 @@ public abstract class AbstractCucumberExtension implements CucumberJvmExtensionP
 
     private List<PsiElement> getFragment(String step, Module module) {
         final List<PsiElement> result = new ArrayList<>();
-
-        GlobalSearchScope scope = GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.moduleScope(module), GherkinFileType.INSTANCE);
         String title = TagProjectUtils.parseTitle(step);
-        for (VirtualFile virtualFile : FilenameIndex.getAllFilesByExt(scope.getProject(), "feature", scope)) {
-            GherkinFile gherkinFile = (GherkinFile) PsiManager.getInstance(scope.getProject()).findFile(virtualFile);
+        Collection<VirtualFile> files = FilenameIndex
+                .getAllFilesByExt(module.getProject(), "feature", GlobalSearchScope.moduleScope(module));
+
+        for (VirtualFile virtualFile : files) {
+            GherkinFile gherkinFile = (GherkinFile) PsiManager.getInstance(module.getProject()).findFile(virtualFile);
             for (GherkinFeature feature : gherkinFile.getFeatures()) {
                 for (GherkinStepsHolder scenario : feature.getScenarios()) {
                     if (scenario.getScenarioName().trim().equals(title.trim())) {
