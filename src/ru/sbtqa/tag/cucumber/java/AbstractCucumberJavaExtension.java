@@ -26,10 +26,7 @@ public abstract class AbstractCucumberJavaExtension extends AbstractCucumberExte
 
     @Override
     public boolean isStepLikeFile(@NotNull final PsiElement child, @NotNull final PsiElement parent) {
-        if (child instanceof PsiClassOwner) {
-            return true;
-        }
-        return false;
+        return child instanceof PsiClassOwner;
     }
 
     @Override
