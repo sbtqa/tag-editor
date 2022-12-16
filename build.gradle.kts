@@ -1,6 +1,6 @@
 plugins {
     id("java")
-    id("org.jetbrains.intellij") version "1.8.0"
+    id("org.jetbrains.intellij") version "1.10.1"
     id("org.jetbrains.grammarkit") version "2021.1.2"
     id("org.jetbrains.kotlin.jvm") version "1.7.10"
 }
@@ -9,7 +9,7 @@ plugins {
 allprojects {
 
     group = "ru.sbtqa.tag"
-    version = "1.5.7"
+    version = "1.5.8"
 
     repositories {
         mavenCentral()
@@ -26,7 +26,7 @@ allprojects {
 }
 
 intellij {
-    version.set("2022.2")
+    version.set("2022.3")
     type.set("IC")
     plugins.set(listOf("java"))
 }
@@ -34,8 +34,8 @@ intellij {
 tasks {
     // Set the JVM compatibility versions
     withType<JavaCompile> {
-        sourceCompatibility = "8"
-        targetCompatibility = "8"
+        sourceCompatibility = "17"
+        targetCompatibility = "17"
     }
 
     sourceSets {
@@ -50,6 +50,6 @@ tasks {
 
     patchPluginXml {
         changeNotes.set("""
-      Bugfixes.""")
+      Added support for 2022.3""")
     }
 }
