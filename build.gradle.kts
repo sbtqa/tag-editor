@@ -1,23 +1,23 @@
 plugins {
     id("java")
-    id("org.jetbrains.intellij") version "1.10.1"
+    id("org.jetbrains.intellij") version "1.13.3"
     id("org.jetbrains.grammarkit") version "2021.1.2"
-    id("org.jetbrains.kotlin.jvm") version "1.7.10"
+    id("org.jetbrains.kotlin.jvm") version "1.8.20"
 }
 
 
 allprojects {
 
     group = "ru.sbtqa.tag"
-    version = "1.5.8"
+    version = "1.5.9"
 
     repositories {
         mavenCentral()
     }
 
     dependencies {
-        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.10")
-        implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.10")
+        implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.20")
+        implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.20")
         testImplementation("junit:junit:4.13.1")
         implementation("io.cucumber:cucumber-expressions:3.0.0")
         implementation("io.cucumber:cucumber-core:1.2.6")
@@ -26,7 +26,7 @@ allprojects {
 }
 
 intellij {
-    version.set("2022.3")
+    version.set("2023.1")
     type.set("IC")
     plugins.set(listOf("java"))
 }
@@ -50,6 +50,6 @@ tasks {
 
     patchPluginXml {
         changeNotes.set("""
-      Added support for 2022.3""")
+      Added support for 2023.1""")
     }
 }
