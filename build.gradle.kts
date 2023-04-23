@@ -9,7 +9,7 @@ plugins {
 allprojects {
 
     group = "ru.sbtqa.tag"
-    version = "1.5.9"
+    version = "1.5.10"
 
     repositories {
         mavenCentral()
@@ -50,6 +50,6 @@ tasks {
 
     patchPluginXml {
         changeNotes.set("""
-      Added support for 2023.1""")
+      Updated deprecated API""")
     }
 }

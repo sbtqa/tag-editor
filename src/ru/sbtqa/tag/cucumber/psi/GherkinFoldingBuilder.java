@@ -12,6 +12,7 @@ import ru.sbtqa.tag.cucumber.psi.impl.GherkinExamplesBlockImpl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author yole
@@ -25,10 +26,10 @@ public class GherkinFoldingBuilder implements FoldingBuilder, DumbAware {
 
   @Override
   @NotNull
-  public FoldingDescriptor[] buildFoldRegions(@NotNull ASTNode node, @NotNull Document document) {
+  public FoldingDescriptor @NotNull [] buildFoldRegions(@NotNull ASTNode node, @NotNull Document document) {
     List<FoldingDescriptor> descriptors = new ArrayList<>();
     appendDescriptors(node, descriptors);
-    return descriptors.toArray(FoldingDescriptor.EMPTY);
+    return descriptors.toArray(FoldingDescriptor.EMPTY_ARRAY);
   }
 
   private void appendDescriptors(ASTNode node, List<FoldingDescriptor> descriptors) {
@@ -46,7 +47,7 @@ public class GherkinFoldingBuilder implements FoldingBuilder, DumbAware {
   public String getPlaceholderText(@NotNull ASTNode node) {
     if (node.getPsi() instanceof GherkinStepsHolder ||
         node.getPsi() instanceof GherkinExamplesBlockImpl) {
-      return ((NavigationItem) node.getPsi()).getPresentation().getPresentableText();
+      return Objects.requireNonNull(((NavigationItem) node.getPsi()).getPresentation()).getPresentableText();
     }
     return "...";
   }

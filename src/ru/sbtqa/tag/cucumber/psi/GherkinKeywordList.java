@@ -7,6 +7,7 @@ import gnu.trove.THashSet;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,8 +16,8 @@ import java.util.Set;
 */
 public class GherkinKeywordList {
   // maps custom language keyword to base (English) keyword
-  private final Map<String, String> myKeyword2BaseNameTable = new THashMap<>();
-  private final Set<String> myKeywordsWithNoSpaceAfter = new THashSet<>();
+  private final Map<String, String> myKeyword2BaseNameTable = new HashMap<>();
+  private final Set<String> myKeywordsWithNoSpaceAfter = new HashSet<>();
   private final GherkinKeywordTable myKeywordsTable = new GherkinKeywordTable();
 
   public GherkinKeywordList() {
@@ -47,7 +48,7 @@ public class GherkinKeywordList {
         }
       }
       if (forceSpaceAfterKeyword != null) {
-        if (forceSpaceAfterKeyword.booleanValue()) {
+        if (forceSpaceAfterKeyword) {
           myKeywordsWithNoSpaceAfter.clear();
         }
         else {

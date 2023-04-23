@@ -290,7 +290,7 @@ public class CucumberJavaUtil {
                         CachedValueProvider.Result
                                 .create(doGetAllParameterTypes(module), PsiModificationTracker.MODIFICATION_COUNT)), progressIndicator);
             } finally {
-                progressIndicator.dispose();
+                progressIndicator.cancel();
             }
         }
 
@@ -315,8 +315,7 @@ public class CucumberJavaUtil {
         Map<String, SmartPsiElementPointer<PsiElement>> declarations = new HashMap<>();
         for (UsageInfo ui : processor.getResults()) {
             PsiElement element = ui.getElement();
-            if (element != null && element.getParent() instanceof PsiNewExpression) {
-                PsiNewExpression newExpression = (PsiNewExpression) element.getParent();
+            if (element != null && element.getParent() instanceof PsiNewExpression newExpression) {
                 PsiExpressionList arguments = newExpression.getArgumentList();
                 if (arguments != null) {
                     PsiExpression[] expressions = arguments.getExpressions();

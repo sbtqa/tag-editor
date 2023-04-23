@@ -16,9 +16,10 @@ public class GherkinLiveTemplateContextType extends TemplateContextType {
   @NonNls
   private static final String CONTEXT_NAME = "CUCUMBER_FEATURE_FILE";
 
-  public GherkinLiveTemplateContextType() {
-    super(CONTEXT_NAME, CucumberBundle.message("live.templates.context.cucumber.name"));
+  protected GherkinLiveTemplateContextType() {
+    super(CucumberBundle.message("live.templates.context.cucumber.name"));
   }
+
 
   @Override
   public boolean isInContext(TemplateActionContext templateActionContext) {

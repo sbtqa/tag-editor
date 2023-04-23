@@ -60,7 +60,10 @@ public class CucumberJava8Extension extends AbstractCucumberJavaExtension {
     @Override
     public List<AbstractStepDefinition> loadStepsFor(@Nullable PsiFile featureFile, @NotNull Module module) {
         DaemonProgressIndicator progressIndicator = new DaemonProgressIndicator();
-        progressIndicator.setText("Loading steps for" + featureFile.getName());
+
+        progressIndicator.setText("Loading steps for " + (featureFile == null
+                ? "unexpected feature file"
+                : featureFile.getName()));
         List<AbstractStepDefinition> definitions = new ArrayList<>();
 
         try {
@@ -76,7 +79,7 @@ public class CucumberJava8Extension extends AbstractCucumberJavaExtension {
                 return result;
             }, progressIndicator));
         } finally {
-            progressIndicator.dispose();
+            progressIndicator.cancel();
         }
         return definitions;
     }

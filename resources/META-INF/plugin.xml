@@ -90,7 +90,7 @@
     <spellchecker.support language="Gherkin" implementationClass="ru.sbtqa.tag.spellchecker.GherkinSpellcheckerStrategy"/>
     <lang.inspectionSuppressor language="Gherkin" implementationClass="ru.sbtqa.tag.cucumber.inspections.model.GherkinInspectionSuppressor"/>
 
-    <liveTemplateContext implementation="ru.sbtqa.tag.cucumber.GherkinLiveTemplateContextType"/>
+    <liveTemplateContext implementation="ru.sbtqa.tag.cucumber.GherkinLiveTemplateContextType" contextId="CUCUMBER_FEATURE_FILE"/>
 
     <extendWordSelectionHandler implementation="ru.sbtqa.tag.cucumber.actions.GherkinStepParameterSelectioner"/>
 
