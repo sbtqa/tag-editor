@@ -9,7 +9,7 @@ plugins {
 allprojects {
 
     group = "ru.sbtqa.tag"
-    version = "1.5.10"
+    version = "1.5.11"
 
     repositories {
         mavenCentral()
@@ -26,7 +26,7 @@ allprojects {
 }
 
 intellij {
-    version.set("2023.1")
+    version.convention("2023.2")
     type.set("IC")
     plugins.set(listOf("java"))
 }
@@ -50,6 +50,6 @@ tasks {
 
     patchPluginXml {
         changeNotes.set("""
-      Updated deprecated API""")
+      Support for 2023.2""")
     }
 }
